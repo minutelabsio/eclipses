@@ -1,0 +1,27 @@
+{
+  "name": "eclipses",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "@sveltejs/vite-plugin-svelte": "^2.4.2",
+    "@types/three": "^0.155.1",
+    "svelte": "^4.0.5",
+    "vite": "^4.4.5"
+  },
+  "dependencies": {
+    "@minutelabsio/colors": "^0.0.2",
+    "@threlte/core": "^6.0.8",
+    "@threlte/extras": "^5.6.1",
+    "cousin-it": "0.0.1-alpha.6",
+    "intween": "1.0.0-beta.7",
+    "pug": "^3.0.2",
+    "sass": "^1.66.1",
+    "three": "^0.156.1"
+  }
+}
