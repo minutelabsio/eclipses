@@ -1,7 +1,15 @@
 <script>
   import { Canvas } from '@threlte/core'
   import Space from './scenes/Space.svelte'
+  import Test from './scenes/Test.svelte'
   import { onMount } from 'svelte'
+
+  const renderOptions = {
+    powerPreference: 'high-performance',
+    antialias: false,
+    stencil: false,
+    depth: false
+  }
 
   onMount(() => {
     // remove the .ml-spinner element
@@ -10,13 +18,15 @@
 </script>
 
 <main>
-  <Canvas>
-    <Space />
+  <Canvas useLegacyLights={false} rendererParameters={renderOptions}>
+    <Space/>
+    <!-- <Test /> -->
   </Canvas>
 </main>
 
 <style lang="sass">
   main
+    background: black
     display: flex
     flex-grow: 1
 </style>
