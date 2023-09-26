@@ -1,7 +1,7 @@
 import { ShaderMaterial, TextureLoader } from 'three'
 import * as THREE from 'three'
-import vertexShader from './vertex.glsl?raw'
-import fragmentShader from './fragment.glsl?raw'
+import vertexShader from './vertex.glsl'
+import fragmentShader from './fragment.glsl'
 import corona from '../../assets/corona.jpg'
 
 const coronaTexture = new TextureLoader().load(corona)
@@ -13,8 +13,9 @@ export default ({
   const shader = new ShaderMaterial({
     vertexShader,
     fragmentShader,
-    blending: THREE.NormalBlending,
+    blending: THREE.AdditiveBlending,
     transparent: true,
+    depthWrite: false,
   })
 
   shader.uniforms.uOpacity = { value: opacity }

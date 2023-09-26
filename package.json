@@ -10,20 +10,24 @@
     "deploy": "sh deploy.sh"
   },
   "devDependencies": {
-    "@sveltejs/vite-plugin-svelte": "^2.4.2",
+    "@sveltejs/vite-plugin-svelte": "^2.4.6",
     "@types/three": "^0.155.1",
     "svelte": "^4.0.5",
-    "vite": "^4.4.5"
+    "vite": "^4.4.5",
+    "vite-plugin-glslify": "^2.0.2"
   },
   "dependencies": {
     "@minutelabsio/colors": "^0.0.2",
     "@threlte/core": "^6.0.8",
     "@threlte/extras": "^5.6.1",
     "cousin-it": "0.0.1-alpha.6",
+    "glsl-dither": "^1.0.1",
     "intween": "1.0.0-beta.7",
+    "lil-gui": "^0.18.2",
     "postprocessing": "^6.33.0",
     "pug": "^3.0.2",
     "sass": "^1.66.1",
-    "three": "^0.156.1"
+    "three": "^0.156.1",
+    "three-good-godrays": "^0.4.4"
   }
 }

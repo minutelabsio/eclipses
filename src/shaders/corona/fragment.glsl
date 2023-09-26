@@ -7,10 +7,12 @@ uniform float uOpacity;
 void main(){
   vec3 view = normalize(cameraPosition - vPosition);
   vec3 c = vec3(dot(view, vNormal), 0, 0);
-  vec4 corona = texture2D(uCoronaTexture, vUv);
+  vec2 offset = vec2(-0.002, -0.0058);
+  vec2 xy = vUv + offset;
+  vec4 corona = texture2D(uCoronaTexture, xy);
   vec3 one = normalize(vec3(1.0));
   float alpha = dot(one, corona.xyz);
-  float cutoff = 0.1;
+  float cutoff = 0.05;
   if (alpha < cutoff){
     alpha = 0.0;
   }

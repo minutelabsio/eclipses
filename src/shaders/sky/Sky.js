@@ -1,7 +1,7 @@
 import { ShaderMaterial } from 'three'
 import * as THREE from 'three'
-import vertexShader from './vertex.glsl?raw'
-import fragmentShader from './fragment.glsl?raw'
+import vertexShader from './vertex.glsl'
+import fragmentShader from './fragment.glsl'
 
 export default () => {
   const shader = new ShaderMaterial({
@@ -17,14 +17,16 @@ export default () => {
   shader.uniforms.bottomColor = { value: new THREE.Color(0x999999) }
   shader.uniforms.offset = { value: 33 }
   shader.uniforms.exponent = { value: 0.6 }
+  shader.uniforms.opacity = { value: 1 }
 
   return {
     shader,
     get opacity(){
-      return shader.opacity
+      return shader.uniforms.opacity.value
     },
     set opacity(opacity) {
-      shader.opacity = opacity
+      shader.uniforms.opacity.value = opacity
+      shader.uniforms.opacity.needsUpdate = true
       return opacity
     },
     get bottomColor(){
