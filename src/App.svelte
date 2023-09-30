@@ -29,4 +29,5 @@
     background: black
     display: flex
     flex-grow: 1
+    flex: 1
 </style>

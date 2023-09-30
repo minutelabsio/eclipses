@@ -27,7 +27,7 @@
     "postprocessing": "^6.33.0",
     "pug": "^3.0.2",
     "sass": "^1.66.1",
-    "three": "^0.156.1",
+    "three": "0.157.0",
     "three-good-godrays": "^0.4.4"
   }
 }
