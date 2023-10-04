@@ -18,7 +18,13 @@
     EdgeDetectionMode,
     PredicationMode,
     BlendMode,
-    BlendFunction
+    BlendFunction,
+
+    GammaCorrectionEffect,
+
+    ChromaticAberrationEffect
+
+
   } from 'postprocessing'
   import { GodraysPass } from 'three-good-godrays'
   import createCorona from '../shaders/corona/Corona'
@@ -28,6 +34,8 @@
   let sunlight
   let sun
   let moon
+  let corona
+  let bloom
 
   const Corona = createCorona({
     opacity: 0.5
@@ -82,25 +90,26 @@
     return (x) => 1 - Math.pow(2, -a * x) * (1 - x)
   }
 
-  $: maxCoronaOpacity = totalityFactor * 0.1
+  $: maxCoronaOpacity = totalityFactor * 0.09
+  let minCoronaOpacity = 0.06
 
   const expoIn = createExpotentialIn(10)
   const expoOut = createExpotentialOut(10)
   const expoLightIn = createExpotentialIn(1)
   const expoLightOut = createExpotentialOut(1)
-  $: moonMove = new Tween({ theta: -0.6, corona: 0, brightness: 1 })
+  $: moonMove = new Tween({ theta: -0.6, corona: minCoronaOpacity, brightness: 1 })
     .by('2s', { theta: 0 }, 'quadOut')
     .by('2s', { brightness: 0.1 }, expoLightIn)
     .by('2s', { corona: maxCoronaOpacity }, expoIn)
     .by('4s', { theta: 0.6 }, 'quadIn')
     .by('4s', { brightness: 1.0 }, expoLightOut)
-    .by('4s', { corona: 0 }, expoOut)
+    .by('4s', { corona: minCoronaOpacity }, expoOut)
     .by('6s', { theta: 0 }, 'quadOut')
     .by('6s', { brightness: 0.1 }, expoLightIn)
     .by('6s', { corona: maxCoronaOpacity }, expoIn)
     .by('8s', { theta: -0.6 }, 'quadIn')
     .by('8s', { brightness: 1.0 }, expoLightOut)
-    .by('8s', { corona: 0 }, expoOut)
+    .by('8s', { corona: minCoronaOpacity }, expoOut)
     .loop()
 
   let time = 0
@@ -109,54 +118,64 @@
     time += dt * 1000
     const state = moonMove.at(time / 2)
     moonX = Math.sin(state.theta * DEG) * moonDistance
-    sunMaterial.emissiveIntensity = state.brightness
-    sunBrightness = state.brightness
+    // sunMaterial.emissiveIntensity = state.brightness
+    // sunBrightness = state.brightness
+    bloom.intensity = 30 * (1 - Math.sqrt(state.brightness)) + 5
     Sky.opacity = state.brightness
     Corona.uniforms.uOpacity.value = state.corona
     Corona.uniforms.uOpacity.needsUpdate = true
   })
 
-  const composer = new EffectComposer(renderer)
+  const composer = new EffectComposer(renderer, {
+    frameBufferType: THREE.HalfFloatType,
+  })
+
   const setupEffectComposer = (camera, sun, sunlight) => {
     if (!camera || !sun || !sunlight) return
     sun.layers.enable(11)
+    // corona.layers.enable(11)
     composer.removeAllPasses()
     const renderpass = new RenderPass(scene, camera)
     renderpass.renderToScreen = false
     composer.addPass(renderpass)
-    // const godrays = new GodraysPass(sunlight, camera)
-    // godrays.renderToScreen = true
-    // composer.addPass(godrays)
+    // const goodrays = new GodraysPass(sunlight, camera)
+    // goodrays.renderToScreen = false
+    // composer.addPass(goodrays)
     const godrays = new GodRaysEffect(camera, sun, {
-      // resolutionScale: 1,
-      density: 0.85,
+      resolutionScale: 1,
+      density: 0.95,
       decay: 0.9,
       weight: 0.2,
-      exposure: 0.6,
+      exposure: 0.9,
       samples: 60,
-      clampMax: 1.0
+      clampMax: 1
     })
     godrays.dithering = true
 
-    const bloom = new SelectiveBloomEffect(scene, camera, {
-      intensity: 3,
-      height: 512,
-      width: 512,
-      // luminanceSmoothing: 0.06,
-      mipmapBlur: true,
-      kernelSize: KernelSize.MEDIUM
+    bloom = new SelectiveBloomEffect(scene, camera, {
+      intensity: 30,
+      luminanceThreshold: 0.5,
+      luminanceSmoothing: 0.4,
+      blendFunction: BlendFunction.SCREEN,
+      radius: .9,
+      // levels: 10,
+      mipmapBlur: true
     })
     bloom.dithering = true
+    // bloom.inverted = true
+
+    // composer.addPass(goodrays)
 
     composer.addPass(
       new EffectPass(
         camera,
-        godrays,
         bloom,
+        // godrays,
         new SMAAEffect({
-          preset: SMAAPreset.ULTRA,
-          edgeDetectionMode: EdgeDetectionMode.LUMA,
-          // blendFunction: BlendFunction.NORMAL
+          preset: SMAAPreset.HIGH,
+          // edgeDetectionMode: EdgeDetectionMode.LUMA,
+          edgeDetectionMode: EdgeDetectionMode.DEPTH,
+          blendFunction: BlendFunction.SCREEN
         })
       )
     )
@@ -220,10 +239,12 @@
   <T.MeshBasicMaterial color="#fdffde" bind:ref={sunMaterial} />
 </T.Mesh>
 
+<!-- Corona -->
 <T.Mesh
   position={[sunPosition[0], sunPosition[1], sunPosition[2]]}
   rotation.y={Math.PI}
   scale={[sunRadius, sunRadius, sunRadius]}
+  bind:ref={corona}
 >
   <T.PlaneGeometry args={[4.4, 4.32]} />
   <T is={Corona}/>
