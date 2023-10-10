@@ -1,16 +1,26 @@
-uniform vec3 topColor;
-uniform vec3 bottomColor;
-uniform float offset;
-uniform float exponent;
+varying vec3 vWorldPosition;
+uniform vec3 uSunDir;
 uniform float opacity;
 
-#pragma glslify: dither = require(glsl-dither/2x2)
-
-varying vec3 vWorldPosition;
+#pragma glslify: atmosphere = require(glsl-atmosphere)
 
 void main() {
+  vec3 color = atmosphere(
+    normalize(vWorldPosition),           // normalized ray direction
+    vec3(0, 6372e3, 0),               // ray origin
+    uSunDir,                        // direction of the sun
+    22.0,                           // intensity of the sun
+    6371e3,                         // radius of the planet in meters
+    6471e3,                         // radius of the atmosphere in meters
+    vec3(5.5e-6, 13.0e-6, 22.4e-6), // Rayleigh scattering coefficient
+    21e-6,                          // Mie scattering coefficient
+    8e3,                            // Rayleigh scale height
+    1.2e3,                          // Mie scale height
+    0.758                           // Mie preferred scattering direction
+  );
 
-  float h = normalize(vWorldPosition + offset).y;
-  gl_FragColor = vec4(mix(bottomColor, topColor, max(pow(max(h, 0.0), exponent), 0.0)), opacity);
+    // Apply exposure.
+  color = 1.0 - exp(-1.0 * color);
 
+  gl_FragColor = vec4(color, opacity);
 }

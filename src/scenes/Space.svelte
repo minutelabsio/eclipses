@@ -50,26 +50,30 @@
   const Lsol = 3.828e26 * WATTS
   // luminocity of earth
   const Learth = 1.74e17 * WATTS
+  const Isol = 128e3 / 4 / Math.PI
 
-  const FOV = 5 //26.5
+  const FOV = 26.5
   const METER = 1 / 6378
   const Re = 6378 * 1000 * METER
   const AU = 149597870700 * METER
 
-  const elevation = 2 * DEG
+  let elevation = 2 * DEG
 
   const sunDistance = 1 * AU
-  const sunPosition = [0, Math.sin(elevation) * sunDistance, sunDistance]
+  $: sunPosition = [0, Math.sin(elevation) * sunDistance, sunDistance]
   const sunRadius = 109 * Re
 
   let totalityFactor = 0.9
   const eclipseState = {
     get totalityFactor(){ return totalityFactor },
-    set totalityFactor(value){ totalityFactor = value }
+    set totalityFactor(value){ totalityFactor = value },
+    get elevation(){ return elevation / DEG },
+    set elevation(value){ elevation = value * DEG },
   }
 
   const appSettings = new GUI()
   appSettings.add(eclipseState, 'totalityFactor', 0, 1, 0.01)
+  appSettings.add(eclipseState, 'elevation', 0, 30, 0.01)
 
   const moonPerigee = 356500 * 1000 * METER
   const moonApogee = 406700 * 1000 * METER
@@ -119,11 +123,12 @@
     const state = moonMove.at(time / 2)
     moonX = Math.sin(state.theta * DEG) * moonDistance
     // sunMaterial.emissiveIntensity = state.brightness
-    // sunBrightness = state.brightness
-    bloom.intensity = 30 * (1 - Math.sqrt(state.brightness)) + 5
+    sunBrightness = state.brightness
+    bloom.intensity = 0.0009 * (30 * (1 - Math.sqrt(state.brightness)) + 5)
     Sky.opacity = state.brightness
     Corona.uniforms.uOpacity.value = state.corona
     Corona.uniforms.uOpacity.needsUpdate = true
+    Sky.sunDir.copy(sun.position).normalize()
   })
 
   const composer = new EffectComposer(renderer, {
@@ -203,7 +208,7 @@
   position={[0, 1, -1]}
   fov={FOV}
   near={1}
-  far={10 * AU}
+  far={1.2 * sunDistance}
   makeDefault
   on:create={({ ref }) => {
     // ref.lookAt(0, 0, 10)
@@ -221,11 +226,11 @@
 <!-- Sun -->
 <T.PointLight
   position={sunPosition}
-  intensity={0.3*sunIntensity}
+  intensity={sunIntensity}
   color="white"
   bind:ref={sunlight}
-  shadow.camera.near={0.1 * AU}
-  shadow.camera.far={1.2 * AU}
+  shadow.camera.near={0.8 * sunDistance}
+  shadow.camera.far={1.2 * sunDistance}
   shadow.mapSize.width={1024}
   shadow.mapSize.height={1024}
   shadow.autoUpdate={true}
@@ -236,7 +241,7 @@
   bind:ref={sun}
 >
   <T.SphereGeometry args={[sunRadius, 32, 32]} />
-  <T.MeshBasicMaterial color="#fdffde" bind:ref={sunMaterial} />
+  <T.MeshStandardMaterial emissive="#fdffde" bind:ref={sunMaterial} emissiveIntensity={Isol} />
 </T.Mesh>
 
 <!-- Corona -->

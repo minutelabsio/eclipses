@@ -13,10 +13,7 @@ export default () => {
     depthWrite: false,
   })
 
-  shader.uniforms.topColor = { value: new THREE.Color(0x0077ff) }
-  shader.uniforms.bottomColor = { value: new THREE.Color(0x999999) }
-  shader.uniforms.offset = { value: 33 }
-  shader.uniforms.exponent = { value: 0.6 }
+  shader.uniforms.uSunDir = { value: new THREE.Vector3(0, 0, -1) }
   shader.uniforms.opacity = { value: 1 }
 
   return {
@@ -29,37 +26,13 @@ export default () => {
       shader.uniforms.opacity.needsUpdate = true
       return opacity
     },
-    get bottomColor(){
-      return shader.uniforms.bottomColor.value
+    get sunDir(){
+      return shader.uniforms.uSunDir.value
     },
-    set bottomColor(color) {
-      shader.uniforms.bottomColor.value = color
-      shader.uniforms.bottomColor.needsUpdate = true
-      return color
-    },
-    get topColor(){
-      return shader.uniforms.topColor.value
-    },
-    set topColor(color) {
-      shader.uniforms.topColor.value = color
-      shader.uniforms.topColor.needsUpdate = true
-      return color
-    },
-    get offset(){
-      return shader.uniforms.offset.value
-    },
-    set offset(offset) {
-      shader.uniforms.offset.value = offset
-      shader.uniforms.offset.needsUpdate = true
-      return offset
-    },
-    get exponent(){
-      return shader.uniforms.exponent.value
-    },
-    set exponent(exponent) {
-      shader.uniforms.exponent.value = exponent
-      shader.uniforms.exponent.needsUpdate = true
-      return exponent
+    set sunDir(pos) {
+      shader.uniforms.uSunDir.value = pos
+      shader.uniforms.uSunDir.needsUpdate = true
+      return pos
     },
   }
 }

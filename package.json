@@ -21,6 +21,7 @@
     "@threlte/core": "^6.0.8",
     "@threlte/extras": "^5.6.1",
     "cousin-it": "0.0.1-alpha.6",
+    "glsl-atmosphere": "^2.0.0",
     "glsl-dither": "^1.0.1",
     "intween": "1.0.0-beta.7",
     "lil-gui": "^0.18.2",

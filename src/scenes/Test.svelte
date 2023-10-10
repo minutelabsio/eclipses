@@ -3,6 +3,7 @@
   import { T } from '@threlte/core'
   import * as THREE from 'three'
   import createCorona from '../shaders/corona/Corona'
+  import createTest from '../shaders/test/Test'
 
   const Corona = createCorona({
     opacity: 0.5
@@ -10,6 +11,7 @@
   const DEG = Math.PI / 180
   const FOV = 45
 
+  const Test = createTest()
 </script>
 
 <T.PerspectiveCamera
@@ -30,16 +32,21 @@
   />
 </T.PerspectiveCamera>
 
-<T.Mesh position={[0, 0, -4000]}>
+<!-- <T.Mesh position={[0, 0, -4000]}>
   <T.PlaneGeometry args={[100, 100]} />
   <T is={Corona}/>
+</T.Mesh> -->
+
+<T.Mesh position={[0, 0, -4]}>
+  <T.SphereGeometry args={[100, 32, 32]} />
+  <T is={Test.shader}/>
 </T.Mesh>
 
 <!-- Sun -->
-<T.Mesh position={[-0.4, -0.58, -4100]} castShadow>
+<!-- <T.Mesh position={[-0.4, -0.58, -4100]} castShadow>
   <T.SphereGeometry args={[24, 32, 32]} />
   <T.MeshStandardMaterial emissive="white" />
-</T.Mesh>
+</T.Mesh> -->
 
 <!-- <T.Mesh>
   <T.BoxGeometry args={[200, 200, 200]} />
