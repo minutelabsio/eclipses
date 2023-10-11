@@ -64,16 +64,59 @@
   const sunRadius = 109 * Re
 
   let totalityFactor = 0.9
+
   const eclipseState = {
     get totalityFactor(){ return totalityFactor },
     set totalityFactor(value){ totalityFactor = value },
     get elevation(){ return elevation / DEG },
     set elevation(value){ elevation = value * DEG },
+    doAnimation: true,
+    progress: 0,
+    get altitude(){ return Sky.altitude },
+    set altitude(v){ return Sky.altitude = v },
+    get sunIntensity(){ return Sky.sunIntensity },
+    set sunIntensity(v){ return Sky.sunIntensity = v },
+    get planetRadius(){ return Sky.planetRadius },
+    set planetRadius(v){ return Sky.planetRadius = v },
+    get atmosphereThickness(){ return Sky.atmosphereThickness },
+    set atmosphereThickness(v){ return Sky.atmosphereThickness = v },
+    get rayleighRed(){ return Sky.rayleighCoefficients.x },
+    set rayleighRed(v){ return Sky.rayleighCoefficients.x = v },
+    get rayleighGreen(){ return Sky.rayleighCoefficients.y },
+    set rayleighGreen(v){ return Sky.rayleighCoefficients.y = v },
+    get rayleighBlue(){ return Sky.rayleighCoefficients.z },
+    set rayleighBlue(v){ return Sky.rayleighCoefficients.z = v },
+    get rayleighScaleHeight(){ return Sky.rayleighScaleHeight },
+    set rayleighScaleHeight(v){ return Sky.rayleighScaleHeight = v },
+    get mieCoefficient(){ return Sky.mieCoefficient },
+    set mieCoefficient(v){ return Sky.mieCoefficient = v },
+    get mieScaleHeight(){ return Sky.mieScaleHeight },
+    set mieScaleHeight(v){ return Sky.mieScaleHeight = v },
+    get mieDirectional(){ return Sky.mieDirectional },
+    set mieDirectional(v){ return Sky.mieDirectional = v },
   }
 
-  const appSettings = new GUI()
+  const appSettings = new GUI({
+    width: 400
+  })
   appSettings.add(eclipseState, 'totalityFactor', 0, 1, 0.01)
   appSettings.add(eclipseState, 'elevation', 0, 30, 0.01)
+  appSettings.add(eclipseState, 'doAnimation')
+  appSettings.add(eclipseState, 'progress', 0, 1, 0.01)
+  const skySettings = appSettings.addFolder('Sky')
+  skySettings.add(eclipseState, 'altitude', 0, 10000, 1)
+  skySettings.add(eclipseState, 'sunIntensity', 0, 50, 1)
+  skySettings.add(eclipseState, 'planetRadius', 1, 1e8, 100)
+  skySettings.add(eclipseState, 'atmosphereThickness', 0, 100000, 1)
+  const rayleighSettings = skySettings.addFolder('Rayleigh')
+  rayleighSettings.add(eclipseState, 'rayleighRed', 0, 1e-4, 1e-7)
+  rayleighSettings.add(eclipseState, 'rayleighGreen', 0, 1e-4, 1e-7)
+  rayleighSettings.add(eclipseState, 'rayleighBlue', 0, 1e-4, 1e-7)
+  rayleighSettings.add(eclipseState, 'rayleighScaleHeight', 0, 100000, 10)
+  const mieSettings = skySettings.addFolder('Mie')
+  mieSettings.add(eclipseState, 'mieCoefficient', 0, 1e-4, 1e-7)
+  mieSettings.add(eclipseState, 'mieScaleHeight', 0, 10000, 10)
+  mieSettings.add(eclipseState, 'mieDirectional', 0, 1, 0.01)
 
   const moonPerigee = 356500 * 1000 * METER
   const moonApogee = 406700 * 1000 * METER
@@ -119,7 +162,11 @@
   let time = 0
   useFrame((ctx, dt) => {
     // frame
-    time += dt * 1000
+    if (eclipseState.doAnimation) {
+      time += dt * 1000
+    } else {
+      time = eclipseState.progress * moonMove.duration
+    }
     const state = moonMove.at(time / 2)
     moonX = Math.sin(state.theta * DEG) * moonDistance
     // sunMaterial.emissiveIntensity = state.brightness
@@ -128,8 +175,9 @@
     Sky.opacity = state.brightness
     Corona.uniforms.uOpacity.value = state.corona
     Corona.uniforms.uOpacity.needsUpdate = true
-    Sky.sunDir.copy(sun.position).normalize()
   })
+
+  $: Sky.sunDir.set(...sunPosition).normalize()
 
   const composer = new EffectComposer(renderer, {
     frameBufferType: THREE.HalfFloatType,
@@ -196,7 +244,7 @@
 <!-- <T.AmbientLight intensity={0.1}/> -->
 <!-- <Sky elevation={0.1} /> -->
 <T.HemisphereLight
-  intensity={sunBrightness * 0.5}
+  intensity={sunBrightness * 0.2}
   position={[0, 50, 0]}
 />
 <T.Mesh>
@@ -276,7 +324,7 @@
   receiveShadow
 >
   <T.PlaneGeometry args={[1000, 1000]} />
-  <T.MeshStandardMaterial color='#aa8888' dithering/>
+  <T.MeshStandardMaterial color='#998888' dithering/>
 </T.Mesh>
 
 <!-- Grid -->
