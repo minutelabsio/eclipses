@@ -175,9 +175,12 @@
     Sky.opacity = state.brightness
     Corona.uniforms.uOpacity.value = state.corona
     Corona.uniforms.uOpacity.needsUpdate = true
+    Sky.moonPosition.set(moonX, Math.sin(elevation) * moonDistance, moonDistance)
   })
 
-  $: Sky.sunDir.set(...sunPosition).normalize()
+  $: Sky.sunPosition.set(...sunPosition)
+  $: Sky.sunRadius = sunRadius
+  $: Sky.moonRadius = moonRadius
 
   const composer = new EffectComposer(renderer, {
     frameBufferType: THREE.HalfFloatType,

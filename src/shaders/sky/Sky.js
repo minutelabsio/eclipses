@@ -13,11 +13,20 @@ export default () => {
     depthWrite: false,
   })
 
+  const METER = 1
+  const Re = 6378 * 1000 * METER
+  const AU = 149597870700 * METER
+  const sunDistance = 1 * AU
+  const sunRadius = 109 * Re
+
   const uniforms = {
     opacity: 1,
+    moonPosition: new THREE.Vector3(0, 0, 0),
+    moonRadius: 0.2727 * Re,
     altitude: 0,
     sunIntensity: 22.0,
-    sunDir: new THREE.Vector3(0, 0, -1),
+    sunPosition: new THREE.Vector3(0, 0, -1),
+    sunRadius,
     planetRadius: 6371e3,
     atmosphereThickness: 10e3,
     rayleighCoefficients: new THREE.Vector3(5.5e-6, 13.0e-6, 22.4e-6),
