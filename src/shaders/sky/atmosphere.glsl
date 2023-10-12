@@ -142,8 +142,21 @@ vec4 atmosphere(
   float iOdMie = 0.0;
 
   // angular radii of sun and moon
-  float thetaSun = asin(rSun / length(pSun));
-  float thetaMoon = asin(rMoon / length(pMoon));
+  float thetaSun = asin(rSun / length(pSun - r0));
+  float thetaMoon = asin(rMoon / length(pMoon - r0));
+
+  // float ec = eclipseFactor(r0, thetaSun, pSun, thetaMoon, pMoon);
+  // if (ec < 1.){
+  //   return vec4(0., ec, 0., 1.);
+  // }
+
+  // if (acos(dot(normalize(pSun - r0), r)) < thetaSun) {
+  //   return vec4(1., 0., 0., 1.);
+  // }
+
+  // if (acos(dot(normalize(pMoon - r0), r)) < thetaMoon) {
+  //   return vec4(0., 0., 1., 1.);
+  // }
 
     // Normalize the sun and view directions.
   vec3 sSun = normalize(pSun);
@@ -184,11 +197,8 @@ vec4 atmosphere(
 
     // fraction of sun still exposed
     float ecl = eclipseFactor(iPos, thetaSun, pSun, thetaMoon, pMoon);
-    if (ecl < 1.0) {
-      return vec4(0.0);
-    }
-    // debug
-    return vec4(vec3(ecl), 1.0);
+    // account for the corona
+    ecl = max(1e-6, ecl);
 
         // Sample the secondary ray.
     for(int j = 0; j < jSteps; j++) {
@@ -208,7 +218,7 @@ vec4 atmosphere(
     }
 
         // Calculate attenuation.
-    vec3 attn = exp(-ecl * (kMie * (iOdMie + jOdMie) + kRlh * (iOdRlh + jOdRlh)));
+    vec3 attn = ecl * exp(- (kMie * (iOdMie + jOdMie) + kRlh * (iOdRlh + jOdRlh)));
 
         // Accumulate scattering.
     totalRlh += odStepRlh * attn;

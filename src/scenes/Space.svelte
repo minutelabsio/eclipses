@@ -60,7 +60,7 @@
   let elevation = 2 * DEG
 
   const sunDistance = 1 * AU
-  $: sunPosition = [0, Math.sin(elevation) * sunDistance, sunDistance]
+  $: sunPosition = [0, Math.sin(elevation) * sunDistance, Math.cos(elevation) * sunDistance]
   const sunRadius = 109 * Re
 
   let totalityFactor = 0.9
@@ -122,10 +122,10 @@
   const moonApogee = 406700 * 1000 * METER
   let moonX = 0
   $: moonDistance = MathUtils.lerp(moonPerigee, moonApogee, 1 - totalityFactor)
-  $: moonPosition = [moonX, Math.sin(elevation) * moonDistance, moonDistance]
+  $: moonPosition = [moonX, Math.sin(elevation) * moonDistance, Math.cos(elevation) * moonDistance]
   const moonRadius = 0.2727 * Re
 
-  const orbitTarget =  [0, 1.02, 0]
+  const orbitTarget =  [0, 0, 0]
   let sunBrightness = 1
   $: sunIntensity = sunBrightness * 10000000 * Lsol / (4 * Math.PI * Math.pow(sunDistance, 2))
 
@@ -159,6 +159,8 @@
     .by('8s', { corona: minCoronaOpacity }, expoOut)
     .loop()
 
+  const r0 = new Vector3(0, -Re, 0)
+
   let time = 0
   useFrame((ctx, dt) => {
     // frame
@@ -175,10 +177,10 @@
     // Sky.opacity = state.brightness
     Corona.uniforms.uOpacity.value = state.corona
     Corona.uniforms.uOpacity.needsUpdate = true
-    Sky.moonPosition.set(moonX, Math.sin(elevation) * moonDistance, moonDistance).multiplyScalar(1 / METER)
+    Sky.moonPosition.set(moonX, Math.sin(elevation) * moonDistance, Math.cos(elevation) * moonDistance).sub(r0).multiplyScalar(1 / METER)
   })
 
-  $: Sky.sunPosition.set(...sunPosition).multiplyScalar(1 / METER)
+  $: Sky.sunPosition.set(...sunPosition).sub(r0).multiplyScalar(1 / METER)
   $: Sky.sunRadius = sunRadius / METER
   $: Sky.moonRadius = moonRadius / METER
 
@@ -256,7 +258,7 @@
 </T.Mesh>
 
 <T.PerspectiveCamera
-  position={[0, 1, -1]}
+  position={[0, 0, -1]}
   fov={FOV}
   near={1}
   far={1.2 * sunDistance}
@@ -322,7 +324,7 @@
 
 <!-- Ground -->
 <T.Mesh
-  position={[0, -0.1, 0]}
+  position={[0, -1, 0]}
   rotation={[-90 * DEG, 0, 0]}
   receiveShadow
 >
