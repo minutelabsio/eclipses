@@ -33,10 +33,51 @@ vec2 rsi(vec3 origin, vec3 ray, float radius) {
   return solveQuadratic(a, b, c);
 }
 
+float circleIntersection(float r1, float r2, float d){
+  if (d > r1 + r2){
+    return 0.0;
+  } else if (d <= abs(r1 - r2)){
+    float r = min(r1, r2);
+    return PI * r * r;
+  }
+  float d2 = d * d;
+  float r12 = r1 * r1;
+  float r22 = r2 * r2;
+  float area = r12 * acos((r12 - r22 + d2) / (2.0 * d * r1))
+    + r22 * acos((r22 - r12 + d2) / (2.0 * d * r2))
+    - 0.5 * sqrt((d + r1 - r2) * (d - r1 + r2)* (-d + r1 + r2) * (d + r1 + r2));
+  return area;
+}
 
-vec4 atmosphere(vec3 r, vec3 r0, vec3 pSun, float iSun, float rPlanet, float rAtmos, vec3 kRlh, float kMie, float shRlh, float shMie, float g) {
-    // Normalize the sun and view directions.
-  pSun = normalize(pSun);
+float eclipseFactor(vec3 ri, float thetaSun, vec3 pSun, float thetaMoon, vec3 pMoon){
+  // calculate the amount of the sun that is unobstructed by the moon
+  vec3 sSun = normalize(pSun - ri);
+  vec3 sMoon = normalize(pMoon - ri);
+  float d = length(sSun - sMoon);
+  float rSun = tan(thetaSun);
+  float rMoon = tan(thetaMoon);
+  float area = circleIntersection(rSun, rMoon, d);
+  float totalArea = PI * rSun * rSun;
+  return max(0.0, 1.0 - area / totalArea);
+}
+
+vec4 atmosphere(
+  vec3 r,
+  vec3 r0,
+  vec3 pSun,
+  float rSun,
+  vec3 pMoon,
+  float rMoon,
+  float iSun,
+  float rPlanet,
+  float rAtmos,
+  vec3 kRlh,
+  float kMie,
+  float shRlh,
+  float shMie,
+  float g
+) {
+
   r = normalize(r);
 
     // Calculate the step size of the primary ray.
@@ -100,8 +141,15 @@ vec4 atmosphere(vec3 r, vec3 r0, vec3 pSun, float iSun, float rPlanet, float rAt
   float iOdRlh = 0.0;
   float iOdMie = 0.0;
 
+  // angular radii of sun and moon
+  float thetaSun = asin(rSun / length(pSun));
+  float thetaMoon = asin(rMoon / length(pMoon));
+
+    // Normalize the sun and view directions.
+  vec3 sSun = normalize(pSun);
+
     // Calculate the Rayleigh and Mie phases.
-  float mu = dot(r, pSun);
+  float mu = dot(r, sSun);
   float mumu = mu * mu;
   float gg = g * g;
   float pRlh = 3.0 / (16.0 * PI) * (1.0 + mumu);
@@ -125,7 +173,7 @@ vec4 atmosphere(vec3 r, vec3 r0, vec3 pSun, float iSun, float rPlanet, float rAt
     iOdMie += odStepMie;
 
         // Calculate the step size of the secondary ray.
-    float jStepSize = rsi(iPos, pSun, rAtmos).y / float(jSteps);
+    float jStepSize = rsi(iPos, sSun, rAtmos).y / float(jSteps);
 
         // Initialize the secondary ray time.
     float jTime = 0.0;
@@ -134,11 +182,19 @@ vec4 atmosphere(vec3 r, vec3 r0, vec3 pSun, float iSun, float rPlanet, float rAt
     float jOdRlh = 0.0;
     float jOdMie = 0.0;
 
+    // fraction of sun still exposed
+    float ecl = eclipseFactor(iPos, thetaSun, pSun, thetaMoon, pMoon);
+    if (ecl < 1.0) {
+      return vec4(0.0);
+    }
+    // debug
+    return vec4(vec3(ecl), 1.0);
+
         // Sample the secondary ray.
     for(int j = 0; j < jSteps; j++) {
 
             // Calculate the secondary ray sample position.
-      vec3 jPos = iPos + pSun * (jTime + jStepSize * 0.5);
+      vec3 jPos = iPos + sSun * (jTime + jStepSize * 0.5);
 
             // Calculate the height of the sample.
       float jHeight = length(jPos) - rPlanet;
@@ -152,7 +208,7 @@ vec4 atmosphere(vec3 r, vec3 r0, vec3 pSun, float iSun, float rPlanet, float rAt
     }
 
         // Calculate attenuation.
-    vec3 attn = exp(-(kMie * (iOdMie + jOdMie) + kRlh * (iOdRlh + jOdRlh)));
+    vec3 attn = exp(-ecl * (kMie * (iOdMie + jOdMie) + kRlh * (iOdRlh + jOdRlh)));
 
         // Accumulate scattering.
     totalRlh += odStepRlh * attn;

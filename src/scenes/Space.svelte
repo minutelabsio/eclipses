@@ -172,7 +172,7 @@
     // sunMaterial.emissiveIntensity = state.brightness
     sunBrightness = state.brightness
     bloom.intensity = 0.0009 * (30 * (1 - Math.sqrt(state.brightness)) + 5)
-    Sky.opacity = state.brightness
+    // Sky.opacity = state.brightness
     Corona.uniforms.uOpacity.value = state.corona
     Corona.uniforms.uOpacity.needsUpdate = true
     Sky.moonPosition.set(moonX, Math.sin(elevation) * moonDistance, moonDistance).multiplyScalar(1 / METER)

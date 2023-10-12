@@ -66,6 +66,9 @@ void main() {
     rayDir,           // normalized ray direction
     origin,  // ray origin
     sunPosition,                        // direction of the sun
+    sunRadius,
+    moonPosition,
+    moonRadius,
     intensity,                           // intensity of the sun
     planetRadius,                         // radius of the planet in meters
     planetRadius + atmosphereThickness,                         // radius of the atmosphere in meters
