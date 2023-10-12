@@ -14,32 +14,43 @@ uniform float mieCoefficient;
 uniform float mieScaleHeight;
 uniform float mieDirectional;
 
-#pragma glslify: atmosphere = require(glsl-atmosphere)
+#pragma glslify: atmosphere = require(./atmosphere.glsl)
 
 void main() {
-
-  vec3 moonDir = normalize(moonPosition);
+  vec3 origin = vec3(0, planetRadius + altitude, 0);
+  // vec3 moonDir = normalize(moonPosition);
   vec3 rayDir = normalize(vWorldPosition);
-  vec3 sunDir = normalize(sunPosition);
+  // vec3 sunDir = normalize(sunPosition);
 
   // apparent radius of sun
-  float sunAngle = acos(dot(sunDir, rayDir));
-  float sunAngularRadius = asin(sunRadius / length(sunPosition));
+  // float sunAngle = acos(dot(sunDir, rayDir));
+  // float sunAngularRadius = asin(sunRadius / length(sunPosition));
 
-  // apparent radius of the moon
-  float moonAngle = acos(dot(moonDir, rayDir));
-  float moonAngularRadius = asin(moonRadius / length(moonPosition));
+  // // apparent radius of the moon
+  // float moonAngle = acos(dot(moonDir, rayDir));
+  // float moonAngularRadius = asin(moonRadius / length(moonPosition));
   float intensity = sunIntensity;
 
-  // moon eclipse
-  if(moonAngle < moonAngularRadius) {
-    // intensity *= smoothstep(0.0, 1.0, 0.2 * sunAngle / sunAngularRadius);
-    // debug
-    // gl_FragColor = vec4(0.0, 0.0, 1.0, 1.0);
-    // return;
-  }
+  // // TODO: All of these angular diameters need to take into account the earth radius and altitude
+  // // apparent size of moon umbra
+  // float moonUmbraRadius = asin(moonRadius / (length(moonPosition) - atmosphereThickness));
+  // vec3 moonUmbraDir = normalize(moonPosition - sunPosition);
+  // float a = acos(-dot(moonUmbraDir, sunDir));
+  // vec3 moonUmbraPos = tan(a) * length(sunPosition) * moonUmbraDir;
+  // float umbraAngle = acos(dot(moonUmbraDir, rayDir));
 
-  // debug
+  // // moon eclipse
+  // if(moonAngle < moonAngularRadius && sunAngle < sunAngularRadius) {
+  //   intensity *= smoothstep(0.0, 1.0, 0.01 * sunAngle / sunAngularRadius);
+  //   // debug
+  //   // gl_FragColor = vec4(0.0, 0.0, 1.0, 1.0);
+  //   // return;
+  // } else if (moonAngle < moonAngularRadius){
+  //   intensity *= 0.2;
+  // }
+
+
+  // // debug
   // if (moonAngle < moonAngularRadius) {
   //   gl_FragColor = vec4(0.0, 1.0, 0.0, 1.0);
   //   return;
@@ -51,10 +62,10 @@ void main() {
   //   return;
   // }
 
-  vec3 color = atmosphere(
+  vec4 pixel = atmosphere(
     rayDir,           // normalized ray direction
-    vec3(0, planetRadius + altitude, 0),  // ray origin
-    sunDir,                        // direction of the sun
+    origin,  // ray origin
+    sunPosition,                        // direction of the sun
     intensity,                           // intensity of the sun
     planetRadius,                         // radius of the planet in meters
     planetRadius + atmosphereThickness,                         // radius of the atmosphere in meters
@@ -66,7 +77,7 @@ void main() {
   );
 
   // Apply exposure.
-  color = 1.0 - exp(-1.0 * color);
+  vec3 color = 1.0 - exp(-1.0 * pixel.xyz);
 
-  gl_FragColor = vec4(color, opacity);
+  gl_FragColor = vec4(color, opacity * pixel.a);
 }
