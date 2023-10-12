@@ -25,10 +25,10 @@ export default () => {
     moonRadius: 0.2727 * Re,
     altitude: 0,
     sunIntensity: 22.0,
-    sunPosition: new THREE.Vector3(0, 0, -1),
+    sunPosition: new THREE.Vector3(0, 0, -sunDistance),
     sunRadius,
     planetRadius: 6371e3,
-    atmosphereThickness: 10e3,
+    atmosphereThickness: 100e3, // karman line
     rayleighCoefficients: new THREE.Vector3(5.5e-6, 13.0e-6, 22.4e-6),
     rayleighScaleHeight: 8e3,
     mieCoefficient: 21e-6,
