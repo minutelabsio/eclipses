@@ -104,10 +104,10 @@
   appSettings.add(eclipseState, 'doAnimation')
   appSettings.add(eclipseState, 'progress', 0, 1, 0.01)
   const skySettings = appSettings.addFolder('Sky')
-  skySettings.add(eclipseState, 'altitude', 0, 10000, 1)
+  skySettings.add(eclipseState, 'altitude', 0, 100000, 1)
   skySettings.add(eclipseState, 'sunIntensity', 0, 50, 1)
   skySettings.add(eclipseState, 'planetRadius', 1, 1e8, 100)
-  skySettings.add(eclipseState, 'atmosphereThickness', 0, 100000, 1)
+  skySettings.add(eclipseState, 'atmosphereThickness', 0, 1000000, 1)
   const rayleighSettings = skySettings.addFolder('Rayleigh')
   rayleighSettings.add(eclipseState, 'rayleighRed', 0, 1e-4, 1e-7)
   rayleighSettings.add(eclipseState, 'rayleighGreen', 0, 1e-4, 1e-7)
@@ -175,12 +175,12 @@
     Sky.opacity = state.brightness
     Corona.uniforms.uOpacity.value = state.corona
     Corona.uniforms.uOpacity.needsUpdate = true
-    Sky.moonPosition.set(moonX, Math.sin(elevation) * moonDistance, moonDistance)
+    Sky.moonPosition.set(moonX, Math.sin(elevation) * moonDistance, moonDistance).multiplyScalar(1 / METER)
   })
 
-  $: Sky.sunPosition.set(...sunPosition)
-  $: Sky.sunRadius = sunRadius
-  $: Sky.moonRadius = moonRadius
+  $: Sky.sunPosition.set(...sunPosition).multiplyScalar(1 / METER)
+  $: Sky.sunRadius = sunRadius / METER
+  $: Sky.moonRadius = moonRadius / METER
 
   const composer = new EffectComposer(renderer, {
     frameBufferType: THREE.HalfFloatType,
@@ -251,7 +251,7 @@
   position={[0, 50, 0]}
 />
 <T.Mesh>
-  <T.SphereGeometry args={[1000, 32, 15]} />
+  <T.SphereGeometry args={[moonDistance - 100, 32, 15]} />
   <T is={Sky.shader} />
 </T.Mesh>
 
