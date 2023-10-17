@@ -100,11 +100,11 @@
     width: 400
   })
   appSettings.add(eclipseState, 'totalityFactor', 0, 1, 0.01)
-  appSettings.add(eclipseState, 'elevation', 0, 30, 0.01)
+  appSettings.add(eclipseState, 'elevation', 0, 90, 0.01)
   appSettings.add(eclipseState, 'doAnimation')
   appSettings.add(eclipseState, 'progress', 0, 1, 0.01)
   const skySettings = appSettings.addFolder('Sky')
-  skySettings.add(eclipseState, 'altitude', 0, 100000, 1)
+  skySettings.add(eclipseState, 'altitude', 0, 10000000, 1)
   skySettings.add(eclipseState, 'sunIntensity', 0, 50, 1)
   skySettings.add(eclipseState, 'planetRadius', 1, 1e8, 100)
   skySettings.add(eclipseState, 'atmosphereThickness', 0, 1000000, 1)
@@ -310,6 +310,7 @@
 
 <!-- moon -->
 <T.Mesh
+  visible={false}
   bind:ref={moon}
   position={moonPosition}
   rotation={[180 * DEG, 0, 0]}
@@ -324,12 +325,13 @@
 
 <!-- Ground -->
 <T.Mesh
+  visible={false}
   position={[0, -1, 0]}
   rotation={[-90 * DEG, 0, 0]}
   receiveShadow
 >
   <T.PlaneGeometry args={[1000, 1000]} />
-  <T.MeshStandardMaterial color='#998888' dithering/>
+  <T.MeshStandardMaterial color='#998888' dithering blending={THREE.AdditiveBlending}/>
 </T.Mesh>
 
 <!-- Grid -->

@@ -1,6 +1,9 @@
 #define PI 3.1415926535897932384626433832795
 #define iSteps 16
 #define jSteps 8
+#define RED vec4(1.0, 0.0, 0.0, 1.0)
+#define GREEN vec4(0.0, 1.0, 0.0, 1.0)
+#define BLUE vec4(0.0, 0.0, 1.0, 1.0)
 
 vec2 solveQuadratic(float a, float b, float c) {
     // Solve a quadratic equation of the form ax^2 + bx + c = 0
@@ -78,6 +81,7 @@ vec4 atmosphere(
   float g
 ) {
 
+  vec3 outColor = vec3(0.0);
   r = normalize(r);
 
     // Calculate the step size of the primary ray.
@@ -105,10 +109,6 @@ vec4 atmosphere(
     //    t > 0.
     //    Ray from 0 to isect_planet.x.
 
-    // Ray does not intersect the atmosphere (on the way forward) at all;
-    // exit early.
-  if(p.x > p.y || p.y < 0.0)
-    return vec4(0.0);
 
   vec2 isect_planet = rsi(r0, r, rPlanet);
 
@@ -116,6 +116,23 @@ vec4 atmosphere(
   if(isect_planet.x < 0.0 && isect_planet.y > 0.0) {
     return vec4(0.0);
   }
+
+  // angular radii of sun and moon
+  float thetaSun = asin(rSun / length(pSun - r0));
+  float thetaMoon = asin(rMoon / length(pMoon - r0));
+
+  if(acos(dot(normalize(pMoon - r0), r)) < thetaMoon) {
+    // moon color
+    outColor = vec3(0., 0., 0.);
+  } else if(acos(dot(normalize(pSun - r0), r)) < thetaSun) {
+    // suncolor
+    outColor = vec3(iSun);
+  }
+
+    // Ray does not intersect the atmosphere (on the way forward) at all;
+  // exit early.
+  if(p.x > p.y || p.y < 0.0)
+    return vec4(0.0);
 
     // Treat intersection of the planet in negative t as if the planet had not
     // been intersected at all.
@@ -126,7 +143,7 @@ vec4 atmosphere(
 
     // if the planet is intersected, set the end of the ray to the planet
     // surface.
-  p.y = planet_intersected ? isect_planet.y : p.y;
+  p.y = planet_intersected ? isect_planet.x : p.y;
 
   float iStepSize = (p.y - p.x) / float(iSteps);
 
@@ -140,23 +157,6 @@ vec4 atmosphere(
     // Initialize optical depth accumulators for the primary ray.
   float iOdRlh = 0.0;
   float iOdMie = 0.0;
-
-  // angular radii of sun and moon
-  float thetaSun = asin(rSun / length(pSun - r0));
-  float thetaMoon = asin(rMoon / length(pMoon - r0));
-
-  // float ec = eclipseFactor(r0, thetaSun, pSun, thetaMoon, pMoon);
-  // if (ec < 1.){
-  //   return vec4(0., ec, 0., 1.);
-  // }
-
-  // if (acos(dot(normalize(pSun - r0), r)) < thetaSun) {
-  //   return vec4(1., 0., 0., 1.);
-  // }
-
-  // if (acos(dot(normalize(pMoon - r0), r)) < thetaMoon) {
-  //   return vec4(0., 0., 1., 1.);
-  // }
 
     // Normalize the sun and view directions.
   vec3 sSun = normalize(pSun);
@@ -172,7 +172,7 @@ vec4 atmosphere(
   for(int i = 0; i < iSteps; i++) {
 
         // Calculate the primary ray sample position.
-    vec3 iPos = r0 + r * (iTime + iStepSize * 0.5);
+    vec3 iPos = r0 + r * (iTime + iStepSize * 0.5 + p.x);
 
         // Calculate the height of the sample.
     float iHeight = length(iPos) - rPlanet;
@@ -229,8 +229,9 @@ vec4 atmosphere(
 
   }
 
-    // Calculate and return the final color.
-  return vec4(iSun * (pRlh * kRlh * totalRlh + pMie * kMie * totalMie), 1);
+  // Calculate and return the final color.
+  outColor += vec3(iSun * (pRlh * kRlh * totalRlh + pMie * kMie * totalMie));
+  return vec4(outColor, 1.0);
 }
 
 #pragma glslify: export(atmosphere)

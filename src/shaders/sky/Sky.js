@@ -7,7 +7,7 @@ export default () => {
   const shader = new ShaderMaterial({
     vertexShader,
     fragmentShader,
-    blending: THREE.AdditiveBlending,
+    // blending: THREE.AdditiveBlending,
     side: THREE.BackSide,
     transparent: true,
     depthWrite: false,
