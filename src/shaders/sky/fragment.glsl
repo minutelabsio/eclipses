@@ -13,6 +13,7 @@ uniform float rayleighScaleHeight;
 uniform float mieCoefficient;
 uniform float mieScaleHeight;
 uniform float mieDirectional;
+uniform float exposure;
 
 #pragma glslify: atmosphere = require(./atmosphere.glsl)
 
@@ -79,8 +80,11 @@ void main() {
     mieDirectional                         // Mie preferred scattering direction
   );
 
+  vec3 color = pixel.xyz;
+  // apply gamma correction
+  // color = pow(color, vec3(1.0 / 2.2));
   // Apply exposure.
-  vec3 color = 1.0 - exp(-1.0 * pixel.xyz);
+  color = 1.0 - exp(-exposure * color);
 
   gl_FragColor = vec4(color, opacity * pixel.a);
 }

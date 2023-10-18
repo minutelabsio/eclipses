@@ -7,11 +7,12 @@ export default () => {
   const shader = new ShaderMaterial({
     vertexShader,
     fragmentShader,
-    // blending: THREE.AdditiveBlending,
+    blending: THREE.AdditiveBlending,
     side: THREE.BackSide,
     transparent: true,
     depthWrite: false,
   })
+  shader.toneMapped = false
 
   const METER = 1
   const Re = 6378 * 1000 * METER
@@ -34,6 +35,7 @@ export default () => {
     mieCoefficient: 21e-6,
     mieScaleHeight: 1.2e3,
     mieDirectional: 0.758,
+    exposure: 1.0,
   }
 
   const api = { shader }

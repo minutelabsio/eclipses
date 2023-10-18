@@ -1,9 +1,9 @@
 #define PI 3.1415926535897932384626433832795
 #define iSteps 16
 #define jSteps 8
-#define RED vec4(1.0, 0.0, 0.0, 1.0)
-#define GREEN vec4(0.0, 1.0, 0.0, 1.0)
-#define BLUE vec4(0.0, 0.0, 1.0, 1.0)
+#define RED vec3(1.0, 0.0, 0.0)
+#define GREEN vec3(0.0, 1.0, 0.0)
+#define BLUE vec3(0.0, 0.0, 1.0)
 
 vec2 solveQuadratic(float a, float b, float c) {
     // Solve a quadratic equation of the form ax^2 + bx + c = 0
@@ -111,32 +111,41 @@ vec4 atmosphere(
 
 
   vec2 isect_planet = rsi(r0, r, rPlanet);
+  bool planet_intersected = (isect_planet.x < isect_planet.y && isect_planet.x > 0.0);
 
     // Ray starts inside the planet -> return 0
   if(isect_planet.x < 0.0 && isect_planet.y > 0.0) {
-    return vec4(0.0);
+    return vec4(0.0, 0.0, 0.0, 1.0);
   }
 
   // angular radii of sun and moon
   float thetaSun = asin(rSun / length(pSun - r0));
   float thetaMoon = asin(rMoon / length(pMoon - r0));
 
-  if(acos(dot(normalize(pMoon - r0), r)) < thetaMoon) {
-    // moon color
-    outColor = vec3(0., 0., 0.);
-  } else if(acos(dot(normalize(pSun - r0), r)) < thetaSun) {
-    // suncolor
-    outColor = vec3(iSun);
+  float dSun = 0.0;
+
+  if (!planet_intersected){
+    bool inMoon = step(thetaMoon, acos(dot(normalize(pMoon - r0), r))) < 1.;
+    if (inMoon) {
+      // moon color
+      outColor = vec3(0., 0., 0.);
+    } else if ((dSun = acos(dot(normalize(pSun - r0), r))) < thetaSun * 5.0) {
+      // corona color
+      outColor = vec3(iSun * 1e-6);
+      if (dSun < thetaSun) {
+        // sun color
+        outColor += vec3(iSun);
+      }
+    }
   }
 
     // Ray does not intersect the atmosphere (on the way forward) at all;
   // exit early.
-  if(p.x > p.y || p.y < 0.0)
-    return vec4(0.0);
+  if(p.x > p.y || p.y <= 0.0)
+    return vec4(outColor, 1.0);
 
-    // Treat intersection of the planet in negative t as if the planet had not
+  // Treat intersection of the planet in negative t as if the planet had not
     // been intersected at all.
-  bool planet_intersected = (isect_planet.x < isect_planet.y && isect_planet.x > 0.0);
 
     // always start atmosphere ray at viewpoint if we start inside atmosphere
   p.x = max(p.x, 0.0);

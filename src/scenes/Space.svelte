@@ -19,12 +19,8 @@
     PredicationMode,
     BlendMode,
     BlendFunction,
-
-    GammaCorrectionEffect,
-
-    ChromaticAberrationEffect
-
-
+    ToneMappingEffect,
+    ToneMappingMode,
   } from 'postprocessing'
   import { GodraysPass } from 'three-good-godrays'
   import createCorona from '../shaders/corona/Corona'
@@ -36,6 +32,7 @@
   let moon
   let corona
   let bloom
+  let skyMesh
 
   const Corona = createCorona({
     opacity: 0.5
@@ -66,6 +63,8 @@
   let totalityFactor = 0.9
 
   const eclipseState = {
+    get exposure(){ return Sky.exposure },
+    set exposure(v){ return Sky.exposure = v },
     get totalityFactor(){ return totalityFactor },
     set totalityFactor(value){ totalityFactor = value },
     get elevation(){ return elevation / DEG },
@@ -99,6 +98,7 @@
   const appSettings = new GUI({
     width: 400
   })
+  appSettings.add(eclipseState, 'exposure', 0.1, 40, 0.01)
   appSettings.add(eclipseState, 'totalityFactor', 0, 1, 0.01)
   appSettings.add(eclipseState, 'elevation', 0, 90, 0.01)
   appSettings.add(eclipseState, 'doAnimation')
@@ -188,9 +188,10 @@
     frameBufferType: THREE.HalfFloatType,
   })
 
-  const setupEffectComposer = (camera, sun, sunlight) => {
-    if (!camera || !sun || !sunlight) return
-    sun.layers.enable(11)
+  const setupEffectComposer = (camera, { sun, sunlight, skyMesh }) => {
+    if (!camera || !sun || !sunlight || !skyMesh) return
+    // skyMesh.layers.enable(11)
+    // sun.layers.enable(11)
     // corona.layers.enable(11)
     composer.removeAllPasses()
     const renderpass = new RenderPass(scene, camera)
@@ -212,7 +213,7 @@
 
     bloom = new SelectiveBloomEffect(scene, camera, {
       intensity: 30,
-      luminanceThreshold: 0.5,
+      luminanceThreshold: 0.,
       luminanceSmoothing: 0.4,
       blendFunction: BlendFunction.SCREEN,
       radius: .9,
@@ -227,20 +228,31 @@
     composer.addPass(
       new EffectPass(
         camera,
-        bloom,
+        // bloom,
         // godrays,
+        // new ToneMappingEffect({
+        //   // blendFunction: BlendFunction.NORMAL,
+        //   mode: ToneMappingMode.ACES_FILMIC,
+        //   // adaptive: true,
+        //   // resolution: 256,
+        //   // middleGrey: 0.6,
+        //   whitePoint: 10000,
+        //   minLuminance: 0.0000001,
+        //   // averageLuminance: 0.1,
+        //   adaptationRate: 10
+        // }),
         new SMAAEffect({
           preset: SMAAPreset.HIGH,
           // edgeDetectionMode: EdgeDetectionMode.LUMA,
           edgeDetectionMode: EdgeDetectionMode.DEPTH,
           blendFunction: BlendFunction.SCREEN
-        })
+        }),
       )
     )
   }
   // We need to set up the passes according to the camera in use
   $: composer.setSize($size.width, $size.height)
-  $: setupEffectComposer($camera, sun, sunlight)
+  $: setupEffectComposer($camera, { sun, sunlight, skyMesh })
   useRender((_, delta) => {
     composer.render(delta)
   })
@@ -248,12 +260,12 @@
 
 <!-- <T.AmbientLight intensity={0.1}/> -->
 <!-- <Sky elevation={0.1} /> -->
-<T.HemisphereLight
+<!-- <T.HemisphereLight
   intensity={sunBrightness * 0.2}
   position={[0, 50, 0]}
-/>
-<T.Mesh>
-  <T.SphereGeometry args={[moonDistance - 100, 32, 15]} />
+/> -->
+<T.Mesh bind:ref={skyMesh}>
+  <T.IcosahedronGeometry args={[moonDistance - 100, 4]} />
   <T is={Sky.shader} />
 </T.Mesh>
 
@@ -278,6 +290,7 @@
 
 <!-- Sun -->
 <T.PointLight
+  visible={false}
   position={sunPosition}
   intensity={sunIntensity}
   color="white"
@@ -290,6 +303,7 @@
   castShadow
 />
 <T.Mesh
+  visible={false}
   position={sunPosition}
   bind:ref={sun}
 >
@@ -299,6 +313,7 @@
 
 <!-- Corona -->
 <T.Mesh
+  visible={false}
   position={[sunPosition[0], sunPosition[1], sunPosition[2]]}
   rotation.y={Math.PI}
   scale={[sunRadius, sunRadius, sunRadius]}
