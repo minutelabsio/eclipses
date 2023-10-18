@@ -112,7 +112,7 @@ vec4 atmosphere(
 
 
   vec2 isect_planet = rsi(r0, r, rPlanet);
-  bool planet_intersected = (isect_planet.x < isect_planet.y && isect_planet.x > 0.0);
+  bool planet_intersected = (isect_planet.x < isect_planet.y && isect_planet.y > 0.0);
 
     // Ray starts inside the planet -> return 0
   if(isect_planet.x < 0.0 && isect_planet.y > 0.0) {
