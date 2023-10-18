@@ -1,4 +1,5 @@
 #define PI 3.1415926535897932384626433832795
+#define MIN_STEP_SIZE 0.00001
 #define iSteps 16
 #define jSteps 8
 #define RED vec3(1.0, 0.0, 0.0)
@@ -155,6 +156,10 @@ vec4 atmosphere(
   p.y = planet_intersected ? isect_planet.x : p.y;
 
   float iStepSize = (p.y - p.x) / float(iSteps);
+
+  if (iStepSize < MIN_STEP_SIZE) {
+    return vec4(0.0, 0.0, 0.0, 1.0);
+  }
 
     // Initialize the primary ray time.
   float iTime = 0.0;
