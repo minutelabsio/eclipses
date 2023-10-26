@@ -155,7 +155,7 @@ vec3 scattering(
   path.y = planet_intersected ? intPlanet.x : path.y;
 
   // if we have a very short path, we're probably just looking at ground just ignore
-  if (path.y - path.x < 1000.0){
+  if (path.y - path.x < 100.0){
     return vec3(0.0);
   }
 
