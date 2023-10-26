@@ -50,7 +50,7 @@
   const Learth = 1.74e17 * WATTS
   const Isol = 128e3 / 4 / Math.PI
 
-  const FOV = 26.5
+  let FOV = 26.5
   const METER = 1 / 6378
   const Re = 6378 * 1000 * METER
   const AU = 149597870700 * METER
@@ -64,14 +64,16 @@
   let totalityFactor = 0.9
 
   const eclipseState = {
+    get FOV(){ return FOV },
+    set FOV(v){ return FOV = v },
     get exposure(){ return Sky.exposure },
     set exposure(v){ return Sky.exposure = v },
     get totalityFactor(){ return totalityFactor },
     set totalityFactor(value){ totalityFactor = value },
     get elevation(){ return elevation / DEG },
-    set elevation(value){ elevation = value * DEG },
     doAnimation: true,
     progress: 0,
+    set elevation(value){ elevation = value * DEG },
     get altitude(){ return Math.log10(Sky.altitude + 1) / 8 },
     set altitude(v){ return Sky.altitude = Math.pow(10, v * 8) - 1 },
     get sunIntensity(){ return Sky.sunIntensity },
@@ -104,11 +106,12 @@
     const appSettings = new GUI({
       width: 400
     })
+    appSettings.add(eclipseState, 'FOV', 1, 180, 1)
     appSettings.add(eclipseState, 'exposure', 0.1, 40, 0.01)
     appSettings.add(eclipseState, 'totalityFactor', 0, 1, 0.01)
-    appSettings.add(eclipseState, 'elevation', -90, 90, 0.001)
-    appSettings.add(eclipseState, 'doAnimation')
     appSettings.add(eclipseState, 'progress', 0, 1, 0.01)
+    appSettings.add(eclipseState, 'doAnimation')
+    appSettings.add(eclipseState, 'elevation', -90, 90, 0.001)
     const skySettings = appSettings.addFolder('Sky')
     skySettings.add(eclipseState, 'altitude', 0, 1, 0.01)
     skySettings.add(eclipseState, 'sunIntensity', 0, 50, 1)
@@ -123,8 +126,9 @@
     mieSettings.add(eclipseState, 'mieCoefficient', 0, 1e-4, 1e-7)
     mieSettings.add(eclipseState, 'mieScaleHeight', 0, 10000, 10)
     mieSettings.add(eclipseState, 'mieDirectional', 0, 1, 0.01)
-    skySettings.add(eclipseState, 'iSteps', 1, 32, 1)
-    skySettings.add(eclipseState, 'jSteps', 1, 32, 1)
+    const precisionSettings = skySettings.addFolder('Precision').close()
+    precisionSettings.add(eclipseState, 'iSteps', 1, 32, 1)
+    precisionSettings.add(eclipseState, 'jSteps', 1, 32, 1)
 
     return () => {
       appSettings.destroy()
