@@ -10,9 +10,9 @@ const float THREE_OVER_16_PI = 3.0 / (16.0 * PI);
 const float THREE_OVER_8_PI = 3.0 / (8.0 * PI);
 
 vec2 solveQuadratic(float a, float b, float c) {
-  // Solve a quadratic equation of the form ax^2 + bx + c = 0
-  // Returns a vec2 containing the two solutions.
-  // If there is no solution, x > y
+    // Solve a quadratic equation of the form ax^2 + bx + c = 0
+    // Returns a vec2 containing the two solutions.
+    // If there is no solution, x > y
   float discr = b * b - 4.0 * a * c;
   if (discr < 0.0) {
     return vec2(1e5, -1e5);

@@ -25,6 +25,7 @@
   import { GodraysPass } from 'three-good-godrays'
   import createCorona from '../shaders/corona/Corona'
   import createSky from '../shaders/sky/Sky'
+  import { onMount } from 'svelte'
 
   let sunMaterial
   let sunlight
@@ -71,8 +72,8 @@
     set elevation(value){ elevation = value * DEG },
     doAnimation: true,
     progress: 0,
-    get altitude(){ return Sky.altitude },
-    set altitude(v){ return Sky.altitude = v },
+    get altitude(){ return Math.log10(Sky.altitude + 1) / 8 },
+    set altitude(v){ return Sky.altitude = Math.pow(10, v * 8) - 1 },
     get sunIntensity(){ return Sky.sunIntensity },
     set sunIntensity(v){ return Sky.sunIntensity = v },
     get planetRadius(){ return Sky.planetRadius },
@@ -93,30 +94,42 @@
     set mieScaleHeight(v){ return Sky.mieScaleHeight = v },
     get mieDirectional(){ return Sky.mieDirectional },
     set mieDirectional(v){ return Sky.mieDirectional = v },
+    get iSteps(){ return Sky.iSteps },
+    set iSteps(v){ return Sky.iSteps = v },
+    get jSteps(){ return Sky.jSteps },
+    set jSteps(v){ return Sky.jSteps = v },
   }
 
-  const appSettings = new GUI({
-    width: 400
+  onMount(() => {
+    const appSettings = new GUI({
+      width: 400
+    })
+    appSettings.add(eclipseState, 'exposure', 0.1, 40, 0.01)
+    appSettings.add(eclipseState, 'totalityFactor', 0, 1, 0.01)
+    appSettings.add(eclipseState, 'elevation', -90, 90, 0.001)
+    appSettings.add(eclipseState, 'doAnimation')
+    appSettings.add(eclipseState, 'progress', 0, 1, 0.01)
+    const skySettings = appSettings.addFolder('Sky')
+    skySettings.add(eclipseState, 'altitude', 0, 1, 0.01)
+    skySettings.add(eclipseState, 'sunIntensity', 0, 50, 1)
+    skySettings.add(eclipseState, 'planetRadius', 1, 1e8, 100)
+    skySettings.add(eclipseState, 'atmosphereThickness', 0, 1000000, 1)
+    const rayleighSettings = skySettings.addFolder('Rayleigh')
+    rayleighSettings.add(eclipseState, 'rayleighRed', 0, 1e-4, 1e-7)
+    rayleighSettings.add(eclipseState, 'rayleighGreen', 0, 1e-4, 1e-7)
+    rayleighSettings.add(eclipseState, 'rayleighBlue', 0, 1e-4, 1e-7)
+    rayleighSettings.add(eclipseState, 'rayleighScaleHeight', 0, 100000, 10)
+    const mieSettings = skySettings.addFolder('Mie')
+    mieSettings.add(eclipseState, 'mieCoefficient', 0, 1e-4, 1e-7)
+    mieSettings.add(eclipseState, 'mieScaleHeight', 0, 10000, 10)
+    mieSettings.add(eclipseState, 'mieDirectional', 0, 1, 0.01)
+    skySettings.add(eclipseState, 'iSteps', 1, 32, 1)
+    skySettings.add(eclipseState, 'jSteps', 1, 32, 1)
+
+    return () => {
+      appSettings.destroy()
+    }
   })
-  appSettings.add(eclipseState, 'exposure', 0.1, 40, 0.01)
-  appSettings.add(eclipseState, 'totalityFactor', 0, 1, 0.01)
-  appSettings.add(eclipseState, 'elevation', 0, 90, 0.01)
-  appSettings.add(eclipseState, 'doAnimation')
-  appSettings.add(eclipseState, 'progress', 0, 1, 0.01)
-  const skySettings = appSettings.addFolder('Sky')
-  skySettings.add(eclipseState, 'altitude', 0, 10000000, 1)
-  skySettings.add(eclipseState, 'sunIntensity', 0, 50, 1)
-  skySettings.add(eclipseState, 'planetRadius', 1, 1e8, 100)
-  skySettings.add(eclipseState, 'atmosphereThickness', 0, 1000000, 1)
-  const rayleighSettings = skySettings.addFolder('Rayleigh')
-  rayleighSettings.add(eclipseState, 'rayleighRed', 0, 1e-4, 1e-7)
-  rayleighSettings.add(eclipseState, 'rayleighGreen', 0, 1e-4, 1e-7)
-  rayleighSettings.add(eclipseState, 'rayleighBlue', 0, 1e-4, 1e-7)
-  rayleighSettings.add(eclipseState, 'rayleighScaleHeight', 0, 100000, 10)
-  const mieSettings = skySettings.addFolder('Mie')
-  mieSettings.add(eclipseState, 'mieCoefficient', 0, 1e-4, 1e-7)
-  mieSettings.add(eclipseState, 'mieScaleHeight', 0, 10000, 10)
-  mieSettings.add(eclipseState, 'mieDirectional', 0, 1, 0.01)
 
   const moonPerigee = 356500 * 1000 * METER
   const moonApogee = 406700 * 1000 * METER
@@ -230,22 +243,24 @@
         camera,
         // bloom,
         // godrays,
-        // new ToneMappingEffect({
-        //   // blendFunction: BlendFunction.NORMAL,
-        //   mode: ToneMappingMode.ACES_FILMIC,
-        //   // adaptive: true,
-        //   // resolution: 256,
-        //   // middleGrey: 0.6,
-        //   whitePoint: 10000,
-        //   minLuminance: 0.0000001,
-        //   // averageLuminance: 0.1,
-        //   adaptationRate: 10
-        // }),
         new SMAAEffect({
           preset: SMAAPreset.HIGH,
           // edgeDetectionMode: EdgeDetectionMode.LUMA,
           edgeDetectionMode: EdgeDetectionMode.DEPTH,
           blendFunction: BlendFunction.SCREEN
+        }),
+        new ToneMappingEffect({
+          // blendFunction: BlendFunction.NORMAL,
+          // mode: ToneMappingMode.ACES_FILMIC,
+          // mode: ToneMappingMode.REINHARD2,
+          mode: ToneMappingMode.REINHARD2_ADAPTIVE,
+          // adaptive: true,
+          // resolution: 256,
+          // middleGrey: 0.6,
+          whitePoint: 10,
+          minLuminance: 0.001,
+          averageLuminance: 1,
+          adaptationRate: 10
         }),
       )
     )

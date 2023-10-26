@@ -3,6 +3,7 @@
   import Space from './scenes/Space.svelte'
   import Test from './scenes/Test.svelte'
   import { onMount } from 'svelte'
+  import { NoToneMapping } from 'three'
 
   const renderOptions = {
     powerPreference: 'high-performance',
@@ -19,7 +20,11 @@
 </script>
 
 <main>
-  <Canvas useLegacyLights={false} rendererParameters={renderOptions}>
+  <Canvas
+    useLegacyLights={false}
+    rendererParameters={renderOptions}
+    toneMapping={NoToneMapping}
+  >
     <Space/>
     <!-- <Test /> -->
   </Canvas>

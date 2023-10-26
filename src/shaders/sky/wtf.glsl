@@ -14,9 +14,9 @@ vec2 solveQuadratic(float a, float b, float c) {
   // Returns a vec2 containing the two solutions.
   // If there is no solution, x > y
   float discr = b * b - 4.0 * a * c;
-  if (discr < 0.0) {
+  if(discr < 0.0) {
     return vec2(1e5, -1e5);
-  } else if (discr == 0.0) {
+  } else if(discr == 0.0) {
     float x0 = -0.5 * b / a;
     return vec2(x0, x0);
   } else {
@@ -24,7 +24,7 @@ vec2 solveQuadratic(float a, float b, float c) {
     float q = (b > 0.0) ? -0.5 * (b + sqrtdiscr) : -0.5 * (b - sqrtdiscr);
     float x0 = q / a;
     float x1 = c / q;
-    if (x0 > x1) {
+    if(x0 > x1) {
       return vec2(x1, x0);
     } else {
       return vec2(x0, x1);
@@ -41,10 +41,10 @@ vec2 rsi(vec3 origin, vec3 ray, float radius) {
   return solveQuadratic(a, b, c);
 }
 
-float circleIntersection(float r1, float r2, float d){
-  if (d > r1 + r2){
+float circleIntersection(float r1, float r2, float d) {
+  if(d > r1 + r2) {
     return 0.0;
-  } else if (d <= abs(r1 - r2)){
+  } else if(d <= abs(r1 - r2)) {
     float r = min(r1, r2);
     return PI * r * r;
   }
@@ -63,15 +63,11 @@ float circleIntersection(float r1, float r2, float d){
   //   + r22 * acos((d2 - r12mr22) / (twod * r2))
   //   - 0.5 * sqrt(-r12mr22 * r12mr22 + twod2 * r12 + twod2 * r22 - d2 * d2);
   vec2 r1r2 = vec2(r1, r2);
-  float area = dot(
-      r1r2 * r1r2,
-      acos(vec2(d2 + r12mr22, d2 - r12mr22) / (twod * r1r2))
-    )
-    - 0.5 * sqrt(dot(vec4(-r12mr22, twod2, twod2, -d2), vec4(r12mr22, r12, r22, d2)));
+  float area = dot(r1r2 * r1r2, acos(vec2(d2 + r12mr22, d2 - r12mr22) / (twod * r1r2))) - 0.5 * sqrt(dot(vec4(-r12mr22, twod2, twod2, -d2), vec4(r12mr22, r12, r22, d2)));
   return area;
 }
 
-float eclipseFactor(vec3 ri, float thetaSun, vec3 pSun, float thetaMoon, vec3 pMoon){
+float eclipseFactor(vec3 ri, float thetaSun, vec3 pSun, float thetaMoon, vec3 pMoon) {
   // calculate the amount of the sun that is unobstructed by the moon
   vec3 sSun = normalize(pSun - ri);
   vec3 sMoon = normalize(pMoon - ri);
@@ -107,7 +103,7 @@ vec4 atmosphere(
   int jSteps
 ) {
 
-  vec3 outColor = vec3(0.0);
+  vec3 outColor = vec3(0.5);
   r = normalize(r);
 
     // Calculate the step size of the primary ray.
@@ -135,13 +131,12 @@ vec4 atmosphere(
     //    t > 0.
     //    Ray from 0 to isect_planet.x.
 
-
   vec2 isect_planet = rsi(r0, r, rPlanet);
   bool planet_intersected = (isect_planet.x < isect_planet.y && isect_planet.y > 0.0);
 
     // Ray starts inside the planet -> return 0
-  if(isect_planet.x < 0.0 && isect_planet.y > 0.0) {
-    return vec4(0.0, 0.0, 0.0, 1.0);
+  if(isect_planet.x <= 0.0 && planet_intersected) {
+    return vec4(isect_planet.y, -isect_planet.x/10., -isect_planet.y, 1.0);
   }
 
   // angular radii of sun and moon
@@ -151,14 +146,12 @@ vec4 atmosphere(
   float dSun = 0.0;
   float sundisk = 0.0;
 
-  if (!planet_intersected){
+  if(!planet_intersected) {
     bool inMoon = step(thetaMoon, acos(dot(normalize(pMoon - r0), r))) < 1.;
-    if (inMoon) {
+    if(inMoon) {
       // moon color
-      outColor = vec3(0., 0., 0.);
-    } else if ((dSun = acos(dot(normalize(pSun - r0), r))) < thetaSun * 5.0) {
+    } else if((dSun = acos(dot(normalize(pSun - r0), r))) < thetaSun * 5.0) {
       // corona color
-      outColor = vec3(iSun * 1e-6);
       // float sunAngularCos = dot(normalize(pSun - r0), r);
       // float sundisk = smoothstep(sunAngularCos, sunAngularCos + 2e-5, cos(thetaSun));
 
@@ -167,118 +160,17 @@ vec4 atmosphere(
       //   outColor += vec3(iSun);
       // }
       float sunAngularCos = dot(normalize(pSun - r0), r);
-      sundisk = 100. * (1. - smoothstep(sunAngularCos, sunAngularCos + 1e-6, cos(thetaSun)));
     }
   }
 
     // Ray does not intersect the atmosphere (on the way forward) at all;
   // exit early.
-  if (p.x > p.y || p.y <= 0.0) {
+  if(p.x > p.y || p.y <= 0.0) {
     outColor += vec3(iSun * (sundisk));
     return vec4(outColor, 1.0);
   }
 
-  // Treat intersection of the planet in negative t as if the planet had not
-    // been intersected at all.
 
-    // always start atmosphere ray at viewpoint if we start inside atmosphere
-  p.x = max(p.x, 0.0);
-
-    // if the planet is intersected, set the end of the ray to the planet
-    // surface.
-  p.y = planet_intersected ? isect_planet.x : p.y;
-
-  float iStepSize = (p.y - p.x) / float(iSteps);
-
-  if (iStepSize < MIN_STEP_SIZE) {
-    return vec4(0.0, 0.0, 0.0, 1.0);
-  }
-
-    // Initialize the primary ray time.
-  float iTime = 0.0;
-
-    // Initialize accumulators for Rayleigh and Mie scattering.
-  vec3 totalRlh = vec3(0, 0, 0);
-  vec3 totalMie = vec3(0, 0, 0);
-
-    // Initialize optical depth accumulators for the primary ray.
-  float iOdRlh = 0.0;
-  float iOdMie = 0.0;
-
-    // Normalize the sun and view directions.
-  vec3 sSun = normalize(pSun);
-
-    // Calculate the Rayleigh and Mie phases.
-  float mu = dot(r, sSun);
-  float mumu = mu * mu;
-  float gg = g * g;
-  float pRlh = THREE_OVER_16_PI + THREE_OVER_16_PI * mumu;
-  float pMie = THREE_OVER_8_PI * ((1.0 - gg) * (mumu + 1.0)) / (pow(1.0 + gg - 2.0 * mu * g, 1.5) * (2.0 + gg));
-
-    // Sample the primary ray.
-  for(int i = 0; i < iSteps; i++) {
-
-        // Calculate the primary ray sample position.
-    vec3 iPos = r0 + r * (iTime + iStepSize * 0.5 + p.x);
-
-        // Calculate the height of the sample.
-    float iHeight = length(iPos) - rPlanet;
-
-        // Calculate the optical depth of the Rayleigh and Mie scattering for this step.
-    float odStepRlh = exp(-iHeight / shRlh) * iStepSize;
-    float odStepMie = exp(-iHeight / shMie) * iStepSize;
-
-        // Accumulate optical depth.
-    iOdRlh += odStepRlh;
-    iOdMie += odStepMie;
-
-        // Calculate the step size of the secondary ray.
-    float jStepSize = rsi(iPos, sSun, rAtmos).y / float(jSteps);
-
-        // Initialize the secondary ray time.
-    float jTime = 0.0;
-
-        // Initialize optical depth accumulators for the secondary ray.
-    float jOdRlh = 0.0;
-    float jOdMie = 0.0;
-
-    // fraction of sun still exposed
-    float ecl = eclipseFactor(iPos, thetaSun, pSun, thetaMoon, pMoon);
-    // account for the corona
-    ecl = max(1e-6, ecl);
-
-        // Sample the secondary ray.
-    for(int j = 0; j < jSteps; j++) {
-
-            // Calculate the secondary ray sample position.
-      vec3 jPos = iPos + sSun * (jTime + jStepSize * 0.5);
-
-            // Calculate the height of the sample.
-      float jHeight = length(jPos) - rPlanet;
-
-            // Accumulate the optical depth.
-      jOdRlh += exp(-jHeight / shRlh) * jStepSize;
-      jOdMie += exp(-jHeight / shMie) * jStepSize;
-
-            // Increment the secondary ray time.
-      jTime += jStepSize;
-    }
-
-        // Calculate attenuation.
-    vec3 attn = ecl * exp(- (kMie * (iOdMie + jOdMie) + kRlh * (iOdRlh + jOdRlh)));
-
-        // Accumulate scattering.
-    totalRlh += odStepRlh * attn;
-    totalMie += odStepMie * attn;
-
-        // Increment the primary ray time.
-    iTime += iStepSize;
-
-  }
-
-  // Calculate and return the final color.
-  outColor += vec3(iSun * (pRlh * kRlh * totalRlh + pMie * kMie * totalMie));
-  outColor += vec3(iSun * (sundisk * (kRlh * totalRlh + kMie * totalMie)));
   return vec4(outColor, 1.0);
 }
 
