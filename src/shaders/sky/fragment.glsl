@@ -1,4 +1,5 @@
 varying vec3 vWorldPosition;
+varying vec2 vUv;
 uniform float altitude;
 uniform float sunRadius;
 uniform float moonRadius;
@@ -95,6 +96,12 @@ float umbra(vec3 ri, float thetaSun, vec3 pSun, float thetaMoon, vec3 pMoon) {
   return max(0.0, 1.0 - area / totalArea);
 }
 
+float smoothcircle(vec3 ray, float angularRadius, vec3 centerDir, float boundary){
+  float angle = acos(dot(centerDir, ray));
+  float b = boundary * angularRadius;
+  return 1.0 - smoothstep(angularRadius - b, angularRadius + b, angle);
+}
+
 vec3 scattering(
   vec3 rayOrigin,
   vec3 rayDir,
@@ -131,13 +138,13 @@ vec3 scattering(
   float sunDisk = 0.0;
   // we can't see the sun if the ray intersects the planet
   if(!planet_intersected) {
-    float sun = cos(sunAngularRadius);
-    float cosSun = dot(sSun, rayDir);
-    sunDisk = smoothstep(sun, sun + 1e-7, cosSun);
-    float moon = cos(moonAngularRadius);
-    float cosMoon = dot(normalize(moonPosition - rayOrigin), rayDir);
-    float moonDisk = smoothstep(moon, moon + 1e-7, cosMoon);
+    sunDisk = smoothcircle(rayDir, sunAngularRadius, sSun, 0.01);
+    // the smoothstep ends up looking brighter near the second edge
+    // so for the moon we need to fudge it to get the correct relative size
+    float moonDisk = smoothcircle(rayDir, moonAngularRadius * 1.02, normalize(moonPosition - rayOrigin), 0.01);
     sunDisk = mix(sunDisk, 0.0, moonDisk);
+    // float bloom = 2. * smoothcircle(rayDir, 2.0 * sunAngularRadius, sSun, 0.5) / I0;
+    // sunDisk += bloom;
   }
 
   vec2 path = raySphereIntersection(rayOrigin, rayDir, atmosphereRadius);
@@ -155,7 +162,7 @@ vec3 scattering(
   path.y = planet_intersected ? intPlanet.x : path.y;
 
   // if we have a very short path, we're probably just looking at ground just ignore
-  if (path.y - path.x < 100.0){
+  if (path.y - path.x < 20.0){
     return vec3(0.0);
   }
 

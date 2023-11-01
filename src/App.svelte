@@ -10,7 +10,7 @@
     antialias: false,
     stencil: false,
     depth: false,
-    alpha: false
+    alpha: false,
   }
 
   onMount(() => {

@@ -25,6 +25,8 @@
   import { GodraysPass } from 'three-good-godrays'
   import createCorona from '../shaders/corona/Corona'
   import createSky from '../shaders/sky/Sky'
+  import createStars from '../shaders/stars/Stars'
+  import Earth from '../entities/Earth.svelte'
   import { onMount } from 'svelte'
 
   let sunMaterial
@@ -40,6 +42,7 @@
   })
 
   const Sky = createSky()
+  const Stars = createStars()
 
   const DEG = Math.PI / 180
   const { scene, renderer, camera, size } = useThrelte()
@@ -51,7 +54,7 @@
   const Isol = 128e3 / 4 / Math.PI
 
   let FOV = 26.5
-  const METER = 1 / 6378
+  const METER = 1
   const Re = 6378 * 1000 * METER
   const AU = 149597870700 * METER
 
@@ -60,6 +63,9 @@
   const sunDistance = 1 * AU
   $: sunPosition = [0, Math.sin(elevation) * sunDistance, Math.cos(elevation) * sunDistance]
   const sunRadius = 109 * Re
+
+  let planetRadius = Re
+  let altitude = 1.0
 
   let totalityFactor = 0.9
 
@@ -70,16 +76,16 @@
     set exposure(v){ return Sky.exposure = v },
     get totalityFactor(){ return totalityFactor },
     set totalityFactor(value){ totalityFactor = value },
-    get elevation(){ return elevation / DEG },
     doAnimation: true,
     progress: 0,
+    get elevation(){ return elevation / DEG },
     set elevation(value){ elevation = value * DEG },
-    get altitude(){ return Math.log10(Sky.altitude + 1) / 8 },
-    set altitude(v){ return Sky.altitude = Math.pow(10, v * 8) - 1 },
+    get altitude(){ return Math.log10(altitude + 1) / 8 },
+    set altitude(v){ return altitude = Math.pow(10, v * 8) - 1 },
     get sunIntensity(){ return Sky.sunIntensity },
     set sunIntensity(v){ return Sky.sunIntensity = v },
-    get planetRadius(){ return Sky.planetRadius },
-    set planetRadius(v){ return Sky.planetRadius = v },
+    get planetRadius(){ return planetRadius },
+    set planetRadius(v){ return planetRadius = v },
     get atmosphereThickness(){ return Sky.atmosphereThickness },
     set atmosphereThickness(v){ return Sky.atmosphereThickness = v },
     get rayleighRed(){ return Sky.rayleighCoefficients.x },
@@ -101,6 +107,9 @@
     get jSteps(){ return Sky.jSteps },
     set jSteps(v){ return Sky.jSteps = v },
   }
+
+  $: Sky.planetRadius = planetRadius
+  $: Sky.altitude = altitude
 
   onMount(() => {
     const appSettings = new GUI({
@@ -142,7 +151,7 @@
   $: moonPosition = [moonX, Math.sin(elevation) * moonDistance, Math.cos(elevation) * moonDistance]
   const moonRadius = 0.2727 * Re
 
-  const orbitTarget =  [0, 0, 0]
+  $: orbitTarget =  [0, altitude, 0]
   let sunBrightness = 1
   $: sunIntensity = sunBrightness * 10000000 * Lsol / (4 * Math.PI * Math.pow(sunDistance, 2))
 
@@ -189,7 +198,7 @@
     const state = moonMove.at(time / 2)
     moonX = Math.sin(state.theta * DEG) * moonDistance
     // sunMaterial.emissiveIntensity = state.brightness
-    sunBrightness = state.brightness
+    // sunBrightness = state.brightness
     bloom.intensity = 0.0009 * (30 * (1 - Math.sqrt(state.brightness)) + 5)
     // Sky.opacity = state.brightness
     Corona.uniforms.uOpacity.value = state.corona
@@ -249,23 +258,23 @@
         // godrays,
         new SMAAEffect({
           preset: SMAAPreset.HIGH,
-          // edgeDetectionMode: EdgeDetectionMode.LUMA,
-          edgeDetectionMode: EdgeDetectionMode.DEPTH,
+          edgeDetectionMode: EdgeDetectionMode.LUMA,
+          // edgeDetectionMode: EdgeDetectionMode.DEPTH,
           blendFunction: BlendFunction.SCREEN
         }),
-        new ToneMappingEffect({
-          // blendFunction: BlendFunction.NORMAL,
-          // mode: ToneMappingMode.ACES_FILMIC,
-          // mode: ToneMappingMode.REINHARD2,
-          mode: ToneMappingMode.REINHARD2_ADAPTIVE,
-          // adaptive: true,
-          // resolution: 256,
-          // middleGrey: 0.6,
-          whitePoint: 10,
-          minLuminance: 0.001,
-          averageLuminance: 1,
-          adaptationRate: 10
-        }),
+        // new ToneMappingEffect({
+        //   // blendFunction: BlendFunction.NORMAL,
+        //   // mode: ToneMappingMode.ACES_FILMIC,
+        //   // mode: ToneMappingMode.REINHARD2,
+        //   mode: ToneMappingMode.REINHARD2_ADAPTIVE,
+        //   // adaptive: true,
+        //   // resolution: 256,
+        //   // middleGrey: 0.6,
+        //   whitePoint: 10,
+        //   minLuminance: 0.001,
+        //   averageLuminance: 1,
+        //   adaptationRate: 10
+        // }),
       )
     )
   }
@@ -277,19 +286,22 @@
   })
 </script>
 
-<!-- <T.AmbientLight intensity={0.1}/> -->
+<T.AmbientLight intensity={0.1}/>
 <!-- <Sky elevation={0.1} /> -->
 <!-- <T.HemisphereLight
   intensity={sunBrightness * 0.2}
   position={[0, 50, 0]}
 /> -->
+{#await Stars then Stars}
+<T is={Stars} />
+{/await}
 <T.Mesh bind:ref={skyMesh}>
-  <T.IcosahedronGeometry args={[moonDistance - 100, 4]} />
+  <T.IcosahedronGeometry args={[moonDistance, 256]} />
   <T is={Sky.shader} />
 </T.Mesh>
 
 <T.PerspectiveCamera
-  position={[0, 0, -1]}
+  position={[0, altitude, -2]}
   fov={FOV}
   near={1}
   far={1.2 * sunDistance}
@@ -306,12 +318,10 @@
   />
 </T.PerspectiveCamera>
 
-
 <!-- Sun -->
 <T.PointLight
-  visible={false}
   position={sunPosition}
-  intensity={sunIntensity}
+  intensity={1000000000000000 * sunIntensity}
   color="white"
   bind:ref={sunlight}
   shadow.camera.near={0.8 * sunDistance}
@@ -344,7 +354,6 @@
 
 <!-- moon -->
 <T.Mesh
-  visible={false}
   bind:ref={moon}
   position={moonPosition}
   rotation={[180 * DEG, 0, 0]}
@@ -358,15 +367,15 @@
 </T.Mesh>
 
 <!-- Ground -->
-<T.Mesh
-  visible={false}
-  position={[0, -1, 0]}
-  rotation={[-90 * DEG, 0, 0]}
+<!-- <T.Mesh
+  position={[0, -planetRadius, 0]}
+  rotation={[0, 0, 0]}
   receiveShadow
 >
-  <T.PlaneGeometry args={[1000, 1000]} />
-  <T.MeshStandardMaterial color='#998888' dithering blending={THREE.AdditiveBlending}/>
-</T.Mesh>
+  <T.IcosahedronGeometry args={[planetRadius, 256]} />
+  <T.MeshStandardMaterial color='#888' dithering depthTest={false}/>
+</T.Mesh> -->
+<Earth planetRadius={planetRadius} position={[0, -planetRadius, 0]} />
 
 <!-- Grid -->
 <!-- <Grid

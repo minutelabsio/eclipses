@@ -9,6 +9,7 @@ export default defineConfig({
     glslify(),
     svelte()
   ],
+  assetsInclude: ['**/*.tif', '**/*.dds'],
   base: process.env.NODE_ENV === 'production'
     ? `/${pkg.name}/`
     : '/'
