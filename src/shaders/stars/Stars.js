@@ -1,27 +1,30 @@
 import * as THREE from 'three'
 import bsc5datUrl from '../../assets/bsc5.dat?url'
 
+const brightnessAdjustment = 0.8
+
 function vertexShader() {
   return `
-        attribute float size;
-        attribute vec4 color;
-        varying vec4 vColor;
-        void main() {
-            vColor = color;
-            vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
-            gl_PointSize = size * ( 250.0 / -mvPosition.z );
-            gl_Position = projectionMatrix * mvPosition;
-        }
-    `
+    attribute float size;
+    attribute vec4 color;
+    varying vec4 vColor;
+    void main() {
+      vColor = color;
+      vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+      gl_PointSize = size * ( 250.0 / -mvPosition.z );
+      gl_Position = projectionMatrix * mvPosition;
+    }
+  `
 }
 
 function fragmentShader() {
   return `
-        varying vec4 vColor;
-            void main() {
-                gl_FragColor = vec4( vColor );
-            }
-    `
+    varying vec4 vColor;
+    uniform float exposure;
+    void main() {
+      gl_FragColor = 1.0 - exp(-exposure * vec4( vColor ));
+    }
+  `
 }
 
 export default async function createStars(){
@@ -90,7 +93,7 @@ export default async function createStars(){
 
     const s = (star.mag * 26) / 255 + 0.18
     sizes.push(s)
-    colors.push(color.r, color.g, color.b, s)
+    colors.push(color.r, color.g, color.b, s * brightnessAdjustment)
   })
 
   const starsGeometry = new THREE.BufferGeometry()
@@ -103,6 +106,8 @@ export default async function createStars(){
     fragmentShader: fragmentShader(),
     transparent: true,
   })
+
+  starsMaterial.uniforms.exposure = { value: 1.0 }
 
   return new THREE.Points(starsGeometry, starsMaterial)
 }

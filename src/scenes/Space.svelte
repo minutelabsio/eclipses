@@ -46,7 +46,8 @@
   })
 
   const Sky = createSky()
-  const Stars = createStars()
+  let starsPoints
+  const Stars = createStars().then(s => starsPoints = s)
 
   const DEG = Math.PI / 180
 
@@ -76,7 +77,12 @@
     get FOV(){ return FOV },
     set FOV(v){ return FOV = v },
     get exposure(){ return Sky.exposure },
-    set exposure(v){ return Sky.exposure = v },
+    set exposure(v){
+      Sky.exposure = v
+      if (!starsPoints) return
+      starsPoints.material.uniforms.exposure.value = v
+      starsPoints.material.uniforms.exposure.needsUpdate = true
+    },
     get totalityFactor(){ return totalityFactor },
     set totalityFactor(value){ totalityFactor = value },
     doAnimation: true,
@@ -279,7 +285,7 @@
           // resolution: 256,
           // middleGrey: 0.6,
           whitePoint: 10,
-          minLuminance: 0.1,
+          minLuminance: 0.01,
           averageLuminance: 1,
           adaptationRate: 10
         }),
@@ -319,6 +325,7 @@
     ref.lookAt(sun.position)
     rig = new CameraRig(ref, scene)
     controls = new FreeMovementControls(rig, {
+      domElement: renderer.domElement,
       tiltDegreeFactor: Math.PI / 6,
       panDegreeFactor: Math.PI / 6,
     })
