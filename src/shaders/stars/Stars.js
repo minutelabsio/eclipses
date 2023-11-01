@@ -47,7 +47,7 @@ export default async function createStars(){
     stars[star.id] = star
 
     star.v = new THREE.Vector3().setFromSphericalCoords(
-      1e8,
+      1e12,
       ((90 - star.gLat) / 180) * Math.PI,
       (star.gLon / 180) * Math.PI
     )

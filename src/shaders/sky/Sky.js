@@ -10,7 +10,7 @@ export default () => {
     blending: THREE.AdditiveBlending,
     side: THREE.BackSide,
     transparent: true,
-    depthWrite: false,
+    depthTest: false,
   })
   shader.toneMapped = false
 

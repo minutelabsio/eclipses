@@ -262,19 +262,19 @@
           // edgeDetectionMode: EdgeDetectionMode.DEPTH,
           blendFunction: BlendFunction.SCREEN
         }),
-        // new ToneMappingEffect({
-        //   // blendFunction: BlendFunction.NORMAL,
-        //   // mode: ToneMappingMode.ACES_FILMIC,
-        //   // mode: ToneMappingMode.REINHARD2,
-        //   mode: ToneMappingMode.REINHARD2_ADAPTIVE,
-        //   // adaptive: true,
-        //   // resolution: 256,
-        //   // middleGrey: 0.6,
-        //   whitePoint: 10,
-        //   minLuminance: 0.001,
-        //   averageLuminance: 1,
-        //   adaptationRate: 10
-        // }),
+        new ToneMappingEffect({
+          // blendFunction: BlendFunction.NORMAL,
+          // mode: ToneMappingMode.ACES_FILMIC,
+          // mode: ToneMappingMode.REINHARD2,
+          mode: ToneMappingMode.REINHARD2_ADAPTIVE,
+          // adaptive: true,
+          // resolution: 256,
+          // middleGrey: 0.6,
+          whitePoint: 10,
+          minLuminance: 0.1,
+          averageLuminance: 1,
+          adaptationRate: 10
+        }),
       )
     )
   }
@@ -286,7 +286,7 @@
   })
 </script>
 
-<T.AmbientLight intensity={0.1}/>
+<T.AmbientLight intensity={0.05}/>
 <!-- <Sky elevation={0.1} /> -->
 <!-- <T.HemisphereLight
   intensity={sunBrightness * 0.2}
@@ -295,13 +295,15 @@
 {#await Stars then Stars}
 <T is={Stars} />
 {/await}
+
 <T.Mesh bind:ref={skyMesh}>
-  <T.IcosahedronGeometry args={[moonDistance, 256]} />
+  <T.IcosahedronGeometry args={[AU, 256]} />
   <T is={Sky.shader} />
 </T.Mesh>
 
 <T.PerspectiveCamera
-  position={[0, altitude, -2]}
+  position.y={altitude}
+  position.z={-2}
   fov={FOV}
   near={1}
   far={1.2 * sunDistance}
@@ -314,14 +316,14 @@
     enableZoom={true}
     maxPolarAngle={170 * DEG}
     enableDamping
-    target={orbitTarget}
+    target.y={altitude}
   />
 </T.PerspectiveCamera>
 
 <!-- Sun -->
 <T.PointLight
   position={sunPosition}
-  intensity={1000000000000000 * sunIntensity}
+  intensity={5e14 * sunIntensity}
   color="white"
   bind:ref={sunlight}
   shadow.camera.near={0.8 * sunDistance}

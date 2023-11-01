@@ -162,9 +162,9 @@ vec3 scattering(
   path.y = planet_intersected ? intPlanet.x : path.y;
 
   // if we have a very short path, we're probably just looking at ground just ignore
-  if (path.y - path.x < 20.0){
-    return vec3(0.0);
-  }
+  // if (path.y - path.x < 20.0){
+  //   return vec3(0.0);
+  // }
 
   vec3 rayleighT = vec3(0.0);
   vec3 mieT = vec3(0.0);

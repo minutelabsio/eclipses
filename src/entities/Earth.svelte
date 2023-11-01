@@ -18,11 +18,11 @@ const textures = useLoader(TextureLoader).load({
 {#if $textures}
 <T.Mesh
   position={position}
+  rotation={[Math.PI / 2, 0, -Math.PI / 2]}
 >
   <T.IcosahedronGeometry args={[planetRadius, 256]} />
   <T.MeshPhongMaterial
     dithering
-    depthTest={false}
     map={$textures.map}
     normalMap={$textures.normalMap}
     specularMap={$textures.specularMap}

@@ -11,6 +11,7 @@
     stencil: false,
     depth: false,
     alpha: false,
+    logarithmicDepthBuffer: true,
   }
 
   onMount(() => {
