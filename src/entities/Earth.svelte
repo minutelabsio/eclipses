@@ -19,6 +19,7 @@ const textures = useLoader(TextureLoader).load({
 <T.Mesh
   position={position}
   rotation={[Math.PI / 2, 0, -Math.PI / 2]}
+  receiveShadow
 >
   <T.IcosahedronGeometry args={[planetRadius, 256]} />
   <T.MeshPhongMaterial
@@ -26,6 +27,7 @@ const textures = useLoader(TextureLoader).load({
     map={$textures.map}
     normalMap={$textures.normalMap}
     specularMap={$textures.specularMap}
+    shininess={0}
   />
 </T.Mesh>
 {/if}

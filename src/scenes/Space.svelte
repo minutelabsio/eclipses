@@ -22,12 +22,14 @@
     ToneMappingEffect,
     ToneMappingMode,
   } from 'postprocessing'
-  import { GodraysPass } from 'three-good-godrays'
+  import { CameraRig, FreeMovementControls } from 'three-story-controls'
   import createCorona from '../shaders/corona/Corona'
   import createSky from '../shaders/sky/Sky'
   import createStars from '../shaders/stars/Stars'
   import Earth from '../entities/Earth.svelte'
   import { onMount } from 'svelte'
+
+  const { scene, renderer, camera, size } = useThrelte()
 
   let sunMaterial
   let sunlight
@@ -36,6 +38,8 @@
   let corona
   let bloom
   let skyMesh
+  let rig
+  let controls
 
   const Corona = createCorona({
     opacity: 0.5
@@ -45,7 +49,6 @@
   const Stars = createStars()
 
   const DEG = Math.PI / 180
-  const { scene, renderer, camera, size } = useThrelte()
 
   const WATTS = 1e-3
   const Lsol = 3.828e26 * WATTS
@@ -122,7 +125,11 @@
     appSettings.add(eclipseState, 'doAnimation')
     appSettings.add(eclipseState, 'elevation', -90, 90, 0.001)
     const skySettings = appSettings.addFolder('Sky')
-    skySettings.add(eclipseState, 'altitude', 0, 1, 0.01)
+    skySettings.add(eclipseState, 'altitude', 0, 1, 0.01).onChange(() => {
+      let { position, quaternion } = rig.getWorldCoordinates()
+      position.y = altitude
+      rig.setWorldCoordinates({ position, quaternion })
+    })
     skySettings.add(eclipseState, 'sunIntensity', 0, 50, 1)
     skySettings.add(eclipseState, 'planetRadius', 1, 1e8, 100)
     skySettings.add(eclipseState, 'atmosphereThickness', 0, 1000000, 1)
@@ -195,14 +202,15 @@
     } else {
       time = eclipseState.progress * moonMove.duration
     }
+    controls?.update(window.performance.now())
     const state = moonMove.at(time / 2)
     moonX = Math.sin(state.theta * DEG) * moonDistance
     // sunMaterial.emissiveIntensity = state.brightness
     // sunBrightness = state.brightness
-    bloom.intensity = 0.0009 * (30 * (1 - Math.sqrt(state.brightness)) + 5)
+    // bloom.intensity = 0.0009 * (30 * (1 - Math.sqrt(state.brightness)) + 5)
     // Sky.opacity = state.brightness
-    Corona.uniforms.uOpacity.value = state.corona
-    Corona.uniforms.uOpacity.needsUpdate = true
+    // Corona.uniforms.uOpacity.value = state.corona
+    // Corona.uniforms.uOpacity.needsUpdate = true
     Sky.moonPosition.set(moonX, Math.sin(elevation) * moonDistance, Math.cos(elevation) * moonDistance).sub(r0).multiplyScalar(1 / METER)
   })
 
@@ -215,7 +223,7 @@
   })
 
   const setupEffectComposer = (camera, { sun, sunlight, skyMesh }) => {
-    if (!camera || !sun || !sunlight || !skyMesh) return
+    if (!camera || !sun || !sunlight) return
     // skyMesh.layers.enable(11)
     // sun.layers.enable(11)
     // corona.layers.enable(11)
@@ -302,22 +310,30 @@
 </T.Mesh>
 
 <T.PerspectiveCamera
-  position.y={altitude}
   position.z={-2}
   fov={FOV}
   near={1}
   far={1.2 * sunDistance}
   makeDefault
   on:create={({ ref }) => {
-    // ref.lookAt(0, 0, 10)
+    ref.lookAt(sun.position)
+    rig = new CameraRig(ref, scene)
+    controls = new FreeMovementControls(rig, {
+      tiltDegreeFactor: Math.PI / 6,
+      panDegreeFactor: Math.PI / 6,
+    })
+    controls.enable()
+  }}
+  on:destroy={() => {
+    controls.disable()
   }}
 >
-  <OrbitControls
+  <!-- <OrbitControls
     enableZoom={true}
     maxPolarAngle={170 * DEG}
     enableDamping
     target.y={altitude}
-  />
+  /> -->
 </T.PerspectiveCamera>
 
 <!-- Sun -->
@@ -356,6 +372,7 @@
 
 <!-- moon -->
 <T.Mesh
+  visible={false}
   bind:ref={moon}
   position={moonPosition}
   rotation={[180 * DEG, 0, 0]}
@@ -374,8 +391,8 @@
   rotation={[0, 0, 0]}
   receiveShadow
 >
-  <T.IcosahedronGeometry args={[planetRadius, 256]} />
-  <T.MeshStandardMaterial color='#888' dithering depthTest={false}/>
+  <T.IcosahedronGeometry args={[planetRadius+1, 256]} />
+  <T.MeshStandardMaterial color='#888' dithering/>
 </T.Mesh> -->
 <Earth planetRadius={planetRadius} position={[0, -planetRadius, 0]} />
 

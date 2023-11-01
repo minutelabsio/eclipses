@@ -23,12 +23,14 @@
     "cousin-it": "0.0.1-alpha.6",
     "glsl-atmosphere": "^2.0.0",
     "glsl-dither": "^1.0.1",
+    "gsap": "^3.12.2",
     "intween": "1.0.0-beta.7",
     "lil-gui": "^0.18.2",
     "postprocessing": "^6.33.0",
     "pug": "^3.0.2",
     "sass": "^1.66.1",
     "three": "0.157.0",
-    "three-good-godrays": "^0.4.4"
+    "three-good-godrays": "^0.4.4",
+    "three-story-controls": "^1.0.6"
   }
 }
