@@ -2,6 +2,8 @@
   import { useThrelte, useRender, useFrame } from '@threlte/core'
   import { Easing, Tween } from 'intween'
   import { OrbitControls, Grid } from '@threlte/extras'
+  import Stats from '../components/Stats.svelte'
+  import { scalePow } from 'd3-scale'
   import { T } from '@threlte/core'
   import * as THREE from 'three'
   import GUI from 'lil-gui'
@@ -30,6 +32,19 @@
   import { onMount } from 'svelte'
 
   const { scene, renderer, camera, size } = useThrelte()
+
+  const skyPosition = (distance, elevation, declination, into = []) => {
+    const p = [
+      distance * Math.cos(elevation) * Math.sin(declination),
+      distance * Math.sin(elevation),
+      distance * Math.cos(elevation) * Math.cos(declination)
+    ]
+    if (into instanceof THREE.Vector3){
+      into.set(...p)
+      return into
+    }
+    return p
+  }
 
   let sunMaterial
   let sunlight
@@ -61,17 +76,30 @@
   const METER = 1
   const Re = 6378 * 1000 * METER
   const AU = 149597870700 * METER
+  const moonOrbitInclination = 5.145 * DEG + 23.44 * DEG
+  const moonAxis = new Vector3(1, 0, 0).applyAxisAngle(new Vector3(0, 0, 1), moonOrbitInclination)
 
   let elevation = 2 * DEG
 
   const sunDistance = 1 * AU
-  $: sunPosition = [0, Math.sin(elevation) * sunDistance, Math.cos(elevation) * sunDistance]
   const sunRadius = 109 * Re
+  let moonRadius = 0.2727 * Re
 
   let planetRadius = Re
-  let altitude = 1.0
+  let altitudeFactor = 0.0
 
   let totalityFactor = 0.9
+  let moonPerigee = 356500 * 1000 * METER
+  let moonApogee = 406700 * 1000 * METER
+  $: moonDistance = MathUtils.lerp(moonPerigee, moonApogee, 1 - totalityFactor)
+
+  const lookAtSun = () => {
+    rig.camera.lookAt(sun.position)
+  }
+
+  const lookAtEarth = () => {
+    rig.camera.lookAt(new Vector3(0, -planetRadius, 0))
+  }
 
   const eclipseState = {
     get FOV(){ return FOV },
@@ -87,10 +115,16 @@
     set totalityFactor(value){ totalityFactor = value },
     doAnimation: true,
     progress: 0,
+    get moonRadius(){ return moonRadius },
+    set moonRadius(v){ return moonRadius = v },
+    get moonPerigee(){ return moonPerigee },
+    set moonPerigee(v){ return moonPerigee = v },
+    get moonApogee(){ return moonApogee },
+    set moonApogee(v){ return moonApogee = v },
     get elevation(){ return elevation / DEG },
     set elevation(value){ elevation = value * DEG },
-    get altitude(){ return Math.log10(altitude + 1) / 8 },
-    set altitude(v){ return altitude = Math.pow(10, v * 8) - 1 },
+    get altitude(){ return altitudeFactor },
+    set altitude(v){ return altitudeFactor = v },
     get sunIntensity(){ return Sky.sunIntensity },
     set sunIntensity(v){ return Sky.sunIntensity = v },
     get planetRadius(){ return planetRadius },
@@ -115,56 +149,67 @@
     set iSteps(v){ return Sky.iSteps = v },
     get jSteps(){ return Sky.jSteps },
     set jSteps(v){ return Sky.jSteps = v },
+    lookAtSun: lookAtSun,
+    lookAtEarth: lookAtEarth,
   }
-
-  $: Sky.planetRadius = planetRadius
-  $: Sky.altitude = altitude
 
   onMount(() => {
     const appSettings = new GUI({
       width: 400
     })
-    appSettings.add(eclipseState, 'FOV', 1, 180, 1)
-    appSettings.add(eclipseState, 'exposure', 0.1, 40, 0.01)
-    appSettings.add(eclipseState, 'totalityFactor', 0, 1, 0.01)
-    appSettings.add(eclipseState, 'progress', 0, 1, 0.01)
-    appSettings.add(eclipseState, 'doAnimation')
-    appSettings.add(eclipseState, 'elevation', -90, 90, 0.001)
-    const skySettings = appSettings.addFolder('Sky')
-    skySettings.add(eclipseState, 'altitude', 0, 1, 0.01).onChange(() => {
-      let { position, quaternion } = rig.getWorldCoordinates()
-      position.y = altitude
-      rig.setWorldCoordinates({ position, quaternion })
-    })
-    skySettings.add(eclipseState, 'sunIntensity', 0, 50, 1)
-    skySettings.add(eclipseState, 'planetRadius', 1, 1e8, 100)
-    skySettings.add(eclipseState, 'atmosphereThickness', 0, 1000000, 1)
-    const rayleighSettings = skySettings.addFolder('Rayleigh')
+    const perspectiveSettings = appSettings.addFolder('Perspective')
+    perspectiveSettings.add(eclipseState, 'FOV', 1, 180, 1)
+    perspectiveSettings.add(eclipseState, 'exposure', 0.1, 40, 0.01)
+    perspectiveSettings.add(eclipseState, 'altitude', 0, 1, 0.01)
+    perspectiveSettings.add(eclipseState, 'lookAtSun')
+    perspectiveSettings.add(eclipseState, 'lookAtEarth')
+    const eclipseSettings = appSettings.addFolder('Eclipse')
+    eclipseSettings.add(eclipseState, 'doAnimation')
+    eclipseSettings.add(eclipseState, 'progress', 0, 1, 0.01)
+    eclipseSettings.add(eclipseState, 'totalityFactor', 0, 1, 0.01)
+    eclipseSettings.add(eclipseState, 'elevation', -90, 90, 0.001)
+    const planetSettings = appSettings.addFolder('Planetary')
+    planetSettings.add(eclipseState, 'sunIntensity', 0, 50, 1)
+    planetSettings.add(eclipseState, 'planetRadius', 1e6, 1e7, 100)
+    planetSettings.add(eclipseState, 'moonRadius', 1e6, 1e7, 100)
+    planetSettings.add(eclipseState, 'moonPerigee', 1e7, 1e9, 100)
+    planetSettings.add(eclipseState, 'moonApogee', 1e7, 1e9, 100)
+    const atmosSettings = appSettings.addFolder('Atmosphere')
+    atmosSettings.add(eclipseState, 'atmosphereThickness', 0, 1000000, 1)
+    const rayleighSettings = atmosSettings.addFolder('Rayleigh')
     rayleighSettings.add(eclipseState, 'rayleighRed', 0, 1e-4, 1e-7)
     rayleighSettings.add(eclipseState, 'rayleighGreen', 0, 1e-4, 1e-7)
     rayleighSettings.add(eclipseState, 'rayleighBlue', 0, 1e-4, 1e-7)
     rayleighSettings.add(eclipseState, 'rayleighScaleHeight', 0, 100000, 10)
-    const mieSettings = skySettings.addFolder('Mie')
+    const mieSettings = atmosSettings.addFolder('Mie')
     mieSettings.add(eclipseState, 'mieCoefficient', 0, 1e-4, 1e-7)
     mieSettings.add(eclipseState, 'mieScaleHeight', 0, 10000, 10)
     mieSettings.add(eclipseState, 'mieDirectional', 0, 1, 0.01)
-    const precisionSettings = skySettings.addFolder('Precision').close()
+    const precisionSettings = atmosSettings.addFolder('Precision').close()
     precisionSettings.add(eclipseState, 'iSteps', 1, 32, 1)
     precisionSettings.add(eclipseState, 'jSteps', 1, 32, 1)
-
     return () => {
       appSettings.destroy()
     }
   })
 
-  const moonPerigee = 356500 * 1000 * METER
-  const moonApogee = 406700 * 1000 * METER
-  let moonX = 0
-  $: moonDistance = MathUtils.lerp(moonPerigee, moonApogee, 1 - totalityFactor)
-  $: moonPosition = [moonX, Math.sin(elevation) * moonDistance, Math.cos(elevation) * moonDistance]
-  const moonRadius = 0.2727 * Re
+  const setAltitude = (f, Rp) => {
+    const alt = (5 * Math.pow(Rp, f) - 1)
+    Sky.altitude = alt
+    if (rig){
+      let { position, quaternion } = rig.getWorldCoordinates()
+      position.y = alt
+      rig.setWorldCoordinates({ position, quaternion })
+    }
+    return alt
+  }
 
-  $: orbitTarget =  [0, altitude, 0]
+  $: setAltitude(altitudeFactor, planetRadius)
+  $: Sky.planetRadius = planetRadius
+  $: sunPosition = skyPosition(sunDistance, elevation, 0)
+
+  let moonDec = 0
+
   let sunBrightness = 1
   $: sunIntensity = sunBrightness * 10000000 * Lsol / (4 * Math.PI * Math.pow(sunDistance, 2))
 
@@ -198,8 +243,6 @@
     .by('8s', { corona: minCoronaOpacity }, expoOut)
     .loop()
 
-  const r0 = new Vector3(0, -Re, 0)
-
   let time = 0
   useFrame((ctx, dt) => {
     // frame
@@ -210,22 +253,19 @@
     }
     controls?.update(window.performance.now())
     const state = moonMove.at(time / 2)
-    moonX = Math.sin(state.theta * DEG) * moonDistance
-    // sunMaterial.emissiveIntensity = state.brightness
-    // sunBrightness = state.brightness
-    // bloom.intensity = 0.0009 * (30 * (1 - Math.sqrt(state.brightness)) + 5)
-    // Sky.opacity = state.brightness
-    // Corona.uniforms.uOpacity.value = state.corona
-    // Corona.uniforms.uOpacity.needsUpdate = true
-    Sky.moonPosition.set(moonX, Math.sin(elevation) * moonDistance, Math.cos(elevation) * moonDistance).sub(r0).multiplyScalar(1 / METER)
+    moonDec = state.theta * DEG
   })
 
+  $: r0 = new Vector3(0, -planetRadius, 0)
   $: Sky.sunPosition.set(...sunPosition).sub(r0).multiplyScalar(1 / METER)
   $: Sky.sunRadius = sunRadius / METER
+  $: moonPosition = skyPosition(moonDistance, elevation, 0, new Vector3()).applyAxisAngle(moonAxis, moonDec)
+  $: Sky.moonPosition.set(...moonPosition).sub(r0).multiplyScalar(1 / METER)
   $: Sky.moonRadius = moonRadius / METER
 
   const composer = new EffectComposer(renderer, {
     frameBufferType: THREE.HalfFloatType,
+    multisampling: 0
   })
 
   const setupEffectComposer = (camera, { sun, sunlight, skyMesh }) => {
@@ -299,6 +339,8 @@
     composer.render(delta)
   })
 </script>
+
+<Stats />
 
 <T.AmbientLight intensity={0.05}/>
 <!-- <Sky elevation={0.1} /> -->
@@ -381,7 +423,7 @@
 <T.Mesh
   visible={false}
   bind:ref={moon}
-  position={moonPosition}
+  position={moonPosition.toArray()}
   rotation={[180 * DEG, 0, 0]}
   castShadow
   receiveShadow
@@ -402,9 +444,3 @@
   <T.MeshStandardMaterial color='#888' dithering/>
 </T.Mesh> -->
 <Earth planetRadius={planetRadius} position={[0, -planetRadius, 0]} />
-
-<!-- Grid -->
-<!-- <Grid
-  cellColor="red"
-  sectionColor="white"
-/> -->
