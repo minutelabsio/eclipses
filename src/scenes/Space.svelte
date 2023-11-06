@@ -325,7 +325,7 @@
     ref.lookAt(sun.position)
     rig = new CameraRig(ref, scene)
     controls = new FreeMovementControls(rig, {
-      domElement: renderer.domElement,
+      domElement: renderer.domElement.parentNode,
       tiltDegreeFactor: Math.PI / 6,
       panDegreeFactor: Math.PI / 6,
     })
