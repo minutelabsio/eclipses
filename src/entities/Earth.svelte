@@ -19,9 +19,10 @@ const textures = useLoader(TextureLoader).load({
 <T.Mesh
   position={position}
   rotation={[Math.PI / 2, 0, -Math.PI / 2]}
+  scale={[planetRadius, planetRadius, planetRadius]}
   receiveShadow
 >
-  <T.IcosahedronGeometry args={[planetRadius, 256]} />
+  <T.IcosahedronGeometry args={[1, 256]} />
   <T.MeshPhongMaterial
     dithering
     map={$textures.map}
