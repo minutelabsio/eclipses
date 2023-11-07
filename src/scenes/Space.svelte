@@ -171,8 +171,8 @@
     const planetSettings = appSettings.addFolder('Planetary')
     planetSettings.add(eclipseState, 'sunIntensity', 0, 50, 1)
     planetSettings.add(eclipseState, 'planetRadius', 1e6, 1e7, 100)
-    planetSettings.add(eclipseState, 'moonRadius', 1e6, 1e7, 100)
-    planetSettings.add(eclipseState, 'moonPerigee', 1e7, 1e9, 100)
+    planetSettings.add(eclipseState, 'moonRadius', 1e5, 1e7, 100)
+    planetSettings.add(eclipseState, 'moonPerigee', 1e6, 1e9, 100)
     planetSettings.add(eclipseState, 'moonApogee', 1e7, 1e9, 100)
     const atmosSettings = appSettings.addFolder('Atmosphere')
     atmosSettings.add(eclipseState, 'atmosphereThickness', 0, 1000000, 1)
@@ -184,7 +184,7 @@
     const mieSettings = atmosSettings.addFolder('Mie')
     mieSettings.add(eclipseState, 'mieCoefficient', 0, 1e-4, 1e-7)
     mieSettings.add(eclipseState, 'mieScaleHeight', 0, 10000, 10)
-    mieSettings.add(eclipseState, 'mieDirectional', 0, 1, 0.01)
+    mieSettings.add(eclipseState, 'mieDirectional', -.999, .999, 0.01)
     const precisionSettings = atmosSettings.addFolder('Precision').close()
     precisionSettings.add(eclipseState, 'iSteps', 1, 32, 1)
     precisionSettings.add(eclipseState, 'jSteps', 1, 32, 1)
@@ -325,7 +325,7 @@
           // resolution: 256,
           // middleGrey: 0.6,
           whitePoint: 10,
-          minLuminance: 0.01,
+          minLuminance: 0.001,
           averageLuminance: 1,
           adaptationRate: 10
         }),
