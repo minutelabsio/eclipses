@@ -1,5 +1,6 @@
 varying vec3 vWorldPosition;
 varying vec2 vUv;
+
 uniform float altitude;
 uniform float sunRadius;
 uniform float moonRadius;
@@ -25,7 +26,7 @@ const float THREE_OVER_16_PI = 3.0 / (16.0 * PI);
 const float THREE_OVER_8_PI = 3.0 / (8.0 * PI);
 
 vec2 opticalDensity(float z, vec2 scaleHeights, float planetRadius) {
-  float h = z - planetRadius;
+  float h = max(0.0, z - planetRadius);
   return exp(-h / scaleHeights);
 }
 
@@ -93,7 +94,7 @@ float umbra(vec3 ri, float thetaSun, vec3 pSun, float thetaMoon, vec3 pMoon) {
   float rMoon = tan(thetaMoon);
   float area = twoCircleIntersection(rSun, rMoon, d);
   float totalArea = PI * rSun * rSun;
-  return max(0.0, 1.0 - area / totalArea);
+  return max(1e-6, 1.0 - area / totalArea);
 }
 
 float smoothcircle(vec3 ray, float angularRadius, vec3 centerDir, float boundary){
@@ -218,8 +219,6 @@ vec3 scattering(
   return I0 * scatter + vec3(I0 * sunDisk);
 }
 
-#pragma glslify: atmosphere = require('./atmosphere.glsl')
-
 void main() {
 
   vec3 RayOrigin = vec3(0, planetRadius + altitude + 1.0, 0);
@@ -244,6 +243,24 @@ void main() {
     planetRadius + atmosphereThickness,
     ivec2(iSteps, jSteps)
   );
+
+  // vec2 intPlanet = raySphereIntersection(RayOrigin, RayDir, planetRadius);
+  // bool planet_intersected = (intPlanet.x <= intPlanet.y && intPlanet.x > 0.0);
+
+  // if (planet_intersected){
+  //   gl_FragColor = vec4(0.0, 0.0, 0.0, opacity);
+  //   return;
+  // }
+
+  // vec2 p = phases(
+  //   RayOrigin,
+  //   RayDir,
+  //   sunPosition,
+  //   mieDirectional
+  // );
+
+  // vec3 scatter = vRayleighT * p[0] + vMieT * p[1];
+  // vec3 color = sunIntensity * scatter;
 
   // apply gamma correction
   // color = 0.4 * pow(color, vec3(1.0 / 1.2));
