@@ -61,6 +61,7 @@
   })
 
   const Sky = createSky()
+
   let starsPoints
   const Stars = createStars().then(s => starsPoints = s)
 
@@ -171,7 +172,7 @@
     })
     const perspectiveSettings = appSettings.addFolder('Perspective')
     perspectiveSettings.add(eclipseState, 'FOV', 1, 180, 1)
-    perspectiveSettings.add(eclipseState, 'exposure', 0.1, 40, 0.01)
+    perspectiveSettings.add(eclipseState, 'exposure', 0.01, 10, 0.01)
     perspectiveSettings.add(eclipseState, 'altitude', 0, 1, 0.01)
     perspectiveSettings.add(eclipseState, 'lookAtSun')
     perspectiveSettings.add(eclipseState, 'lookAtEarth')
@@ -181,7 +182,7 @@
     eclipseSettings.add(eclipseState, 'totalityFactor', 0, 1, 0.01)
     eclipseSettings.add(eclipseState, 'elevation', -90, 90, 0.001)
     const planetSettings = appSettings.addFolder('Planetary')
-    planetSettings.add(eclipseState, 'sunIntensity', 0, 50, 1)
+    planetSettings.add(eclipseState, 'sunIntensity', 0, 500, 1)
     planetSettings.add(eclipseState, 'planetRadius', 1e6, 1e7, 100)
     planetSettings.add(eclipseState, 'lockApparentSize').onChange(v => {
       if (v){
