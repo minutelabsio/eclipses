@@ -87,10 +87,12 @@
 
   let planetRadius = Re
   let altitudeFactor = 0.0
+  let atmosphereThickness = Sky.atmosphereThickness
 
   let totalityFactor = 0.9
   let moonPerigee = 356500 * 1000 * METER
   let moonApogee = 406700 * 1000 * METER
+  let lockApparentSize = false
   $: moonDistance = MathUtils.lerp(moonPerigee, moonApogee, 1 - totalityFactor)
 
   const lookAtSun = () => {
@@ -115,6 +117,8 @@
     set totalityFactor(value){ totalityFactor = value },
     doAnimation: true,
     progress: 0,
+    get lockApparentSize(){ return lockApparentSize },
+    set lockApparentSize(v){ return lockApparentSize = v },
     get moonRadius(){ return moonRadius },
     set moonRadius(v){ return moonRadius = v },
     get moonPerigee(){ return moonPerigee },
@@ -129,8 +133,8 @@
     set sunIntensity(v){ return Sky.sunIntensity = v },
     get planetRadius(){ return planetRadius },
     set planetRadius(v){ return planetRadius = v },
-    get atmosphereThickness(){ return Sky.atmosphereThickness },
-    set atmosphereThickness(v){ return Sky.atmosphereThickness = v },
+    get atmosphereThickness(){ return atmosphereThickness },
+    set atmosphereThickness(v){ return atmosphereThickness = v },
     get rayleighRed(){ return Sky.rayleighCoefficients.x },
     set rayleighRed(v){ return Sky.rayleighCoefficients.x = v },
     get rayleighGreen(){ return Sky.rayleighCoefficients.y },
@@ -153,6 +157,14 @@
     lookAtEarth: lookAtEarth,
   }
 
+  $: Sky.atmosphereThickness = atmosphereThickness
+
+  const apparentSize = (r, d) => {
+    return 2 * Math.asin(r / d) * DEG
+  }
+
+  let lastApparentSize = apparentSize(moonRadius, moonPerigee)
+
   onMount(() => {
     const appSettings = new GUI({
       width: 400
@@ -171,8 +183,13 @@
     const planetSettings = appSettings.addFolder('Planetary')
     planetSettings.add(eclipseState, 'sunIntensity', 0, 50, 1)
     planetSettings.add(eclipseState, 'planetRadius', 1e6, 1e7, 100)
-    planetSettings.add(eclipseState, 'moonRadius', 1e5, 1e7, 100)
-    planetSettings.add(eclipseState, 'moonPerigee', 1e6, 1e9, 100)
+    planetSettings.add(eclipseState, 'lockApparentSize').onChange(v => {
+      if (v){
+        lastApparentSize = apparentSize(moonRadius, moonPerigee)
+      }
+    }).name('Lock Size at Perigee')
+    const moonRadiusCtrl = planetSettings.add(eclipseState, 'moonRadius', 1e5, 1e7, 100)
+    const moonPerigeeCtrl = planetSettings.add(eclipseState, 'moonPerigee', 1e6, 1e9, 100)
     planetSettings.add(eclipseState, 'moonApogee', 1e7, 1e9, 100)
     const atmosSettings = appSettings.addFolder('Atmosphere')
     atmosSettings.add(eclipseState, 'atmosphereThickness', 0, 1000000, 1)
@@ -188,6 +205,21 @@
     const precisionSettings = atmosSettings.addFolder('Precision').close()
     precisionSettings.add(eclipseState, 'iSteps', 1, 32, 1)
     precisionSettings.add(eclipseState, 'jSteps', 1, 32, 1)
+
+    moonRadiusCtrl.onChange(r => {
+      if (lockApparentSize){
+        moonPerigee = (r / Math.sin(lastApparentSize / 2 / DEG))
+        moonPerigeeCtrl.updateDisplay()
+      }
+    })
+
+    moonPerigeeCtrl.onChange(d => {
+      if (lockApparentSize){
+        moonRadius = d * Math.sin(lastApparentSize / 2 / DEG)
+        moonRadiusCtrl.updateDisplay()
+      }
+    })
+
     return () => {
       appSettings.destroy()
     }
@@ -352,8 +384,11 @@
 <T is={Stars} />
 {/await}
 
-<T.Mesh bind:ref={skyMesh}>
-  <T.IcosahedronGeometry args={[AU, 256]} />
+<T.Mesh
+  bind:ref={skyMesh}
+  scale={[AU, AU, AU]}
+>
+  <T.IcosahedronGeometry args={[1, 16]} />
   <T is={Sky.shader} />
 </T.Mesh>
 
