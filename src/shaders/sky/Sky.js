@@ -22,15 +22,18 @@ const lineCircleIntersectionPoints = (r, s, radius) => {
 }
 
 const opticalDensity = (r, planetRadius, H) => {
+  if (H === 0) {
+    return 0
+  }
   const hr = r.length() - planetRadius;
   return Math.exp(-hr / H);
 }
 
 export default () => {
-  const dimension = 512
+  const dimension = 2 * 512
   const opticalDepthMap = new Float32Array(dimension * dimension * 2)
   const opticalDepthMapTexture = new THREE.DataTexture(opticalDepthMap, dimension, dimension, THREE.RGFormat, THREE.FloatType)
-  // opticalDepthMapTexture.colorSpace = THREE.LinearSRGBColorSpace
+  opticalDepthMapTexture.colorSpace = THREE.LinearSRGBColorSpace
 
   const shader = new ShaderMaterial({
     vertexShader,
@@ -71,15 +74,15 @@ export default () => {
   const api = { shader }
 
   const getOpticalDepths = (theta, height) => {
-    const steps = 32
-    const planetRadius = api.planetRadius
-    const atmosphereThickness = api.atmosphereThickness
-    const rH = api.rayleighScaleHeight
-    const mH = api.mieScaleHeight
-    const r = new THREE.Vector2(0, height * atmosphereThickness + planetRadius)
+    const steps = 64
+    const units = api.atmosphereThickness
+    const planetRadius = api.planetRadius / units
+    const rH = api.rayleighScaleHeight / units
+    const mH = api.mieScaleHeight / units
+    const r = new THREE.Vector2(0, height + 1/units + planetRadius)
     const s = new THREE.Vector2(Math.sin(theta), Math.cos(theta))
     const planetInt = lineCircleIntersectionPoints(r, s, planetRadius)
-    const atmosphereInt = lineCircleIntersectionPoints(r, s, planetRadius + atmosphereThickness)
+    const atmosphereInt = lineCircleIntersectionPoints(r, s, planetRadius + 1)
     let dist = atmosphereInt.y
     const planetIntersected = planetInt.x >= 0 && planetInt.x <= planetInt.y
     if (planetIntersected) {
@@ -95,7 +98,7 @@ export default () => {
       odh += opticalDensity(pos, planetRadius, rH) * ds;
       odm += opticalDensity(pos, planetRadius, mH) * ds;
     }
-    return [odh, odm]
+    return [odh * units, odm * units]
   }
 
   const refreshOpticalDepthMap = debounce(() => {
@@ -122,7 +125,7 @@ export default () => {
       set(value) {
         shader.uniforms[key].value = value
         shader.uniforms[key].needsUpdate = true
-        if (key === 'planetRadius' || key === 'atmosphereThickness' || key === 'rayleighScaleHeight') {
+        if (key === 'planetRadius' || key === 'atmosphereThickness' || key === 'rayleighScaleHeight' || key === 'mieScaleHeight') {
           refreshOpticalDepthMap()
         }
         return value
@@ -133,6 +136,7 @@ export default () => {
   Object.keys(uniforms).forEach(defineUniform)
   refreshOpticalDepthMap()
   shader.uniforms.opticalDepthMap = { value: opticalDepthMapTexture }
+  shader.uniforms.opticalDepthMapSize = { value: dimension }
 
   return api
 }

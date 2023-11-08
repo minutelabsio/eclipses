@@ -2,6 +2,7 @@ varying vec3 vWorldPosition;
 varying vec2 vUv;
 
 uniform sampler2D opticalDepthMap;
+uniform float opticalDepthMapSize;
 uniform float altitude;
 uniform float sunRadius;
 uniform float moonRadius;
@@ -29,7 +30,7 @@ const float MIN_STEP_SIZE = 1e4;
 
 vec2 opticalDensity(float z, vec2 scaleHeights, float planetRadius) {
   float h = max(0.0, z - planetRadius);
-  return exp(-h / scaleHeights);
+  return clamp(exp(-h / scaleHeights), 0., 1.);
 }
 
 // optical depth from start to end in the atmosphere
@@ -49,13 +50,14 @@ vec2 opticalDepths(vec3 start, vec3 end, vec2 scaleHeights, float planetRadius, 
   return od;
 }
 
-vec2 getOpticalDepths(vec3 start, vec3 end, float planetRadius, float atmosphereRadius) {
+vec2 getOpticalDepths(vec3 start, vec3 s, float planetRadius, float atmosphereRadius) {
   float h = max(0.0, length(start) - planetRadius);
-  vec3 s = normalize(end - start);
+  // vec3 s = normalize(end - start);
   start = normalize(start);
   float angle = acos(dot(start, s));
   float ah = atmosphereRadius - planetRadius;
-  vec2 texCoord = vec2(h / ah, angle / PI);
+  float halfStep = 0.5 / opticalDepthMapSize;
+  vec2 texCoord = vec2(angle / PI + halfStep, h / ah + halfStep);
   vec2 data = texture2D(opticalDepthMap, texCoord).rg;
   return data;
 }
@@ -206,12 +208,12 @@ vec3 scattering(
     // if it intersects the planet, we're in shadow
     if (intPlanet2.x < intPlanet2.y && intPlanet2.y > 0.0) {
       // not sure if this is the best thing to do
-      earthShadow = 1.0 - smoothstep(0.0, 0.3, max(0.0, intPlanet2.y - intPlanet2.x) / planetRadius);
+      earthShadow = 1.0 - smoothstep(-0.2, 0.2, asin(0.5 * max(0.0, intPlanet2.y - intPlanet2.x) / planetRadius));
     }
     vec2 intAtmosphere2 = raySphereIntersection(pos, sSun, atmosphereRadius);
     vec3 exit = pos + intAtmosphere2.y * sSun;
     // vec2 secondaryDepth = opticalDepths(pos, exit, scaleHeights, planetRadius, steps.y);
-    vec2 secondaryDepth = getOpticalDepths(pos, exit, planetRadius, atmosphereRadius);
+    vec2 secondaryDepth = getOpticalDepths(pos, normalize(exit - pos), planetRadius, atmosphereRadius);
     float g = umbra(
       pos,
       sunAngularRadius,
@@ -242,6 +244,23 @@ void main() {
   vec3 RayOrigin = vec3(0, planetRadius + altitude + 1.0, 0);
   vec3 RayDir = normalize(vWorldPosition);
 
+  // debug optical depth
+  // vec2 od = opticalDepths(
+  //   normalize(RayOrigin),
+  //   normalize(RayDir + RayOrigin),
+  //   vec2(rayleighScaleHeight),
+  //   planetRadius, ivec2(iSteps, jSteps)
+  // );
+  // vec2 od = getOpticalDepths(
+  //   RayOrigin,
+  //   RayDir,
+  //   planetRadius,
+  //   planetRadius + atmosphereThickness
+  // );
+
+  // gl_FragColor = vec4(1. - exp(-0.02* od.x), 1. - exp(-0.02 * od.y), 0.0, 1.0);
+  // gl_FragColor = vec4(od.x, od.y, 0.0, 1.0);
+  // return;
   // angular radii of sun and moon change very little
   float SunAngularRadius = asin(sunRadius / length(sunPosition - RayOrigin));
   float MoonAngularRadius = asin(moonRadius / length(moonPosition - RayOrigin));
