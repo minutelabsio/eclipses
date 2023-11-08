@@ -24,6 +24,7 @@ uniform int jSteps;
 
 const float THREE_OVER_16_PI = 3.0 / (16.0 * PI);
 const float THREE_OVER_8_PI = 3.0 / (8.0 * PI);
+const float MIN_STEP_SIZE = 1e4;
 
 vec2 opticalDensity(float z, vec2 scaleHeights, float planetRadius) {
   float h = max(0.0, z - planetRadius);
@@ -34,8 +35,12 @@ vec2 opticalDensity(float z, vec2 scaleHeights, float planetRadius) {
 vec2 opticalDepths(vec3 start, vec3 end, vec2 scaleHeights, float planetRadius, int steps) {
   vec2 od = vec2(0.0);
   float fsteps = float(steps);
-  float ds = length(end - start) / fsteps;
-  for(int i = 0; i < steps; i++) {
+  float d = length(end - start);
+  float ds = max(MIN_STEP_SIZE, d / fsteps);
+  fsteps = ceil(length(end - start) / ds);
+  int isteps = int(fsteps);
+  ds = d / fsteps;
+  for(int i = 0; i < isteps; i++) {
     float t = (float(i) + 0.5) / fsteps;
     vec3 p = mix(start, end, t);
     od += opticalDensity(length(p), scaleHeights, planetRadius) * ds;
@@ -162,20 +167,21 @@ vec3 scattering(
   // surface.
   path.y = planet_intersected ? intPlanet.x : path.y;
 
-  // if we have a very short path, we're probably just looking at ground just ignore
-  // if (path.y - path.x < 20.0){
-  //   return vec3(0.0);
-  // }
-
   vec3 rayleighT = vec3(0.0);
   vec3 mieT = vec3(0.0);
   // begin calculating transmittance via optical depth accumulation
   vec2 primaryDepth = vec2(0.0);
 
-  float fsteps = float(steps.x);
   vec3 start = rayOrigin + rayDir * path.x;
   vec3 end = rayOrigin + rayDir * path.y;
-  float ds = (path.y - path.x) / fsteps;
+
+  float fsteps = float(steps.x);
+  float d = (path.y - path.x);
+  float ds = max(MIN_STEP_SIZE, d / fsteps);
+  // adjust the number of steps to compensate for min step size
+  fsteps = ceil(d / ds);
+  steps.x = int(fsteps);
+  ds = d / fsteps;
 
   for (int i = 0; i < steps.x; i++){
     float t = (float(i) + 0.5) / fsteps;
