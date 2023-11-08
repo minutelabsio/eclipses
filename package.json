@@ -27,6 +27,7 @@
     "gsap": "^3.12.2",
     "intween": "1.0.0-beta.7",
     "lil-gui": "^0.18.2",
+    "lodash": "^4.17.21",
     "postprocessing": "^6.33.0",
     "pug": "^3.0.2",
     "sass": "^1.66.1",

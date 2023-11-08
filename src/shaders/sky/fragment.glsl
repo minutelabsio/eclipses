@@ -1,6 +1,7 @@
 varying vec3 vWorldPosition;
 varying vec2 vUv;
 
+uniform sampler2D opticalDepthMap;
 uniform float altitude;
 uniform float sunRadius;
 uniform float moonRadius;
@@ -46,6 +47,17 @@ vec2 opticalDepths(vec3 start, vec3 end, vec2 scaleHeights, float planetRadius, 
     od += opticalDensity(length(p), scaleHeights, planetRadius) * ds;
   }
   return od;
+}
+
+vec2 getOpticalDepths(vec3 start, vec3 end, float planetRadius, float atmosphereRadius) {
+  float h = max(0.0, length(start) - planetRadius);
+  vec3 s = normalize(end - start);
+  start = normalize(start);
+  float angle = acos(dot(start, s));
+  float ah = atmosphereRadius - planetRadius;
+  vec2 texCoord = vec2(h / ah, angle / PI);
+  vec2 data = texture2D(opticalDepthMap, texCoord).rg;
+  return data;
 }
 
 vec2 raySphereIntersection(vec3 origin, vec3 ray, float radius) {
@@ -177,11 +189,11 @@ vec3 scattering(
 
   float fsteps = float(steps.x);
   float d = (path.y - path.x);
-  float ds = max(MIN_STEP_SIZE, d / fsteps);
-  // adjust the number of steps to compensate for min step size
-  fsteps = ceil(d / ds);
-  steps.x = int(fsteps);
-  ds = d / fsteps;
+  // float ds = max(MIN_STEP_SIZE, d / fsteps);
+  // // adjust the number of steps to compensate for min step size
+  // fsteps = ceil(d / ds);
+  // steps.x = int(fsteps);
+  float ds = d / fsteps;
 
   for (int i = 0; i < steps.x; i++){
     float t = (float(i) + 0.5) / fsteps;
@@ -198,7 +210,8 @@ vec3 scattering(
     }
     vec2 intAtmosphere2 = raySphereIntersection(pos, sSun, atmosphereRadius);
     vec3 exit = pos + intAtmosphere2.y * sSun;
-    vec2 secondaryDepth = opticalDepths(pos, exit, scaleHeights, planetRadius, steps.y);
+    // vec2 secondaryDepth = opticalDepths(pos, exit, scaleHeights, planetRadius, steps.y);
+    vec2 secondaryDepth = getOpticalDepths(pos, exit, planetRadius, atmosphereRadius);
     float g = umbra(
       pos,
       sunAngularRadius,
@@ -226,7 +239,6 @@ vec3 scattering(
 }
 
 void main() {
-
   vec3 RayOrigin = vec3(0, planetRadius + altitude + 1.0, 0);
   vec3 RayDir = normalize(vWorldPosition);
 
