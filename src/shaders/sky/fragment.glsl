@@ -24,6 +24,7 @@ uniform int jSteps;
 
 #define PI 3.1415926535897932384626433832795
 
+const float ONE_OVER_E = exp(-1.0);
 const float THREE_OVER_16_PI = 3.0 / (16.0 * PI);
 const float THREE_OVER_8_PI = 3.0 / (8.0 * PI);
 const float MIN_STEP_SIZE = 1e4;
@@ -31,6 +32,27 @@ const float MIN_STEP_SIZE = 1e4;
 vec2 opticalDensity(float z, vec2 scaleHeights, float planetRadius) {
   float h = max(0.0, z - planetRadius);
   return clamp(exp(-h / scaleHeights), 0., 1.);
+}
+
+float shellDensity(int index, int steps){
+  if (index == steps){
+    return 0.0;
+  } else if (index == 0){
+    return 1.0;
+  } else {
+    return 1. - float(index) / float(steps);
+  }
+}
+
+// spherical shells starting at Re -> Re + atmosphereThickness
+float shellRadius(int index, int steps, float H, float atmosphereThickness, float planetRadius){
+  if (index == steps){
+    return atmosphereThickness + planetRadius;
+  } else if (index == 0){
+    return planetRadius;
+  } else {
+    return planetRadius - H * log(1. - float(index) / float(steps));
+  }
 }
 
 // optical depth from start to end in the atmosphere
@@ -74,7 +96,7 @@ vec2 raySphereIntersection(vec3 origin, vec3 ray, float radius) {
   float c = dot(origin, origin) - (radius * radius);
   float d = b * b - c;
   if(d < 0.0) {
-    return vec2(1e5, -1e5);
+    return vec2(1e-5, -1e-5);
   }
   float sqrtd = sqrt(d);
   float x0 = -b - sqrtd;
@@ -84,6 +106,14 @@ vec2 raySphereIntersection(vec3 origin, vec3 ray, float radius) {
   } else {
     return vec2(x0, x1);
   }
+}
+
+bool intersects1(vec2 intersections){
+  return intersections.x <= intersections.y && intersections.x > 0.0;
+}
+
+bool intersects2(vec2 intersections) {
+  return intersections.x <= intersections.y && intersections.y > 0.0;
 }
 
 float twoCircleIntersection(float r1, float r2, float d) {
@@ -122,6 +152,42 @@ float smoothcircle(vec3 ray, float angularRadius, vec3 centerDir, float boundary
   return 1.0 - smoothstep(angularRadius - b, angularRadius + b, angle);
 }
 
+float closestApproachDepth(vec3 start, vec3 ray, float planetRadius) {
+  float dist = dot(ray, start);
+  if (dist >= 0.0){
+    return 0.0;
+  }
+  float depth = planetRadius - sqrt(dot(start, start) - dist * dist);
+  return max(0.0, depth);
+}
+
+float clampMix(float x, float y, float a) {
+  return mix(x, y, clamp(a, 0.0, 1.0));
+}
+
+float expScale(float x){
+  return exp(x) * ONE_OVER_E - 1.0;
+}
+
+vec2 getPhases(vec3 rayDir, vec3 sSun, float g){
+  // phases
+  float mu = dot(rayDir, sSun);
+  float mumu = mu * mu;
+  float gg = g * g;
+  float rayleighP = THREE_OVER_16_PI + THREE_OVER_16_PI * mumu;
+  float mieP = THREE_OVER_8_PI * ((1.0 - gg) * (mumu + 1.0)) / (pow(1.0 + gg - 2.0 * mu * g, 1.5) * (2.0 + gg));
+  return vec2(rayleighP, mieP);
+}
+
+vec3 sunMoon(vec3 rayDir, vec3 sSun, float sunAngularRadius, vec3 sMoon, float moonAngularRadius, float I0){
+  // Color of the solar disk (that isn't blocked by the moon)
+  float sunDisk = 0.0;
+  sunDisk = smoothcircle(rayDir, sunAngularRadius, sSun, 0.01);
+  float moonDisk = smoothcircle(rayDir, moonAngularRadius * 1.02, sMoon, 0.01);
+  sunDisk = mix(sunDisk, 0.0, moonDisk);
+  return vec3(I0 * sunDisk);
+}
+
 vec3 scattering(
   vec3 rayOrigin,
   vec3 rayDir,
@@ -145,33 +211,16 @@ vec3 scattering(
 ){
   // determine intersections with the planet, atmosphere, etc
   vec2 intPlanet = raySphereIntersection(rayOrigin, rayDir, planetRadius);
-  bool planet_intersected = (intPlanet.x <= intPlanet.y && intPlanet.x > 0.0);
-
   // Ray starts inside the planet -> return 0
   if (intPlanet.x < 0.0 && intPlanet.y > 0.0) {
     return vec3(0.0, 0.0, 0.0);
-  }
-
-  vec3 sSun = normalize(sunPosition - rayOrigin);
-
-  // Color of the solar disk (that isn't blocked by the moon)
-  float sunDisk = 0.0;
-  // we can't see the sun if the ray intersects the planet
-  if(!planet_intersected) {
-    sunDisk = smoothcircle(rayDir, sunAngularRadius, sSun, 0.01);
-    // the smoothstep ends up looking brighter near the second edge
-    // so for the moon we need to fudge it to get the correct relative size
-    float moonDisk = smoothcircle(rayDir, moonAngularRadius * 1.02, normalize(moonPosition - rayOrigin), 0.01);
-    sunDisk = mix(sunDisk, 0.0, moonDisk);
-    // float bloom = 2. * smoothcircle(rayDir, 2.0 * sunAngularRadius, sSun, 0.5) / I0;
-    // sunDisk += bloom;
   }
 
   vec2 path = raySphereIntersection(rayOrigin, rayDir, atmosphereRadius);
   // Ray does not intersect the atmosphere (on the way forward) at all;
   // exit early.
   if (path.x > path.y || path.y <= 0.0) {
-    return vec3(I0 * sunDisk);
+    return vec3(0.0);
   }
 
   // always start atmosphere ray at viewpoint if we start inside atmosphere
@@ -179,15 +228,24 @@ vec3 scattering(
 
   // if the planet is intersected, set the end of the ray to the planet
   // surface.
+  bool planet_intersected = intersects1(intPlanet);
   path.y = planet_intersected ? intPlanet.x : path.y;
-
-  vec3 rayleighT = vec3(0.0);
-  vec3 mieT = vec3(0.0);
-  // begin calculating transmittance via optical depth accumulation
-  vec2 primaryDepth = vec2(0.0);
 
   vec3 start = rayOrigin + rayDir * path.x;
   vec3 end = rayOrigin + rayDir * path.y;
+
+  vec3 sSun = normalize(sunPosition - start);
+
+  // if the start point and end point is in shadow just return black
+  vec2 startInt = raySphereIntersection(start, sSun, planetRadius);
+  vec2 endInt = raySphereIntersection(end, sSun, planetRadius);
+  if(
+    startInt.x < startInt.y &&
+    startInt.y > 0.0 &&
+    endInt.x < endInt.y &&
+    endInt.y > 0.0) {
+    // return vec3(0.0);
+  }
 
   float fsteps = float(steps.x);
   float d = (path.y - path.x);
@@ -197,23 +255,26 @@ vec3 scattering(
   // steps.x = int(fsteps);
   float ds = d / fsteps;
 
+  vec3 rayleighT = vec3(0.0);
+  vec3 mieT = vec3(0.0);
+  // begin calculating transmittance via optical depth accumulation
+  vec2 primaryDepth = vec2(0.0);
+
   for (int i = 0; i < steps.x; i++){
     float t = (float(i) + 0.5) / fsteps;
     vec3 pos = mix(start, end, t);
     vec2 odStep = opticalDensity(length(pos), scaleHeights, planetRadius) * ds;
     primaryDepth += odStep;
 
-    vec2 intPlanet2 = raySphereIntersection(pos, sSun, planetRadius);
-    float earthShadow = 1.0;
-    // if it intersects the planet, we're in shadow
-    if (intPlanet2.x < intPlanet2.y && intPlanet2.y > 0.0) {
-      // not sure if this is the best thing to do
-      earthShadow = 1.0 - smoothstep(-0.2, 0.2, asin(0.5 * max(0.0, intPlanet2.y - intPlanet2.x) / planetRadius));
-    }
+    float approachDepth = closestApproachDepth(pos, sSun, planetRadius);
+    float earthShadow = clampMix(1.0, 0.0, approachDepth / ds);
+
     vec2 intAtmosphere2 = raySphereIntersection(pos, sSun, atmosphereRadius);
     vec3 exit = pos + intAtmosphere2.y * sSun;
-    // vec2 secondaryDepth = opticalDepths(pos, exit, scaleHeights, planetRadius, steps.y);
-    vec2 secondaryDepth = getOpticalDepths(pos, normalize(exit - pos), planetRadius, atmosphereRadius);
+    // vec2 intPlanet2 = raySphereIntersection(pos, sSun, planetRadius);
+    // if(intPlanet2.x < intPlanet2.y && intPlanet2.x >= 0.0) {
+    //   exit = pos + intPlanet2.x * sSun;
+    // }
     float g = umbra(
       pos,
       sunAngularRadius,
@@ -221,6 +282,9 @@ vec3 scattering(
       moonAngularRadius,
       moonPosition
     );
+    // vec2 secondaryDepth = opticalDepths(pos, exit, scaleHeights, planetRadius, steps.y);
+    vec2 secondaryDepth = getOpticalDepths(pos, normalize(exit - pos), planetRadius, atmosphereRadius);
+    // vec2 secondaryDepth = vec2(0.0);
     vec2 depth = primaryDepth + secondaryDepth;
     vec4 alpha = vec4(vec3(depth.x), depth.y) * scatteringCoefficients;
     vec3 transmittance = earthShadow * g * exp(- alpha.xyz - alpha.w);
@@ -230,37 +294,18 @@ vec3 scattering(
   }
 
   // phases
-  float mu = dot(rayDir, sSun);
-  float mumu = mu * mu;
-  float gg = g * g;
-  float rayleighP = THREE_OVER_16_PI + THREE_OVER_16_PI * mumu;
-  float mieP = THREE_OVER_8_PI * ((1.0 - gg) * (mumu + 1.0)) / (pow(1.0 + gg - 2.0 * mu * g, 1.5) * (2.0 + gg));
+  vec2 phases = getPhases(rayDir, sSun, g);
+  float rayleighP = phases.x;
+  float mieP = phases.y;
 
   vec3 scatter = rayleighT * rayleighP * scatteringCoefficients.xyz + mieT * mieP * scatteringCoefficients.w;
-  return I0 * scatter + vec3(I0 * sunDisk);
+  return I0 * scatter;
 }
 
 void main() {
   vec3 RayOrigin = vec3(0, planetRadius + altitude + 1.0, 0);
   vec3 RayDir = normalize(vWorldPosition);
 
-  // debug optical depth
-  // vec2 od = opticalDepths(
-  //   normalize(RayOrigin),
-  //   normalize(RayDir + RayOrigin),
-  //   vec2(rayleighScaleHeight),
-  //   planetRadius, ivec2(iSteps, jSteps)
-  // );
-  // vec2 od = getOpticalDepths(
-  //   RayOrigin,
-  //   RayDir,
-  //   planetRadius,
-  //   planetRadius + atmosphereThickness
-  // );
-
-  // gl_FragColor = vec4(1. - exp(-0.02* od.x), 1. - exp(-0.02 * od.y), 0.0, 1.0);
-  // gl_FragColor = vec4(od.x, od.y, 0.0, 1.0);
-  // return;
   // angular radii of sun and moon change very little
   float SunAngularRadius = asin(sunRadius / length(sunPosition - RayOrigin));
   float MoonAngularRadius = asin(moonRadius / length(moonPosition - RayOrigin));
@@ -281,8 +326,18 @@ void main() {
     ivec2(iSteps, jSteps)
   );
 
-  // vec2 intPlanet = raySphereIntersection(RayOrigin, RayDir, planetRadius);
-  // bool planet_intersected = (intPlanet.x <= intPlanet.y && intPlanet.x > 0.0);
+  vec2 intPlanet = raySphereIntersection(RayOrigin, RayDir, planetRadius);
+  bool planet_intersected = intersects2(intPlanet);
+  if (!planet_intersected){
+    color += sunMoon(
+      RayDir,
+      normalize(sunPosition - RayOrigin),
+      SunAngularRadius,
+      normalize(moonPosition - RayOrigin),
+      MoonAngularRadius,
+      sunIntensity
+    );
+  }
 
   // if (planet_intersected){
   //   gl_FragColor = vec4(0.0, 0.0, 0.0, opacity);
