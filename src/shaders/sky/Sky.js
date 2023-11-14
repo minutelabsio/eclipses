@@ -30,7 +30,7 @@ const opticalDensity = (r, planetRadius, H) => {
 }
 
 export default () => {
-  const dimension = 2 * 512
+  const dimension = 4 * 512
   const opticalDepthMap = new Float32Array(dimension * dimension * 2)
   const opticalDepthMapTexture = new THREE.DataTexture(opticalDepthMap, dimension, dimension, THREE.RGFormat, THREE.FloatType)
   opticalDepthMapTexture.colorSpace = THREE.LinearSRGBColorSpace
@@ -81,22 +81,17 @@ export default () => {
     const mH = api.mieScaleHeight / units
     const r = new THREE.Vector2(0, height + 1/units + planetRadius)
     const s = new THREE.Vector2(Math.sin(theta), Math.cos(theta))
-    const planetInt = lineCircleIntersectionPoints(r, s, planetRadius)
     const atmosphereInt = lineCircleIntersectionPoints(r, s, planetRadius + 1)
     let dist = atmosphereInt.y
-    const planetIntersected = planetInt.x >= 0 && planetInt.x <= planetInt.y
-    if (planetIntersected) {
-      dist = planetInt.x
-    }
 
     const ds = dist / steps;
     let odh = 0
     let odm = 0
     const pos = r.clone().addScaledVector(s, ds / 2);
     for (let i = 0; i < steps; i++) {
-      pos.addScaledVector(s, ds);
       odh += opticalDensity(pos, planetRadius, rH) * ds;
       odm += opticalDensity(pos, planetRadius, mH) * ds;
+      pos.addScaledVector(s, ds);
     }
     return [odh * units, odm * units]
   }
