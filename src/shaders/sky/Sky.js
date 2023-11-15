@@ -9,7 +9,7 @@ const lineCircleIntersectionPoints = (r, s, radius) => {
   const c = r.dot(r) - (radius * radius);
   const d = b * b - c;
   if (d < 0.0) {
-    return new THREE.Vector2(1e5, -1e5);
+    return new THREE.Vector2(1e-5, -1e-5);
   }
   const sqrtd = Math.sqrt(d);
   const x0 = -b - sqrtd;
@@ -79,10 +79,15 @@ export default () => {
     const planetRadius = api.planetRadius / units
     const rH = api.rayleighScaleHeight / units
     const mH = api.mieScaleHeight / units
-    const r = new THREE.Vector2(0, height + 1/units + planetRadius)
+    const r = new THREE.Vector2(0, height / units + 1 / units + planetRadius)
     const s = new THREE.Vector2(Math.sin(theta), Math.cos(theta))
     const atmosphereInt = lineCircleIntersectionPoints(r, s, planetRadius + 1)
     let dist = atmosphereInt.y
+    // const planetInt = lineCircleIntersectionPoints(r, s, planetRadius)
+    // if (planetInt.x < planetInt.y && planetInt.x > 0) {
+    //   dist = planetInt.x
+    //   // return [1e9, 1e9]
+    // }
 
     const ds = dist / steps;
     let odh = 0
@@ -96,11 +101,28 @@ export default () => {
     return [odh * units, odm * units]
   }
 
+  const logHeightScale = (i) => {
+    if (i === 0) {
+      return 0
+    }
+    if (i === (dimension - 1)) {
+      return api.atmosphereThickness
+    }
+    return -Math.log(1 - i / (dimension - 1)) * api.rayleighScaleHeight
+  }
+
+  const thetaScale = (j) => {
+    const t = j / (dimension - 1)
+    return t * Math.PI
+    // const c = Math.acos(1 - Math.sin(Math.PI * t)) / Math.PI
+    // return (t > 0.5 ? 1 - c : c) * Math.PI
+  }
+
   const refreshOpticalDepthMap = debounce(() => {
     for (let i = 0; i < dimension; i++) {
-      const height = i / dimension
+      const height = logHeightScale(i)
       for (let j = 0; j < dimension; j++) {
-        const theta = Math.PI * j / dimension
+        const theta = thetaScale(j)
         const [odh, odm] = getOpticalDepths(theta, height)
         opticalDepthMap[i * 2 * dimension + j * 2] = odh
         opticalDepthMap[i * 2 * dimension + j * 2 + 1] = odm

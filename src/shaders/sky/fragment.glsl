@@ -72,20 +72,25 @@ vec2 opticalDepths(vec3 start, vec3 end, vec2 scaleHeights, float planetRadius, 
   return od;
 }
 
-vec2 getOpticalDepths(vec3 start, vec3 s, float planetRadius, float atmosphereRadius) {
+vec2 getOpticalDepths(vec3 start, vec3 s, vec2 scaleHeights, float planetRadius, float atmosphereRadius) {
+  // float ah = atmosphereRadius - planetRadius;
   float h = max(0.0, length(start) - planetRadius);
+  float v = (1. - exp(-h / scaleHeights.x));
   // vec3 s = normalize(end - start);
   start = normalize(start);
   float angle = acos(dot(start, s));
-  float ah = atmosphereRadius - planetRadius;
+  // Math.PI * (4 * (t - 0.5) ^ 3 + 0.5)
+  float u = angle / PI;
+  // float c = 0.5 - abs(0.5 - angle / PI);
+  // float u = asin(1. - cos(PI * c)) / PI;
   float halfStep = 0.5 / opticalDepthMapSize;
-  vec2 texCoord = vec2(angle / PI + halfStep, h / ah + halfStep);
+  vec2 texCoord = vec2(u + halfStep, v + halfStep);
   vec2 data = texture2D(opticalDepthMap, texCoord).rg;
   return data;
 }
 
 vec2 raySphereIntersection(vec3 origin, vec3 ray, float radius) {
-  ray = normalize(ray);
+  // ray = normalize(ray);
   // ray-sphere intersection that assumes
   // the sphere is centered at the origin.
   // float a = dot(ray, ray);
@@ -209,10 +214,15 @@ vec3 scattering(
   float atmosphereRadius,
   ivec2 steps
 ){
-  // determine intersections with the planet, atmosphere, etc
-  vec2 intPlanet = raySphereIntersection(rayOrigin, rayDir, planetRadius);
+  float rayHeight = length(rayOrigin);
   // Ray starts inside the planet -> return 0
-  if (intPlanet.x < 0.0 && intPlanet.y > 0.0) {
+  if (rayHeight < planetRadius) {
+    return vec3(0.0, 0.0, 0.0);
+  }
+
+  vec2 inter = raySphereIntersection(rayOrigin, rayDir, atmosphereRadius);
+  // Ray does not intersect the atmosphere (on the way forward) at all;
+  if(!intersects2(inter)) {
     return vec3(0.0, 0.0, 0.0);
   }
 
@@ -228,6 +238,8 @@ vec3 scattering(
 
   // if the planet is intersected, set the end of the ray to the planet
   // surface.
+  // determine intersections with the planet, atmosphere, etc
+  vec2 intPlanet = raySphereIntersection(rayOrigin, rayDir, planetRadius);
   bool planet_intersected = intersects1(intPlanet);
   path.y = planet_intersected ? intPlanet.x : path.y;
 
@@ -249,10 +261,6 @@ vec3 scattering(
 
   float fsteps = float(steps.x);
   float d = (path.y - path.x);
-  // float ds = max(MIN_STEP_SIZE, d / fsteps);
-  // // adjust the number of steps to compensate for min step size
-  // fsteps = ceil(d / ds);
-  // steps.x = int(fsteps);
   float ds = d / fsteps;
 
   vec3 rayleighT = vec3(0.0);
@@ -266,15 +274,20 @@ vec3 scattering(
     vec2 odStep = opticalDensity(length(pos), scaleHeights, planetRadius) * ds;
     primaryDepth += odStep;
 
-    float approachDepth = closestApproachDepth(pos, sSun, planetRadius);
-    float earthShadow = clampMix(1.0, 0.0, approachDepth / ds);
+    vec2 intPlanet2 = raySphereIntersection(pos, sSun, planetRadius);
+    // if the ray intersects the planet, no light comes this way
+    if(intPlanet2.x < intPlanet2.y && intPlanet2.x >= 0.0) {
+      continue;
+      // exit = pos + intPlanet2.x * sSun;
+      // earthShadow = 0.01;
+    }
+
+    // float approachDepth = closestApproachDepth(pos, sSun, planetRadius);
+    float earthShadow = 1.0; //clampMix(1.0, 0.0, approachDepth / ds);
 
     vec2 intAtmosphere2 = raySphereIntersection(pos, sSun, atmosphereRadius);
     vec3 exit = pos + intAtmosphere2.y * sSun;
-    // vec2 intPlanet2 = raySphereIntersection(pos, sSun, planetRadius);
-    // if(intPlanet2.x < intPlanet2.y && intPlanet2.x >= 0.0) {
-    //   exit = pos + intPlanet2.x * sSun;
-    // }
+
     float g = umbra(
       pos,
       sunAngularRadius,
@@ -283,7 +296,7 @@ vec3 scattering(
       moonPosition
     );
     // vec2 secondaryDepth = opticalDepths(pos, exit, scaleHeights, planetRadius, steps.y);
-    vec2 secondaryDepth = getOpticalDepths(pos, normalize(exit - pos), planetRadius, atmosphereRadius);
+    vec2 secondaryDepth = getOpticalDepths(pos, normalize(exit - pos), scaleHeights, planetRadius, atmosphereRadius);
     // vec2 secondaryDepth = vec2(0.0);
     vec2 depth = primaryDepth + secondaryDepth;
     vec4 alpha = vec4(vec3(depth.x), depth.y) * scatteringCoefficients;
