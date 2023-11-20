@@ -90,6 +90,7 @@
   let altitudeFactor = 0.0
   let atmosphereThickness = Sky.atmosphereThickness
 
+  let exposure = 0.4
   let totalityFactor = 0.9
   let moonPerigee = 356500 * 1000 * METER
   let moonApogee = 406700 * 1000 * METER
@@ -107,12 +108,9 @@
   const eclipseState = {
     get FOV(){ return FOV },
     set FOV(v){ return FOV = v },
-    get exposure(){ return Sky.exposure },
+    get exposure(){ return exposure },
     set exposure(v){
-      Sky.exposure = v
-      if (!starsPoints) return
-      starsPoints.material.uniforms.exposure.value = v
-      starsPoints.material.uniforms.exposure.needsUpdate = true
+      exposure = v
     },
     get totalityFactor(){ return totalityFactor },
     set totalityFactor(value){ totalityFactor = value },
@@ -159,6 +157,13 @@
   }
 
   $: Sky.atmosphereThickness = atmosphereThickness
+  $: {
+    Sky.exposure = exposure
+    if (starsPoints){
+      starsPoints.material.uniforms.exposure.value = exposure
+      starsPoints.material.uniforms.exposure.needsUpdate = true
+    }
+  }
 
   const apparentSize = (r, d) => {
     return 2 * Math.asin(r / d) * DEG
@@ -357,10 +362,10 @@
           // adaptive: true,
           // resolution: 256,
           // middleGrey: 0.6,
-          whitePoint: 10,
-          minLuminance: 0.001,
+          whitePoint: 2,
+          minLuminance: 0.0001,
           averageLuminance: 1,
-          adaptationRate: 10
+          adaptationRate: 5
         }),
       )
     )
