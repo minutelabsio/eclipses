@@ -21,7 +21,7 @@ function fragmentShader() {
     varying vec4 vColor;
     uniform float exposure;
     void main() {
-      gl_FragColor = 1.0 - exp(-exposure * vec4( vColor ));
+      gl_FragColor = vColor; //1.0 - exp(-exposure * vec4( vColor ));
     }
   `
 }

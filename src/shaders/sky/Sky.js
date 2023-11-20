@@ -30,7 +30,7 @@ const opticalDensity = (r, planetRadius, H) => {
 }
 
 export default () => {
-  const dimension = 4 * 512
+  const dimension = 4//4 * 512
   const opticalDepthMap = new Float32Array(dimension * dimension * 2)
   const opticalDepthMapTexture = new THREE.DataTexture(opticalDepthMap, dimension, dimension, THREE.RGFormat, THREE.FloatType)
   opticalDepthMapTexture.colorSpace = THREE.LinearSRGBColorSpace
@@ -56,16 +56,16 @@ export default () => {
     moonPosition: new THREE.Vector3(0, 0, 0),
     moonRadius: 0.2727 * Re,
     altitude: 0,
-    sunIntensity: 40,
+    sunIntensity: 16,
     sunPosition: new THREE.Vector3(0, 0, -sunDistance),
     sunRadius,
     planetRadius: 6371e3,
-    atmosphereThickness: 100e3, // karman line
+    atmosphereThickness: 80e3, // karman line
     rayleighCoefficients: new THREE.Vector3(5.5e-6, 13.0e-6, 22.4e-6),
     rayleighScaleHeight: 8e3,
     mieCoefficient: 21e-6,
     mieScaleHeight: 500,
-    mieDirectional: 0.758,
+    mieDirectional: -0.758,
     exposure: 1.0,
     iSteps: 10,
     jSteps: 4,

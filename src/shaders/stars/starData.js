@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import bsc5dat from '../../assets/bsc5.dat?raw'
 
-const brightnessAdjustment = 1
+const brightnessAdjustment = 0.2
 
 export function starData(){
   const stars = {}

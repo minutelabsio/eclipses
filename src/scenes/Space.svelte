@@ -90,7 +90,7 @@
   let altitudeFactor = 0.0
   let atmosphereThickness = Sky.atmosphereThickness
 
-  let exposure = 0.4
+  let exposure = 1
   let totalityFactor = 0.9
   let moonPerigee = 356500 * 1000 * METER
   let moonApogee = 406700 * 1000 * METER
@@ -157,13 +157,14 @@
   }
 
   $: Sky.atmosphereThickness = atmosphereThickness
-  $: {
-    Sky.exposure = exposure
-    if (starsPoints){
-      starsPoints.material.uniforms.exposure.value = exposure
-      starsPoints.material.uniforms.exposure.needsUpdate = true
-    }
-  }
+  // $: {
+  //   Sky.exposure = exposure
+  //   if (starsPoints){
+  //     starsPoints.material.uniforms.exposure.value = exposure
+  //     starsPoints.material.uniforms.exposure.needsUpdate = true
+  //   }
+  // }
+  $: renderer.toneMappingExposure = exposure
 
   const apparentSize = (r, d) => {
     return 2 * Math.asin(r / d) * DEG
@@ -363,9 +364,9 @@
           // resolution: 256,
           // middleGrey: 0.6,
           whitePoint: 2,
-          minLuminance: 0.0001,
-          averageLuminance: 1,
-          adaptationRate: 5
+          minLuminance: 0.01,
+          averageLuminance: .1,
+          adaptationRate: 2
         }),
       )
     )
@@ -380,7 +381,7 @@
 
 <Stats />
 
-<T.AmbientLight intensity={0.05}/>
+<T.AmbientLight intensity={0.0001}/>
 <!-- <Sky elevation={0.1} /> -->
 <!-- <T.HemisphereLight
   intensity={sunBrightness * 0.2}

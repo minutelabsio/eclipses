@@ -295,8 +295,8 @@ vec3 scattering(
       moonAngularRadius,
       moonPosition
     );
-    // vec2 secondaryDepth = opticalDepths(pos, exit, scaleHeights, planetRadius, steps.y);
-    vec2 secondaryDepth = getOpticalDepths(pos, normalize(exit - pos), scaleHeights, planetRadius, atmosphereRadius);
+    vec2 secondaryDepth = opticalDepths(pos, exit, scaleHeights, planetRadius, steps.y);
+    // vec2 secondaryDepth = getOpticalDepths(pos, normalize(exit - pos), scaleHeights, planetRadius, atmosphereRadius);
     // vec2 secondaryDepth = vec2(0.0);
     vec2 depth = primaryDepth + secondaryDepth;
     vec4 alpha = vec4(vec3(depth.x), depth.y) * scatteringCoefficients;
@@ -370,7 +370,7 @@ void main() {
   // apply gamma correction
   // color = 0.4 * pow(color, vec3(1.0 / 1.2));
   // Apply exposure.
-  color = 1.0 - exp(-exposure * color);
+  // color = 1.0 - exp(-exposure * color);
 
   gl_FragColor = vec4(color, opacity);
 }
