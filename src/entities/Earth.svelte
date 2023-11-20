@@ -1,5 +1,5 @@
 <script>
-import { TextureLoader } from 'three'
+import { MeshBasicMaterial, PlaneGeometry, TextureLoader } from 'three'
 import { T, useLoader } from '@threlte/core'
 import earthTextureUrl from '../assets/earth/Earth.png'
 import earthNormalUrl from '../assets/earth/normal/hires/EarthNormal.png'
@@ -16,19 +16,29 @@ const textures = useLoader(TextureLoader).load({
 </script>
 
 {#if $textures}
-<T.Mesh
-  position={position}
-  rotation={[Math.PI / 2, 0, -Math.PI / 2]}
-  scale={[planetRadius, planetRadius, planetRadius]}
-  receiveShadow
->
-  <T.IcosahedronGeometry args={[1, 256]} />
-  <T.MeshPhongMaterial
-    dithering
-    map={$textures.map}
-    normalMap={$textures.normalMap}
-    specularMap={$textures.specularMap}
-    shininess={0}
-  />
-</T.Mesh>
+<T.LOD let:ref={lod}>
+  <T.Mesh position={position} on:create={({ ref }) => lod.addLevel(ref, 0)}>
+    <T.PlaneGeometry/>
+    <T.MeshBasicMaterial transparent opacity={0}/>
+  </T.Mesh>
+  <T.Mesh
+    position={position}
+    rotation={[Math.PI / 2, 0, -Math.PI / 2]}
+    scale={[planetRadius, planetRadius, planetRadius]}
+    receiveShadow
+    on:create={({ ref }) => {
+      lod.addLevel(ref, planetRadius * 0.01)
+    }}
+  >
+    <T.IcosahedronGeometry args={[1, 64]} />
+    <T.MeshPhongMaterial
+      dithering
+      map={$textures.map}
+      normalMap={$textures.normalMap}
+      specularMap={$textures.specularMap}
+      shininess={0}
+    />
+  </T.Mesh>
+</T.LOD>
+
 {/if}
