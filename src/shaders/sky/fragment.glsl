@@ -183,14 +183,39 @@ vec2 getPhases(vec3 rayDir, vec3 sSun, float g){
   float mieP = THREE_OVER_8_PI * ((1.0 - gg) * (mumu + 1.0)) / (pow(1.0 + gg - 2.0 * mu * g, 1.5) * (2.0 + gg));
   return vec2(rayleighP, mieP);
 }
+float rand(vec2 n) {
+  return fract(sin(dot(n, vec2(12.9898, 4.1414))) * 43758.5453);
+}
+
+float noise(vec2 p) {
+  vec2 ip = floor(p);
+  vec2 u = fract(p);
+  u = u * u * (3.0 - 2.0 * u);
+
+  float res = mix(mix(rand(ip), rand(ip + vec2(1.0, 0.0)), u.x), mix(rand(ip + vec2(0.0, 1.0)), rand(ip + vec2(1.0, 1.0)), u.x), u.y);
+  return res * res;
+}
 
 vec3 sunMoon(vec3 rayDir, vec3 sSun, float sunAngularRadius, vec3 sMoon, float moonAngularRadius, float I0){
+  float mu = dot(rayDir, sSun);
+  if (mu < 0.999){
+    return vec3(0.0);
+  }
   // Color of the solar disk (that isn't blocked by the moon)
   float sunDisk = 0.0;
-  sunDisk = smoothcircle(rayDir, sunAngularRadius, sSun, 0.01);
+  // sunDisk = smoothcircle(rayDir, sunAngularRadius, sSun, 0.01);
+
+  float g = clampMix(0.99993, 0.999, (acos(dot(sSun, sMoon)) - 0.001) / 0.02);
+  float gg = g * g;
+  float mumu = mu * mu;
+  // sunDisk = (0.001) * THREE_OVER_8_PI * ((1.0 - gg) * (mumu + 1.0)) / (pow(1.0 + gg - 2.0 * mu * g, 1.5) * (2.0 + gg));
+  sunDisk = I0 * 0.000003 * (1. - gg) * (mumu + 1.0) / pow(1. + gg - 2. * mu * g, 1.5);
+
   float moonDisk = smoothcircle(rayDir, moonAngularRadius * 1.02, sMoon, 0.01);
-  sunDisk = mix(sunDisk, 0.0, moonDisk);
-  return vec3(I0 * sunDisk);
+  sunDisk = (1. + noise(normalize(rayDir-sSun).xy*10.)) * mix(sunDisk, 0.0, moonDisk);
+  sunDisk *= smoothstep(0.999, 1.0, mu);
+
+  return vec3(clamp(sunDisk, 0.0, I0));
 }
 
 vec3 scattering(
