@@ -23,6 +23,7 @@
     BlendFunction,
     ToneMappingEffect,
     ToneMappingMode,
+    ColorAverageEffect,
   } from 'postprocessing'
   import { CameraRig, FreeMovementControls } from 'three-story-controls'
   import createCorona from '../shaders/corona/Corona'
@@ -349,12 +350,6 @@
         camera,
         // bloom,
         // godrays,
-        new SMAAEffect({
-          preset: SMAAPreset.HIGH,
-          edgeDetectionMode: EdgeDetectionMode.LUMA,
-          // edgeDetectionMode: EdgeDetectionMode.DEPTH,
-          blendFunction: BlendFunction.SCREEN
-        }),
         new ToneMappingEffect({
           // blendFunction: BlendFunction.NORMAL,
           // mode: ToneMappingMode.ACES_FILMIC,
@@ -363,10 +358,17 @@
           // adaptive: true,
           // resolution: 256,
           // middleGrey: 0.6,
-          whitePoint: 2,
+          resolution: 512,
+          whitePoint: 4,
           minLuminance: 0.01,
           averageLuminance: .1,
           adaptationRate: 2
+        }),
+        new SMAAEffect({
+          preset: SMAAPreset.HIGH,
+          edgeDetectionMode: EdgeDetectionMode.LUMA,
+          // edgeDetectionMode: EdgeDetectionMode.DEPTH,
+          blendFunction: BlendFunction.SCREEN
         }),
       )
     )

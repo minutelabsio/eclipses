@@ -38,7 +38,12 @@ export default () => {
   const shader = new ShaderMaterial({
     vertexShader,
     fragmentShader,
-    blending: THREE.AdditiveBlending,
+    // blending: THREE.AdditiveBlending,
+    blending: THREE.CustomBlending,
+    blendEquation: THREE.AddEquation,
+    blendSrc: THREE.OneFactor,
+    blendDst: THREE.OneMinusSrcAlphaFactor,
+    dithering: true,
     side: THREE.BackSide,
     transparent: true,
     depthTest: false,

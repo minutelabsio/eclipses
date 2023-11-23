@@ -1,5 +1,6 @@
 varying vec3 vWorldPosition;
 varying vec2 vUv;
+varying vec3 vCameraDirection;
 
 uniform sampler2D opticalDepthMap;
 uniform float opticalDepthMapSize;
@@ -196,6 +197,9 @@ float noise(vec2 p) {
   return res * res;
 }
 
+#pragma glslify: snoise3 = require(glsl-noise/simplex/3d)
+#pragma glslify: cnoise3 = require(glsl-noise/classic/3d)
+
 vec3 sunMoon(vec3 rayDir, vec3 sSun, float sunAngularRadius, vec3 sMoon, float moonAngularRadius, float I0){
   float mu = dot(rayDir, sSun);
   if (mu < 0.999){
@@ -211,14 +215,14 @@ vec3 sunMoon(vec3 rayDir, vec3 sSun, float sunAngularRadius, vec3 sMoon, float m
   // sunDisk = (0.001) * THREE_OVER_8_PI * ((1.0 - gg) * (mumu + 1.0)) / (pow(1.0 + gg - 2.0 * mu * g, 1.5) * (2.0 + gg));
   sunDisk = I0 * 0.000003 * (1. - gg) * (mumu + 1.0) / pow(1. + gg - 2. * mu * g, 1.5);
 
-  float moonDisk = smoothcircle(rayDir, moonAngularRadius * 1.02, sMoon, 0.01);
-  sunDisk = (1. + noise(normalize(rayDir-sSun).xy*10.)) * mix(sunDisk, 0.0, moonDisk);
+  float moonDisk = smoothcircle(rayDir, moonAngularRadius * 1.0, sMoon, 0.01);
+  sunDisk = (1. - 0.6*cnoise3(vec3(normalize(rayDir-sSun).xy * 6., 3.*snoise3(20.*vCameraDirection)))) * mix(sunDisk, 0.0, moonDisk);
   sunDisk *= smoothstep(0.999, 1.0, mu);
 
   return vec3(clamp(sunDisk, 0.0, I0));
 }
 
-vec3 scattering(
+vec4 scattering(
   vec3 rayOrigin,
   vec3 rayDir,
   // rayleigh xyz, mie w
@@ -242,20 +246,20 @@ vec3 scattering(
   float rayHeight = length(rayOrigin);
   // Ray starts inside the planet -> return 0
   if (rayHeight < planetRadius) {
-    return vec3(0.0, 0.0, 0.0);
+    return vec4(0.0);
   }
 
   vec2 inter = raySphereIntersection(rayOrigin, rayDir, atmosphereRadius);
   // Ray does not intersect the atmosphere (on the way forward) at all;
   if(!intersects2(inter)) {
-    return vec3(0.0, 0.0, 0.0);
+    return vec4(0.0);
   }
 
   vec2 path = raySphereIntersection(rayOrigin, rayDir, atmosphereRadius);
   // Ray does not intersect the atmosphere (on the way forward) at all;
   // exit early.
   if (path.x > path.y || path.y <= 0.0) {
-    return vec3(0.0);
+    return vec4(0.0);
   }
 
   // always start atmosphere ray at viewpoint if we start inside atmosphere
@@ -313,7 +317,7 @@ vec3 scattering(
     vec2 intAtmosphere2 = raySphereIntersection(pos, sSun, atmosphereRadius);
     vec3 exit = pos + intAtmosphere2.y * sSun;
 
-    float g = umbra(
+    float u = umbra(
       pos,
       sunAngularRadius,
       sunPosition,
@@ -325,7 +329,7 @@ vec3 scattering(
     // vec2 secondaryDepth = vec2(0.0);
     vec2 depth = primaryDepth + secondaryDepth;
     vec4 alpha = vec4(vec3(depth.x), depth.y) * scatteringCoefficients;
-    vec3 transmittance = earthShadow * g * exp(- alpha.xyz - alpha.w);
+    vec3 transmittance = earthShadow * u * exp(- alpha.xyz - alpha.w);
 
     rayleighT += transmittance * odStep.x;
     mieT += transmittance * odStep.y;
@@ -337,7 +341,7 @@ vec3 scattering(
   float mieP = phases.y;
 
   vec3 scatter = rayleighT * rayleighP * scatteringCoefficients.xyz + mieT * mieP * scatteringCoefficients.w;
-  return I0 * scatter;
+  return vec4(I0 * scatter, clamp((primaryDepth.y * mieCoefficient), 0.0, 1.0));
 }
 
 void main() {
@@ -348,7 +352,7 @@ void main() {
   float SunAngularRadius = asin(sunRadius / length(sunPosition - RayOrigin));
   float MoonAngularRadius = asin(moonRadius / length(moonPosition - RayOrigin));
 
-  vec3 color = scattering(
+  vec4 color = scattering(
     RayOrigin,
     RayDir,
     vec4(rayleighCoefficients, mieCoefficient),
@@ -367,7 +371,7 @@ void main() {
   vec2 intPlanet = raySphereIntersection(RayOrigin, RayDir, planetRadius);
   bool planet_intersected = intersects2(intPlanet);
   if (!planet_intersected){
-    color += sunMoon(
+    vec3 sm = sunMoon(
       RayDir,
       normalize(sunPosition - RayOrigin),
       SunAngularRadius,
@@ -375,6 +379,7 @@ void main() {
       MoonAngularRadius,
       sunIntensity
     );
+    color += vec4(sm, min(1.0, length(sm)));
   }
 
   // if (planet_intersected){
@@ -397,5 +402,5 @@ void main() {
   // Apply exposure.
   // color = 1.0 - exp(-exposure * color);
 
-  gl_FragColor = vec4(color, opacity);
+  gl_FragColor = color; //vec4(color, opacity);
 }
