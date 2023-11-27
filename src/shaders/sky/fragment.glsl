@@ -199,25 +199,30 @@ float noise(vec2 p) {
 
 #pragma glslify: snoise3 = require(glsl-noise/simplex/3d)
 #pragma glslify: cnoise3 = require(glsl-noise/classic/3d)
+#pragma glslify: cnoise2 = require(glsl-noise/classic/2d)
+
 
 vec3 sunMoon(vec3 rayDir, vec3 sSun, float sunAngularRadius, vec3 sMoon, float moonAngularRadius, float I0){
   float mu = dot(rayDir, sSun);
   if (mu < 0.999){
     return vec3(0.0);
   }
+  mu = max(mu, 0.99);
   // Color of the solar disk (that isn't blocked by the moon)
   float sunDisk = 0.0;
-  // sunDisk = smoothcircle(rayDir, sunAngularRadius, sSun, 0.01);
+  sunDisk = smoothcircle(rayDir, sunAngularRadius, sSun, 0.01);
 
-  float g = clampMix(0.99993, 0.999, (acos(dot(sSun, sMoon)) - 0.001) / 0.02);
+  float g = 0.9997; //clampMix(0.99993, 0.999, (acos(dot(sSun, sMoon)) - 0.001) / 0.02);
   float gg = g * g;
   float mumu = mu * mu;
   // sunDisk = (0.001) * THREE_OVER_8_PI * ((1.0 - gg) * (mumu + 1.0)) / (pow(1.0 + gg - 2.0 * mu * g, 1.5) * (2.0 + gg));
-  sunDisk = I0 * 0.000003 * (1. - gg) * (mumu + 1.0) / pow(1. + gg - 2. * mu * g, 1.5);
 
   float moonDisk = smoothcircle(rayDir, moonAngularRadius * 1.0, sMoon, 0.01);
-  sunDisk = (1. - 0.6*cnoise3(vec3(normalize(rayDir-sSun).xy * 6., 3.*snoise3(20.*vCameraDirection)))) * mix(sunDisk, 0.0, moonDisk);
-  sunDisk *= smoothstep(0.999, 1.0, mu);
+
+  sunDisk += I0 * 0.000003 * (1. - gg) * (mumu + 1.0) / pow(1. + gg - 2. * mu * g, 1.5);
+  sunDisk = mumu*(1. - 0.3*cnoise3(vec3(normalize(rayDir-sSun).xy * 6., 3.*snoise3(20.*vCameraDirection)))) * mix(sunDisk, 0.0, moonDisk);
+  // sunDisk *= smoothstep(0.9997 * (1. - 0.0008 * cnoise3(6.*normalize(rayDir - sSun))), 1.0, mu);
+  sunDisk = mix(0.0, sunDisk, mumu/5.);
 
   return vec3(clamp(sunDisk, 0.0, I0));
 }

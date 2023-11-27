@@ -308,8 +308,10 @@
     multisampling: 0
   })
 
-  const setupEffectComposer = (camera, { sun, sunlight, skyMesh }) => {
-    if (!camera || !sun || !sunlight) return
+  const setupEffectComposer = async (camera, { sun, sunlight, skyMesh }) => {
+    const stars = await Stars
+    if (!camera || !sun || !sunlight || !stars) return
+    // stars.layers.enable(11)
     // skyMesh.layers.enable(11)
     // sun.layers.enable(11)
     // corona.layers.enable(11)
@@ -322,9 +324,10 @@
     // composer.addPass(goodrays)
     const godrays = new GodRaysEffect(camera, sun, {
       resolutionScale: 1,
-      density: 0.95,
-      decay: 0.9,
-      weight: 0.2,
+      blendFunction: BlendFunction.ADD,
+      density: 0.85,
+      decay: 0.95,
+      weight: 0.8,
       exposure: 0.9,
       samples: 60,
       clampMax: 1
@@ -332,15 +335,16 @@
     godrays.dithering = true
 
     bloom = new SelectiveBloomEffect(scene, camera, {
-      intensity: 30,
-      luminanceThreshold: 0.,
-      luminanceSmoothing: 0.4,
-      blendFunction: BlendFunction.SCREEN,
-      radius: .9,
-      // levels: 10,
+      intensity: 10,
+      luminanceThreshold: 0.5,
+      luminanceSmoothing: .5,
+      blendFunction: BlendFunction.ADD,
+      radius: .9, //.99,
+      levels: 10, //40,
       mipmapBlur: true
     })
     bloom.dithering = true
+    // bloom.ignoreBackground = true
     // bloom.inverted = true
 
     // composer.addPass(goodrays)
@@ -348,7 +352,13 @@
     composer.addPass(
       new EffectPass(
         camera,
-        // bloom,
+        new SMAAEffect({
+          preset: SMAAPreset.HIGH,
+          edgeDetectionMode: EdgeDetectionMode.LUMA,
+          // edgeDetectionMode: EdgeDetectionMode.DEPTH,
+          blendFunction: BlendFunction.SCREEN
+        }),
+        bloom,
         // godrays,
         new ToneMappingEffect({
           // blendFunction: BlendFunction.NORMAL,
@@ -363,12 +373,6 @@
           minLuminance: 0.01,
           averageLuminance: .1,
           adaptationRate: 2
-        }),
-        new SMAAEffect({
-          preset: SMAAPreset.HIGH,
-          edgeDetectionMode: EdgeDetectionMode.LUMA,
-          // edgeDetectionMode: EdgeDetectionMode.DEPTH,
-          blendFunction: BlendFunction.SCREEN
         }),
       )
     )
@@ -448,7 +452,7 @@
   bind:ref={sun}
 >
   <T.SphereGeometry args={[sunRadius, 32, 32]} />
-  <T.MeshStandardMaterial emissive="#fdffde" bind:ref={sunMaterial} emissiveIntensity={Isol} />
+  <T.MeshStandardMaterial emissive="#fdffde" bind:ref={sunMaterial} emissiveIntensity={16} />
 </T.Mesh>
 
 <!-- Corona -->
