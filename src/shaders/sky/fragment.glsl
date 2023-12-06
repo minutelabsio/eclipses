@@ -296,6 +296,10 @@ float circleEdge(vec2 p, float r1, vec2 c2, float r2){
 
 const float bloomFactor = 8e-6;
 float sunMoonIntensity(vec3 rayDir, vec3 sSun, float sunAngularRadius, vec3 sMoon, float moonAngularRadius, float I0){
+  float mu = dot(rayDir, sSun);
+  if(mu < 0.9995) {
+    return 0.0;
+  }
   // screen space of ray and moon, sun is at origin
   vec2 moonxy = squash(sMoon, sSun);
   vec2 rayxy = squash(rayDir, sSun);
@@ -306,7 +310,7 @@ float sunMoonIntensity(vec3 rayDir, vec3 sSun, float sunAngularRadius, vec3 sMoo
   // TODO: should also account for thickness of segment for more bloom
 
   float bloom = min(1.0, bloomFactor / sqrt(distFromSunEdge));
-  return bloom * I0;
+  return step(0.001, bloom) * bloom * I0;
 }
 
 vec4 scattering(
