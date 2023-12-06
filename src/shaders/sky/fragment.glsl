@@ -1,6 +1,9 @@
 varying vec3 vWorldPosition;
 varying vec2 vUv;
 varying vec3 vCameraDirection;
+varying vec3 rayOrigin;
+varying float SunAngularRadius;
+varying float MoonAngularRadius;
 
 uniform sampler2D opticalDepthMap;
 uniform float opticalDepthMapSize;
@@ -61,12 +64,10 @@ vec2 opticalDepths(vec3 start, vec3 end, vec2 scaleHeights, float planetRadius, 
   vec2 od = vec2(0.0);
   float fsteps = float(steps);
   float d = length(end - start);
-  float ds = max(MIN_STEP_SIZE, d / fsteps);
-  fsteps = ceil(length(end - start) / ds);
-  int isteps = int(fsteps);
-  ds = d / fsteps;
-  for(int i = 0; i < isteps; i++) {
-    float t = (float(i) + 0.5) / fsteps;
+  float ds = d / fsteps;
+  float invFsteps = 1.0 / fsteps;
+  float halfstep = 0.5 / fsteps;
+  for(float t = 0.5 / fsteps; t < 1.0; t += invFsteps) {
     vec3 p = mix(start, end, t);
     od += opticalDensity(length(p), scaleHeights, planetRadius) * ds;
   }
@@ -141,12 +142,10 @@ float twoCircleIntersection(float r1, float r2, float d) {
 }
 
 // amount of the sun that is unobstructed by the moon
-float umbra(vec3 ri, float thetaSun, vec3 pSun, float thetaMoon, vec3 pMoon) {
+float umbra(vec3 ri, float rSun, vec3 pSun, float rMoon, vec3 pMoon) {
   vec3 sSun = normalize(pSun - ri);
   vec3 sMoon = normalize(pMoon - ri);
   float d = length(sSun - sMoon);
-  float rSun = tan(thetaSun);
-  float rMoon = tan(thetaMoon);
   float area = twoCircleIntersection(rSun, rMoon, d);
   float totalArea = PI * rSun * rSun;
   return max(1e-6, 1.0 - area / totalArea);
@@ -334,11 +333,14 @@ vec4 scattering(
   float atmosphereRadius,
   ivec2 steps
 ){
-  float rayHeight = length(rayOrigin);
-  // Ray starts inside the planet -> return 0
-  if (rayHeight < planetRadius) {
-    return vec4(0.0);
-  }
+  // float rayHeight = length(rayOrigin);
+  // // Ray starts inside the planet -> return 0
+  // if (rayHeight < planetRadius) {
+  //   return vec4(0.0);
+  // }
+
+  float rApparentSun = tan(SunAngularRadius);
+  float rApparentMoon = tan(moonAngularRadius);
 
   vec2 inter = raySphereIntersection(rayOrigin, rayDir, atmosphereRadius);
   // Ray does not intersect the atmosphere (on the way forward) at all;
@@ -369,15 +371,15 @@ vec4 scattering(
   vec3 sSun = normalize(sunPosition - start);
 
   // if the start point and end point is in shadow just return black
-  vec2 startInt = raySphereIntersection(start, sSun, planetRadius);
-  vec2 endInt = raySphereIntersection(end, sSun, planetRadius);
-  if(
-    startInt.x < startInt.y &&
-    startInt.y > 0.0 &&
-    endInt.x < endInt.y &&
-    endInt.y > 0.0) {
-    // return vec3(0.0);
-  }
+  // vec2 startInt = raySphereIntersection(start, sSun, planetRadius);
+  // vec2 endInt = raySphereIntersection(end, sSun, planetRadius);
+  // if(
+  //   startInt.x < startInt.y &&
+  //   startInt.y > 0.0 &&
+  //   endInt.x < endInt.y &&
+  //   endInt.y > 0.0) {
+  //   // return vec3(0.0);
+  // }
 
   float fsteps = float(steps.x);
   float d = (path.y - path.x);
@@ -393,7 +395,6 @@ vec4 scattering(
     vec3 pos = mix(start, end, t);
     vec2 odStep = opticalDensity(length(pos), scaleHeights, planetRadius) * ds;
     primaryDepth += odStep;
-
     vec2 intPlanet2 = raySphereIntersection(pos, sSun, planetRadius);
     // if the ray intersects the planet, no light comes this way
     if(intPlanet2.x < intPlanet2.y && intPlanet2.x >= 0.0) {
@@ -410,9 +411,9 @@ vec4 scattering(
 
     float u = umbra(
       pos,
-      sunAngularRadius,
+      rApparentSun,
       sunPosition,
-      moonAngularRadius,
+      rApparentMoon,
       moonPosition
     );
     vec2 secondaryDepth = opticalDepths(pos, exit, scaleHeights, planetRadius, steps.y);
@@ -436,16 +437,18 @@ vec4 scattering(
 }
 
 void main() {
-  vec3 RayOrigin = vec3(0, planetRadius + altitude + 1.0, 0);
-  vec3 RayDir = normalize(vWorldPosition);
+  vec3 rayDir = normalize(vWorldPosition);
+  vec2 intPlanet = raySphereIntersection(rayOrigin, rayDir, planetRadius);
 
-  // angular radii of sun and moon change very little
-  float SunAngularRadius = asin(sunRadius / length(sunPosition - RayOrigin));
-  float MoonAngularRadius = asin(moonRadius / length(moonPosition - RayOrigin));
+  bool planet_intersected = intersects2(intPlanet);
+  if(planet_intersected && intPlanet.x > 0. && intPlanet.x < 1000.) {
+    gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+    return;
+  }
 
   vec4 color = scattering(
-    RayOrigin,
-    RayDir,
+    rayOrigin,
+    rayDir,
     vec4(rayleighCoefficients, mieCoefficient),
     vec2(rayleighScaleHeight, mieScaleHeight),
     mieDirectional,
@@ -459,14 +462,12 @@ void main() {
     ivec2(iSteps, jSteps)
   );
 
-  vec2 intPlanet = raySphereIntersection(RayOrigin, RayDir, planetRadius);
-  bool planet_intersected = intersects2(intPlanet);
   if (!planet_intersected){
     float sm = sunMoonIntensity(
-      RayDir,
-      normalize(sunPosition - RayOrigin),
+      rayDir,
+      normalize(sunPosition - rayOrigin),
       SunAngularRadius,
-      normalize(moonPosition - RayOrigin),
+      normalize(moonPosition - rayOrigin),
       MoonAngularRadius,
       sunIntensity
     );
@@ -481,7 +482,7 @@ void main() {
 
   // vec2 p = phases(
   //   RayOrigin,
-  //   RayDir,
+  //   rayDir,
   //   sunPosition,
   //   mieDirectional
   // );
