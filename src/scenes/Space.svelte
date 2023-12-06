@@ -335,7 +335,7 @@
     godrays.dithering = true
 
     bloom = new SelectiveBloomEffect(scene, camera, {
-      intensity: 10,
+      intensity: 1,
       luminanceThreshold: 0.5,
       luminanceSmoothing: .5,
       blendFunction: BlendFunction.ADD,

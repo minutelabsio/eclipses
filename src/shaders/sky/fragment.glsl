@@ -227,6 +227,88 @@ vec3 sunMoon(vec3 rayDir, vec3 sSun, float sunAngularRadius, vec3 sMoon, float m
   return vec3(clamp(sunDisk, 0.0, I0));
 }
 
+float screenDist(vec3 a, vec3 b){
+  return 1. / dot(a, b);
+}
+
+// get the 2d point on the screen that a ray intersects
+vec2 squash(vec3 p, vec3 n){
+  vec3 yaxis = vec3(0.0, 1.0, 0.0);
+  vec3 up = normalize(yaxis - dot(yaxis, n) * n);
+  vec3 right = normalize(cross(up, n));
+  return vec2(dot(p, right), dot(p, up));
+}
+
+vec4 circleCircleChord(float r1, vec2 c2, float r2){
+  float d2 = dot(c2, c2);
+  float r1r2 = r1 + r2;
+  if (d2 > r1r2 * r1r2){
+    return vec4(1e18);
+  }
+  float r12 = r1 * r1;
+  float r22 = r2 * r2;
+  float phi = (d2 - r22 + r12);
+  float d = sqrt(d2);
+  float x = phi / (2. * d);
+  float disc = 4. * d2 * r12 - phi * phi;
+  if (disc < 0.0){
+    return vec4(1e18);
+  }
+  float y = sqrt(disc) / (2. * d);
+  vec2 b = normalize(c2);
+  vec2 mid = b * x;
+  vec2 perp = vec2(-b.y, b.x) * y;
+  return vec4(mid + perp, mid - perp);
+}
+
+vec2 nearestEdgePoint(vec2 p, vec2 c, float r){
+  vec2 d = p - c;
+  float l = length(d);
+  return c + d * (r / l);
+}
+
+// distance of point from edge of a clipped region of a circle, clipped by another circle
+float circleEdge(vec2 p, float r1, vec2 c2, float r2){
+  // check both edges
+  vec2 e1 = nearestEdgePoint(p, vec2(0.0), r1);
+  vec2 e2 = nearestEdgePoint(p, c2, r2);
+
+  float e1d = distance(e1, p);
+  float e2d = distance(e2, p);
+
+  // if edge 1 is outside the second circle, and closer return distance to edge 1
+  if (length(e1 - c2) > r2 && e1d < e2d){
+    return length(p) - r1;
+  }
+
+  float de2 = r2 - length(p - c2);
+  // if edge 2 is inside first circle, and closer return distance to edge 2
+  if(length(e2) < r1 && e2d < e1d) {
+    return de2;
+  }
+
+  // otherwise we return the distance to the nearest chord vertex
+  vec4 chord = circleCircleChord(r1, c2, r2);
+  float d1 = distance(p, chord.xy);
+  float d2 = distance(p, chord.zw);
+  return min(d1, d2);
+}
+
+const float bloomFactor = 8e-6;
+float sunMoonIntensity(vec3 rayDir, vec3 sSun, float sunAngularRadius, vec3 sMoon, float moonAngularRadius, float I0){
+  // screen space of ray and moon, sun is at origin
+  vec2 moonxy = squash(sMoon, sSun);
+  vec2 rayxy = squash(rayDir, sSun);
+
+  float distFromSunEdge = circleEdge(rayxy, sunAngularRadius, moonxy, moonAngularRadius);
+  distFromSunEdge = max(0.0, distFromSunEdge);
+
+  // TODO: should also account for thickness of segment for more bloom
+
+  float bloom = min(1.0, bloomFactor / distFromSunEdge);
+  return bloom * I0;
+}
+
 vec4 scattering(
   vec3 rayOrigin,
   vec3 rayDir,
@@ -376,7 +458,7 @@ void main() {
   vec2 intPlanet = raySphereIntersection(RayOrigin, RayDir, planetRadius);
   bool planet_intersected = intersects2(intPlanet);
   if (!planet_intersected){
-    vec3 sm = sunMoon(
+    float sm = sunMoonIntensity(
       RayDir,
       normalize(sunPosition - RayOrigin),
       SunAngularRadius,
@@ -384,7 +466,8 @@ void main() {
       MoonAngularRadius,
       sunIntensity
     );
-    color += vec4(sm, min(1.0, length(sm)));
+    color += vec4(sm, sm, sm, 1.0);
+    // color += vec4(sm, min(1.0, length(sm)));
   }
 
   // if (planet_intersected){
