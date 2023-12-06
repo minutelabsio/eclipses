@@ -66,9 +66,10 @@ vec2 opticalDepths(vec3 start, vec3 end, vec2 scaleHeights, float planetRadius, 
   float d = length(end - start);
   float ds = d / fsteps;
   float invFsteps = 1.0 / fsteps;
-  float halfstep = 0.5 / fsteps;
-  for(float t = 0.5 / fsteps; t < 1.0; t += invFsteps) {
-    vec3 p = mix(start, end, t);
+  float halfstep = 0.5 * invFsteps;
+  vec3 p;
+  for(float t = halfstep; t < 1.0; t += invFsteps) {
+    p = mix(start, end, t);
     od += opticalDensity(length(p), scaleHeights, planetRadius) * ds;
   }
   return od;
