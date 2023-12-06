@@ -1,5 +1,5 @@
 <script>
-  import { useThrelte, useRender, useFrame } from '@threlte/core'
+  import { useThrelte, useTask, useFrame } from '@threlte/core'
   import { Easing, Tween } from 'intween'
   import { OrbitControls, Grid } from '@threlte/extras'
   import Stats from '../components/Stats.svelte'
@@ -32,7 +32,7 @@
   import Earth from '../entities/Earth.svelte'
   import { onMount } from 'svelte'
 
-  const { scene, renderer, camera, size } = useThrelte()
+  const { scene, renderer, camera, size, autoRender, renderStage } = useThrelte()
 
   const skyPosition = (distance, elevation, declination, into = []) => {
     const p = [
@@ -228,8 +228,12 @@
       }
     })
 
+    let auto = autoRender.current
+    autoRender.set(false)
+
     return () => {
       appSettings.destroy()
+      autoRender.set(auto)
     }
   })
 
@@ -308,44 +312,24 @@
     multisampling: 0
   })
 
-  const setupEffectComposer = async (camera, { sun, sunlight, skyMesh }) => {
-    const stars = await Stars
-    if (!camera || !sun || !sunlight || !stars) return
-    // stars.layers.enable(11)
-    // skyMesh.layers.enable(11)
-    // sun.layers.enable(11)
-    // corona.layers.enable(11)
+  const setupEffectComposer = async (camera) => {
+    if (!camera) return
     composer.removeAllPasses()
     const renderpass = new RenderPass(scene, camera)
-    renderpass.renderToScreen = false
     composer.addPass(renderpass)
-    // const goodrays = new GodraysPass(sunlight, camera)
-    // goodrays.renderToScreen = false
-    // composer.addPass(goodrays)
-    const godrays = new GodRaysEffect(camera, sun, {
-      resolutionScale: 1,
-      blendFunction: BlendFunction.ADD,
-      density: 0.85,
-      decay: 0.95,
-      weight: 0.8,
-      exposure: 0.9,
-      samples: 60,
-      clampMax: 1
-    })
-    godrays.dithering = true
 
     bloom = new SelectiveBloomEffect(scene, camera, {
       intensity: 1,
-      luminanceThreshold: 0.5,
-      luminanceSmoothing: .5,
+      luminanceThreshold: 0.9, //0.5,
+      luminanceSmoothing: 0.,
       blendFunction: BlendFunction.ADD,
-      radius: .9, //.99,
+      radius: .8, //.99,
       levels: 10, //40,
       mipmapBlur: true
     })
     bloom.dithering = true
     // bloom.ignoreBackground = true
-    // bloom.inverted = true
+    bloom.inverted = true
 
     // composer.addPass(goodrays)
 
@@ -359,7 +343,6 @@
           blendFunction: BlendFunction.SCREEN
         }),
         bloom,
-        // godrays,
         new ToneMappingEffect({
           // blendFunction: BlendFunction.NORMAL,
           // mode: ToneMappingMode.ACES_FILMIC,
@@ -378,11 +361,11 @@
     )
   }
   // We need to set up the passes according to the camera in use
+  $: setupEffectComposer($camera)
   $: composer.setSize($size.width, $size.height)
-  $: setupEffectComposer($camera, { sun, sunlight, skyMesh })
-  useRender((_, delta) => {
+  useTask((delta) => {
     composer.render(delta)
-  })
+  }, { stage: renderStage, autoInvalidate: false })
 </script>
 
 <Stats />
@@ -436,15 +419,8 @@
 <!-- Sun -->
 <T.PointLight
   position={sunPosition}
-  intensity={5e14 * sunIntensity}
+  intensity={4e14 * sunIntensity}
   color="white"
-  bind:ref={sunlight}
-  shadow.camera.near={0.8 * sunDistance}
-  shadow.camera.far={1.2 * sunDistance}
-  shadow.mapSize.width={1024}
-  shadow.mapSize.height={1024}
-  shadow.autoUpdate={true}
-  castShadow
 />
 <T.Mesh
   visible={false}
@@ -456,7 +432,7 @@
 </T.Mesh>
 
 <!-- Corona -->
-<T.Mesh
+<!-- <T.Mesh
   visible={false}
   position={[sunPosition[0], sunPosition[1], sunPosition[2]]}
   rotation.y={Math.PI}
@@ -465,7 +441,7 @@
 >
   <T.PlaneGeometry args={[4.4, 4.32]} />
   <T is={Corona}/>
-</T.Mesh>
+</T.Mesh> -->
 
 <!-- moon -->
 <T.Mesh
@@ -474,7 +450,6 @@
   position={moonPosition.toArray()}
   rotation={[180 * DEG, 0, 0]}
   castShadow
-  receiveShadow
 >
   <!-- <T.SphereGeometry args={[moonRadius, 32, 32]} /> -->
   <T.IcosahedronGeometry args={[moonRadius, 32]} />
