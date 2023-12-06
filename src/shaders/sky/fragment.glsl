@@ -305,7 +305,7 @@ float sunMoonIntensity(vec3 rayDir, vec3 sSun, float sunAngularRadius, vec3 sMoo
 
   // TODO: should also account for thickness of segment for more bloom
 
-  float bloom = min(1.0, bloomFactor / distFromSunEdge);
+  float bloom = min(1.0, bloomFactor / sqrt(distFromSunEdge));
   return bloom * I0;
 }
 
