@@ -377,16 +377,18 @@
   position={[0, 50, 0]}
 /> -->
 {#await Stars then Stars}
-<T is={Stars} />
+<T is={Stars}/>
 {/await}
 
 <T.Mesh
   bind:ref={skyMesh}
   scale={[AU, AU, AU]}
+  renderOrder={1}
 >
   <T.IcosahedronGeometry args={[1, 16]} />
   <T is={Sky.shader} />
 </T.Mesh>
+
 
 <T.PerspectiveCamera
   position.z={-2}

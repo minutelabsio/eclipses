@@ -45,7 +45,6 @@ export default () => {
     blendDst: THREE.OneMinusSrcAlphaFactor,
     // dithering: true,
     side: THREE.BackSide,
-    transparent: true,
     depthTest: false,
   })
   shader.toneMapped = false

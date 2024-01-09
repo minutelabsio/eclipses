@@ -41,7 +41,6 @@ export default async function createStars(){
   const starsMaterial = new THREE.ShaderMaterial({
     vertexShader: vertexShader(),
     fragmentShader: fragmentShader(),
-    transparent: true,
   })
 
   starsMaterial.uniforms.exposure = { value: 1.0 }
