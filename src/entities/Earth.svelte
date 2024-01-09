@@ -17,10 +17,6 @@ const textures = useLoader(TextureLoader).load({
 
 {#if $textures}
 <T.LOD let:ref={lod}>
-  <T.Mesh position={position} on:create={({ ref }) => lod.addLevel(ref, 0)}>
-    <T.PlaneGeometry/>
-    <T.MeshBasicMaterial transparent opacity={0}/>
-  </T.Mesh>
   <T.Mesh
     position={position}
     rotation={[Math.PI / 2, 0, -Math.PI / 2]}
@@ -40,5 +36,4 @@ const textures = useLoader(TextureLoader).load({
     />
   </T.Mesh>
 </T.LOD>
-
 {/if}
