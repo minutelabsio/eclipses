@@ -10,6 +10,7 @@ uniform float opticalDepthMapSize;
 uniform float altitude;
 uniform float sunRadius;
 uniform float moonRadius;
+uniform vec3 planetColor;
 
 uniform float opacity;
 uniform vec3 moonPosition;
@@ -452,14 +453,21 @@ vec4 scattering(
   return vec4(I0 * scatter + sunDiskColor, clamp((primaryDepth.y * mieCoefficient), 0.0, 1.0));
 }
 
+float remap(float value, float low1, float high1, float low2, float high2) {
+  return clamp(low2 + (value - low1) * (high2 - low2) / (high1 - low1), low2, high2);
+}
+
 void main() {
   vec3 rayDir = normalize(vWorldPosition);
   vec2 intPlanet = raySphereIntersection(rayOrigin, rayDir, planetRadius);
 
+  // if the ray intersects the planet, return planet color
   bool planet_intersected = intersects2(intPlanet);
-  if(planet_intersected && intPlanet.x > 0. && intPlanet.x < 1000.) {
-    gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
-    return;
+  if (altitude < 2000.){
+    if(planet_intersected) {
+      gl_FragColor = vec4(planetColor, 1.);
+      return;
+    }
   }
 
   vec4 color = scattering(
@@ -477,6 +485,12 @@ void main() {
     planetRadius + atmosphereThickness,
     ivec2(iSteps, jSteps)
   );
+
+  // as we get closer to the planet, the atmosphere should get darker
+  if (planet_intersected){
+    float k = remap(altitude, 2000., 4000., 0., 1.);
+    color = mix(vec4(planetColor, 1.), color, k);
+  }
 
   // if (!planet_intersected){
   //   float sm = sunMoonIntensity(
