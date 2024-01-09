@@ -343,17 +343,26 @@ vec4 scattering(
   float rApparentSun = tan(SunAngularRadius);
   float rApparentMoon = tan(moonAngularRadius);
 
-  vec2 inter = raySphereIntersection(rayOrigin, rayDir, atmosphereRadius);
-  // Ray does not intersect the atmosphere (on the way forward) at all;
-  if(!intersects2(inter)) {
-    return vec4(0.0);
-  }
+  float sunDisk = sunMoonIntensity(
+    rayDir,
+    normalize(sunPosition - rayOrigin),
+    SunAngularRadius,
+    normalize(moonPosition - rayOrigin),
+    MoonAngularRadius,
+    sunIntensity
+  );
+
+  // vec2 inter = raySphereIntersection(rayOrigin, rayDir, atmosphereRadius);
+  // // Ray does not intersect the atmosphere (on the way forward) at all;
+  // if(!intersects2(inter)) {
+  //   return vec4(0.0);
+  // }
 
   vec2 path = raySphereIntersection(rayOrigin, rayDir, atmosphereRadius);
   // Ray does not intersect the atmosphere (on the way forward) at all;
   // exit early.
-  if (path.x > path.y || path.y <= 0.0) {
-    return vec4(0.0);
+  if (!intersects2(path)) {
+    return vec4(vec3(sunDisk), 0.0);
   }
 
   // always start atmosphere ray at viewpoint if we start inside atmosphere
@@ -365,6 +374,8 @@ vec4 scattering(
   vec2 intPlanet = raySphereIntersection(rayOrigin, rayDir, planetRadius);
   bool planet_intersected = intersects1(intPlanet);
   path.y = planet_intersected ? intPlanet.x : path.y;
+
+  sunDisk = planet_intersected ? 0.0 : sunDisk;
 
   vec3 start = rayOrigin + rayDir * path.x;
   vec3 end = rayOrigin + rayDir * path.y;
@@ -433,8 +444,12 @@ vec4 scattering(
   float rayleighP = phases.x;
   float mieP = phases.y;
 
+  vec4 alpha = vec4(vec3(primaryDepth.x), primaryDepth.y) * scatteringCoefficients;
+  vec3 transmittance = exp(-alpha.xyz - alpha.w);
+  vec3 sunDiskColor = sunDisk * transmittance;
+
   vec3 scatter = rayleighT * rayleighP * scatteringCoefficients.xyz + mieT * mieP * scatteringCoefficients.w;
-  return vec4(I0 * scatter, clamp((primaryDepth.y * mieCoefficient), 0.0, 1.0));
+  return vec4(I0 * scatter + sunDiskColor, clamp((primaryDepth.y * mieCoefficient), 0.0, 1.0));
 }
 
 void main() {
@@ -463,18 +478,18 @@ void main() {
     ivec2(iSteps, jSteps)
   );
 
-  if (!planet_intersected){
-    float sm = sunMoonIntensity(
-      rayDir,
-      normalize(sunPosition - rayOrigin),
-      SunAngularRadius,
-      normalize(moonPosition - rayOrigin),
-      MoonAngularRadius,
-      sunIntensity
-    );
-    color += vec4(sm, sm, sm, 1.0);
-    // color += vec4(sm, min(1.0, length(sm)));
-  }
+  // if (!planet_intersected){
+  //   float sm = sunMoonIntensity(
+  //     rayDir,
+  //     normalize(sunPosition - rayOrigin),
+  //     SunAngularRadius,
+  //     normalize(moonPosition - rayOrigin),
+  //     MoonAngularRadius,
+  //     sunIntensity
+  //   );
+  //   color += vec4(sm, sm, sm, 1.0);
+  //   // color += vec4(sm, min(1.0, length(sm)));
+  // }
 
   // if (planet_intersected){
   //   gl_FragColor = vec4(0.0, 0.0, 0.0, opacity);
