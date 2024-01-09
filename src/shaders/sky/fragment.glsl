@@ -64,14 +64,15 @@ float shellRadius(int index, int steps, float H, float atmosphereThickness, floa
 vec2 opticalDepths(vec3 start, vec3 end, vec2 scaleHeights, float planetRadius, int steps) {
   vec2 od = vec2(0.0);
   float fsteps = float(steps);
-  float d = length(end - start);
+  vec3 r = end - start;
+  float d = length(r);
+  r /= d;
   float ds = d / fsteps;
-  float invFsteps = 1.0 / fsteps;
-  float halfstep = 0.5 * invFsteps;
-  vec3 p;
-  for(float t = halfstep; t < 1.0; t += invFsteps) {
-    p = mix(start, end, t);
-    od += opticalDensity(length(p), scaleHeights, planetRadius) * ds;
+  vec3 dr = ds * r;
+  vec3 pos = start - 0.5 * dr;
+  for(int i = 0; i < steps; i++) {
+    pos += dr;
+    od += opticalDensity(length(pos), scaleHeights, planetRadius) * ds;
   }
   return od;
 }
@@ -140,7 +141,6 @@ float twoCircleIntersection(float r1, float r2, float d) {
   float twod2 = 2.0 * d2;
   float area = dot(rs2, acos(vec2(d2 + r12mr22, d2 - r12mr22) / (twod * rs))) - 0.5 * sqrt(dot(vec4(-r12mr22, twod2, twod2, -d2), vec4(r12mr22, rs2, d2)));
   return area;
-  return 0.;
 }
 
 // amount of the sun that is unobstructed by the moon
@@ -403,9 +403,11 @@ vec4 scattering(
   // begin calculating transmittance via optical depth accumulation
   vec2 primaryDepth = vec2(0.0);
 
+  vec3 dr = rayDir * ds;
+  vec3 pos = start - 0.5 * dr;
+
   for (int i = 0; i < steps.x; i++){
-    float t = (float(i) + 0.5) / fsteps;
-    vec3 pos = mix(start, end, t);
+    pos += dr;
     vec2 odStep = opticalDensity(length(pos), scaleHeights, planetRadius) * ds;
     primaryDepth += odStep;
     vec2 intPlanet2 = raySphereIntersection(pos, sSun, planetRadius);
@@ -417,7 +419,7 @@ vec4 scattering(
     }
 
     // float approachDepth = closestApproachDepth(pos, sSun, planetRadius);
-    float earthShadow = 1.0; //clampMix(1.0, 0.0, approachDepth / ds);
+    // float earthShadow = 1.0; //clampMix(1.0, 0.0, approachDepth / ds);
 
     vec2 intAtmosphere2 = raySphereIntersection(pos, sSun, atmosphereRadius);
     vec3 exit = pos + intAtmosphere2.y * sSun;
@@ -434,22 +436,22 @@ vec4 scattering(
     // vec2 secondaryDepth = vec2(0.0);
     vec2 depth = primaryDepth + secondaryDepth;
     vec4 alpha = vec4(vec3(depth.x), depth.y) * scatteringCoefficients;
-    vec3 transmittance = earthShadow * u * exp(- alpha.xyz - alpha.w);
+    vec3 transmittance = exp(- alpha.xyz - alpha.w);
+    vec3 scatter = u * transmittance;
 
-    rayleighT += transmittance * odStep.x;
-    mieT += transmittance * odStep.y;
+    rayleighT += scatter * odStep.x;
+    mieT += scatter * odStep.y;
   }
 
   // phases
   vec2 phases = getPhases(rayDir, sSun, g);
-  float rayleighP = phases.x;
-  float mieP = phases.y;
 
+  // scatter direct light from the sundisk
   vec4 alpha = vec4(vec3(primaryDepth.x), primaryDepth.y) * scatteringCoefficients;
   vec3 transmittance = exp(-alpha.xyz - alpha.w);
   vec3 sunDiskColor = sunDisk * transmittance;
 
-  vec3 scatter = rayleighT * rayleighP * scatteringCoefficients.xyz + mieT * mieP * scatteringCoefficients.w;
+  vec3 scatter = rayleighT * phases.x * scatteringCoefficients.xyz + mieT * phases.y * scatteringCoefficients.w;
   return vec4(I0 * scatter + sunDiskColor, clamp((primaryDepth.y * mieCoefficient), 0.0, 1.0));
 }
 
