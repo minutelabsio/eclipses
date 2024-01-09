@@ -418,19 +418,17 @@ vec4 scattering(
       // earthShadow = 0.01;
     }
 
+    float u = umbra(pos, rApparentSun, sunPosition, rApparentMoon, moonPosition);
+
+    if (u < 1e-2){
+      continue;
+    }
     // float approachDepth = closestApproachDepth(pos, sSun, planetRadius);
     // float earthShadow = 1.0; //clampMix(1.0, 0.0, approachDepth / ds);
 
     vec2 intAtmosphere2 = raySphereIntersection(pos, sSun, atmosphereRadius);
     vec3 exit = pos + intAtmosphere2.y * sSun;
 
-    float u = umbra(
-      pos,
-      rApparentSun,
-      sunPosition,
-      rApparentMoon,
-      moonPosition
-    );
     vec2 secondaryDepth = opticalDepths(pos, exit, scaleHeights, planetRadius, steps.y);
     // vec2 secondaryDepth = getOpticalDepths(pos, normalize(exit - pos), scaleHeights, planetRadius, atmosphereRadius);
     // vec2 secondaryDepth = vec2(0.0);
