@@ -133,14 +133,14 @@ float twoCircleIntersection(float r1, float r2, float d) {
     return PI * r * r;
   }
   float d2 = d * d;
-  float r12 = r1 * r1;
-  float r22 = r2 * r2;
-  float r12mr22 = r12 - r22;
+  vec2 rs = vec2(r1, r2);
+  vec2 rs2 = rs * rs;
+  float r12mr22 = dot(rs2, vec2(1., -1.));
   float twod = 2.0 * d;
   float twod2 = 2.0 * d2;
-  vec2 r1r2 = vec2(r1, r2);
-  float area = dot(r1r2 * r1r2, acos(vec2(d2 + r12mr22, d2 - r12mr22) / (twod * r1r2))) - 0.5 * sqrt(dot(vec4(-r12mr22, twod2, twod2, -d2), vec4(r12mr22, r12, r22, d2)));
+  float area = dot(rs2, acos(vec2(d2 + r12mr22, d2 - r12mr22) / (twod * rs))) - 0.5 * sqrt(dot(vec4(-r12mr22, twod2, twod2, -d2), vec4(r12mr22, rs2, d2)));
   return area;
+  return 0.;
 }
 
 // amount of the sun that is unobstructed by the moon
@@ -491,39 +491,6 @@ void main() {
     float k = remap(altitude, 2000., 4000., 0., 1.);
     color = mix(vec4(planetColor, 1.), color, k);
   }
-
-  // if (!planet_intersected){
-  //   float sm = sunMoonIntensity(
-  //     rayDir,
-  //     normalize(sunPosition - rayOrigin),
-  //     SunAngularRadius,
-  //     normalize(moonPosition - rayOrigin),
-  //     MoonAngularRadius,
-  //     sunIntensity
-  //   );
-  //   color += vec4(sm, sm, sm, 1.0);
-  //   // color += vec4(sm, min(1.0, length(sm)));
-  // }
-
-  // if (planet_intersected){
-  //   gl_FragColor = vec4(0.0, 0.0, 0.0, opacity);
-  //   return;
-  // }
-
-  // vec2 p = phases(
-  //   RayOrigin,
-  //   rayDir,
-  //   sunPosition,
-  //   mieDirectional
-  // );
-
-  // vec3 scatter = vRayleighT * p[0] + vMieT * p[1];
-  // vec3 color = sunIntensity * scatter;
-
-  // apply gamma correction
-  // color = 0.4 * pow(color, vec3(1.0 / 1.2));
-  // Apply exposure.
-  // color = 1.0 - exp(-exposure * color);
 
   // Dithering by hornet: https://www.shadertoy.com/view/MslGR8
   float dither_bit = 8.0;
