@@ -72,8 +72,8 @@ export default () => {
     mieScaleHeight: 500,
     mieDirectional: -0.758,
     exposure: 1.0,
-    iSteps: 10,
-    jSteps: 4,
+    iSteps: 6,
+    jSteps: 5,
   }
 
   const api = { shader }

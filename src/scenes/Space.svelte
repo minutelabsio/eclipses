@@ -320,7 +320,7 @@
 
     bloom = new SelectiveBloomEffect(scene, camera, {
       intensity: 1,
-      luminanceThreshold: 0.9, //0.5,
+      luminanceThreshold: 10, //0.5,
       luminanceSmoothing: 0.,
       blendFunction: BlendFunction.ADD,
       radius: .8, //.99,
@@ -352,7 +352,7 @@
           // resolution: 256,
           // middleGrey: 0.6,
           resolution: 512,
-          whitePoint: 4,
+          whitePoint: 15,
           minLuminance: 0.01,
           averageLuminance: .1,
           adaptationRate: 2

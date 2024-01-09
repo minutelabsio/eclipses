@@ -496,5 +496,12 @@ void main() {
   // Apply exposure.
   // color = 1.0 - exp(-exposure * color);
 
-  gl_FragColor = color; //vec4(color, opacity);
+  // Dithering by hornet: https://www.shadertoy.com/view/MslGR8
+  float dither_bit = 8.0;
+  float grid_position = fract(dot(gl_FragCoord.xy - vec2(0.5, 0.5), vec2(1.0 / 16.0, 10.0 / 36.0) + 0.25));
+  float dither_shift = (0.25) * (1.0 / (pow(2.0, dither_bit) - 1.0));
+  vec3 dither_shift_RGB = vec3(dither_shift, -dither_shift, dither_shift); //subpixel dithering
+  dither_shift_RGB = mix(2.0 * dither_shift_RGB, -2.0 * dither_shift_RGB, grid_position);
+
+  gl_FragColor = vec4(color.rgb + dither_shift_RGB, color.a); //vec4(color, opacity);
 }
