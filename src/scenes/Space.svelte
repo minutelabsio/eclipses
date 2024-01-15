@@ -385,7 +385,7 @@
   scale={[AU, AU, AU]}
   renderOrder={1}
 >
-  <T.IcosahedronGeometry args={[1, 16]} />
+  <T.IcosahedronGeometry args={[1, 32]} />
   <T is={Sky.shader} />
 </T.Mesh>
 
