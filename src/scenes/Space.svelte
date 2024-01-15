@@ -1,9 +1,7 @@
 <script>
   import { useThrelte, useTask, useFrame } from '@threlte/core'
   import { Easing, Tween } from 'intween'
-  import { OrbitControls, Grid } from '@threlte/extras'
   import Stats from '../components/Stats.svelte'
-  import { scalePow } from 'd3-scale'
   import { T } from '@threlte/core'
   import * as THREE from 'three'
   import GUI from 'lil-gui'
@@ -15,15 +13,10 @@
     SMAAEffect,
     SMAAPreset,
     SelectiveBloomEffect,
-    GodRaysEffect,
-    KernelSize,
     EdgeDetectionMode,
-    PredicationMode,
-    BlendMode,
     BlendFunction,
     ToneMappingEffect,
     ToneMappingMode,
-    ColorAverageEffect,
   } from 'postprocessing'
   import { CameraRig, FreeMovementControls } from 'three-story-controls'
   import createCorona from '../shaders/corona/Corona'
@@ -52,7 +45,6 @@
   let sun
   let moon
   let corona
-  let bloom
   let skyMesh
   let rig
   let controls
@@ -158,13 +150,6 @@
   }
 
   $: Sky.atmosphereThickness = atmosphereThickness
-  // $: {
-  //   Sky.exposure = exposure
-  //   if (starsPoints){
-  //     starsPoints.material.uniforms.exposure.value = exposure
-  //     starsPoints.material.uniforms.exposure.needsUpdate = true
-  //   }
-  // }
   $: renderer.toneMappingExposure = exposure
 
   const apparentSize = (r, d) => {
@@ -318,7 +303,7 @@
     const renderpass = new RenderPass(scene, camera)
     composer.addPass(renderpass)
 
-    bloom = new SelectiveBloomEffect(scene, camera, {
+    const bloom = new SelectiveBloomEffect(scene, camera, {
       intensity: 1,
       luminanceThreshold: 1.2, //0.5,
       luminanceSmoothing: 0.7,
@@ -328,10 +313,7 @@
       mipmapBlur: true
     })
     bloom.dithering = true
-    // bloom.ignoreBackground = true
     bloom.inverted = true
-
-    // composer.addPass(goodrays)
 
     composer.addPass(
       new EffectPass(
@@ -370,7 +352,7 @@
 
 <Stats />
 
-<T.AmbientLight intensity={0.0001}/>
+<T.AmbientLight intensity={0.02}/>
 <!-- <Sky elevation={0.1} /> -->
 <!-- <T.HemisphereLight
   intensity={sunBrightness * 0.2}
