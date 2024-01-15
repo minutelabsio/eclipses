@@ -1,7 +1,7 @@
 import * as THREE from 'three'
 import bsc5dat from '../../assets/bsc5.dat?raw'
 
-const brightnessAdjustment = 0.7
+const brightnessAdjustment = 0.2
 
 export function starData(){
   const stars = {}
@@ -69,7 +69,7 @@ export function starData(){
     const s = (star.mag * 26) / 255 + 0.18
     sizes.push(s)
 
-    colors.push(color.r, color.g, color.b, s * brightnessAdjustment)
+    colors.push(color.r, color.g, color.b, 1)
   })
 
   return {

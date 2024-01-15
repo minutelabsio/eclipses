@@ -352,9 +352,9 @@
           // resolution: 256,
           // middleGrey: 0.6,
           resolution: 512,
-          whitePoint: 5,
-          minLuminance: 0.01,
-          averageLuminance: .1,
+          whitePoint: 2,
+          minLuminance: 0.005,
+          averageLuminance: .2,
           adaptationRate: 2
         }),
       )

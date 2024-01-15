@@ -420,9 +420,6 @@ vec4 scattering(
 
     float u = umbra(pos, rApparentSun, sunPosition, rApparentMoon, moonPosition);
 
-    if (u < 1e-2){
-      continue;
-    }
     // float approachDepth = closestApproachDepth(pos, sSun, planetRadius);
     // float earthShadow = 1.0; //clampMix(1.0, 0.0, approachDepth / ds);
 
