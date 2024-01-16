@@ -34,7 +34,7 @@
       Terrain.Hill(g, o, feature, valley);
     },
     material,
-    maxHeight: 2800,
+    maxHeight: 2000,
     minHeight: -0.1,
     steps: 1,
     xSegments: xS,
