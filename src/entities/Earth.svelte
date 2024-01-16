@@ -28,7 +28,7 @@ const textures = useLoader(TextureLoader).load({
     renderOrder={2}
   >
     <T.HemisphereLight
-      intensity={sunBrightness}
+      intensity={sunBrightness * 0.25 + 0.1}
       position={[0, 100, 0]}
     />
     <T.DirectionalLight

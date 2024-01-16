@@ -25,7 +25,7 @@
     coords.y = 0.5 + Math.sin(theta) * r;
   }
 
-  const material = new THREE.MeshStandardMaterial({color: 0x000000})
+  const material = new THREE.MeshStandardMaterial({ color: 0x000000, dithering: true })
 
   const terrainScene = Terrain({
     easing: Terrain.EaseInOut,

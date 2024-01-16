@@ -241,6 +241,7 @@
 
   let sunBrightness = 1
   $: sunIntensity = sunBrightness * 10000000 * Lsol / (4 * Math.PI * Math.pow(sunDistance, 2))
+  $: sunsetBrightness = MathUtils.clamp(MathUtils.inverseLerp(-10, 20, elevation / DEG), 0, 1)
 
   const createExpotentialIn = (a) => {
     return (x) => Math.pow(2, a * x - a) * x
@@ -283,15 +284,17 @@
     controls?.update(window.performance.now())
     const state = moonMove.at(time / 2)
     moonDec = state.theta * DEG
-    sunBrightness = state.brightness
+    sunBrightness = state.brightness * sunsetBrightness
   })
 
+  let fog
   $: r0 = new Vector3(0, -planetRadius, 0)
   $: Sky.sunPosition.set(...sunPosition).sub(r0).multiplyScalar(1 / METER)
   $: Sky.sunRadius = sunRadius / METER
   $: moonPosition = skyPosition(moonDistance, elevation, 0, new Vector3()).applyAxisAngle(moonAxis, moonDec)
   $: Sky.moonPosition.set(...moonPosition).sub(r0).multiplyScalar(1 / METER)
   $: Sky.moonRadius = moonRadius / METER
+  $: fog?.color.setHSL(200, 0.2, Easing.sinIn(sunBrightness) * 0.15)
 
   const composer = new EffectComposer(renderer, {
     frameBufferType: THREE.HalfFloatType,
@@ -334,10 +337,9 @@
           // adaptive: true,
           // resolution: 256,
           // middleGrey: 0.6,
-          resolution: 512,
+          // resolution: 512,
           whitePoint: 2,
           minLuminance: 0.005,
-          averageLuminance: .2,
           adaptationRate: 2
         }),
       )
@@ -354,6 +356,7 @@
 <Stats />
 
 <T.AmbientLight intensity={0.02}/>
+<T.FogExp2 attach="fog" bind:ref={fog} far={90000} density={2.5e-5}/>
 <!-- <Sky elevation={0.1} /> -->
 <!-- <T.HemisphereLight
   intensity={sunBrightness * 0.2}
