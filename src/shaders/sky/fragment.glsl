@@ -496,5 +496,8 @@ void main() {
   vec3 dither_shift_RGB = vec3(dither_shift, -dither_shift, dither_shift); //subpixel dithering
   dither_shift_RGB = mix(2.0 * dither_shift_RGB, -2.0 * dither_shift_RGB, grid_position);
 
-  gl_FragColor = vec4(color.rgb + dither_shift_RGB, color.a); //vec4(color, opacity);
+  // reduce color banding
+  color.rgb += dither_shift_RGB * length(color.rgb) * 16.;
+
+  gl_FragColor = color;
 }
