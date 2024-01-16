@@ -1,12 +1,16 @@
 <script>
-import { MeshBasicMaterial, PlaneGeometry, TextureLoader } from 'three'
+import { Group, MeshBasicMaterial, PlaneGeometry, TextureLoader, Vector3 } from 'three'
+import Terrain from '../entities/Terrain.svelte'
 import { T, useLoader } from '@threlte/core'
 import earthTextureUrl from '../assets/earth/Earth.png'
 import earthNormalUrl from '../assets/earth/normal/hires/EarthNormal.png'
 import earthSpecularUrl from '../assets/earth/spec/hires/EarthSpec.png'
 
+export let sunPosition = [0, 0, 0]
+export let sunBrightness = 1
 export let planetRadius = 1
 export let position = [0, 0, 0]
+export let planetColor = 0x886666
 
 const textures = useLoader(TextureLoader).load({
   map: earthTextureUrl,
@@ -17,6 +21,32 @@ const textures = useLoader(TextureLoader).load({
 
 {#if $textures}
 <T.LOD let:ref={lod}>
+  <T.Group
+    on:create={({ ref }) => {
+      lod.addLevel(ref, 100)
+    }}
+    renderOrder={2}
+  >
+    <T.HemisphereLight
+      intensity={sunBrightness}
+      position={[0, 100, 0]}
+    />
+    <T.DirectionalLight
+      castShadow
+      intensity={sunBrightness}
+      position={sunPosition}
+    />
+    <T.Mesh
+      position={[0, -1, 0]}
+      rotation={[-Math.PI / 2, 0, 0]}
+      receiveShadow
+      scale={[1e6, 1e6, 1]}
+    >
+      <T.PlaneGeometry args={[1, 1]} />
+      <T.MeshStandardMaterial color={planetColor}/>
+    </T.Mesh>
+    <Terrain color={planetColor} />
+  </T.Group>
   <T.Mesh
     position={position}
     rotation={[Math.PI / 2, 0, -Math.PI / 2]}
@@ -25,6 +55,7 @@ const textures = useLoader(TextureLoader).load({
     on:create={({ ref }) => {
       lod.addLevel(ref, planetRadius * 0.01)
     }}
+    renderOrder={1}
   >
     <T.IcosahedronGeometry args={[1, 64]} />
     <T.MeshPhongMaterial

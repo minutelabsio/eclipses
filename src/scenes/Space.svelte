@@ -255,20 +255,20 @@
 
   const expoIn = createExpotentialIn(10)
   const expoOut = createExpotentialOut(10)
-  const expoLightIn = createExpotentialIn(1)
-  const expoLightOut = createExpotentialOut(1)
+  const lightIn = 'quadInOut'
+  const lightOut = 'quadInOut'
   $: moonMove = new Tween({ theta: -0.8, corona: minCoronaOpacity, brightness: 1 })
     .by('2s', { theta: 0 }, 'quadOut')
-    .by('2s', { brightness: 0.1 }, expoLightIn)
+    .by('2s', { brightness: 0.01 }, lightIn)
     .by('2s', { corona: maxCoronaOpacity }, expoIn)
     .by('4s', { theta: 0.8 }, 'quadIn')
-    .by('4s', { brightness: 1.0 }, expoLightOut)
+    .by('4s', { brightness: 1.0 }, lightOut)
     .by('4s', { corona: minCoronaOpacity }, expoOut)
     .by('6s', { theta: 0 }, 'quadOut')
-    .by('6s', { brightness: 0.1 }, expoLightIn)
+    .by('6s', { brightness: 0.01 }, lightIn)
     .by('6s', { corona: maxCoronaOpacity }, expoIn)
     .by('8s', { theta: -0.8 }, 'quadIn')
-    .by('8s', { brightness: 1.0 }, expoLightOut)
+    .by('8s', { brightness: 1.0 }, lightOut)
     .by('8s', { corona: minCoronaOpacity }, expoOut)
     .loop()
 
@@ -283,6 +283,7 @@
     controls?.update(window.performance.now())
     const state = moonMove.at(time / 2)
     moonDec = state.theta * DEG
+    sunBrightness = state.brightness
   })
 
   $: r0 = new Vector3(0, -planetRadius, 0)
@@ -359,13 +360,13 @@
   position={[0, 50, 0]}
 /> -->
 {#await Stars then Stars}
-<T is={Stars}/>
+<T is={Stars} renderOrder={0}/>
 {/await}
 
 <T.Mesh
   bind:ref={skyMesh}
   scale={[AU, AU, AU]}
-  renderOrder={1}
+  renderOrder={2}
 >
   <T.IcosahedronGeometry args={[1, 32]} />
   <T is={Sky.shader} />
@@ -450,4 +451,9 @@
   <T.IcosahedronGeometry args={[planetRadius+1, 256]} />
   <T.MeshStandardMaterial color='#888' dithering/>
 </T.Mesh> -->
-<Earth planetRadius={planetRadius} position={[0, -planetRadius, 0]} />
+<Earth
+  planetRadius={planetRadius}
+  position={[0, -planetRadius, 0]}
+  sunBrightness={sunBrightness}
+  sunPosition={sunPosition}
+/>

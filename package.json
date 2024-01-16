@@ -10,6 +10,9 @@
     "deploy": "sh deploy.sh"
   },
   "devDependencies": {
+    "@rollup/plugin-inject": "^5.0.5",
+    "@rollup/plugin-legacy": "^3.0.2",
+    "@rollup/plugin-replace": "^5.0.5",
     "@sveltejs/vite-plugin-svelte": "^2.4.6",
     "@types/three": "^0.155.1",
     "svelte": "^4.0.5",
@@ -35,6 +38,7 @@
     "stats.js": "^0.17.0",
     "three": "^0.159.0",
     "three-good-godrays": "^0.4.4",
-    "three-story-controls": "^1.0.6"
+    "three-story-controls": "^1.0.6",
+    "three.terrain.js": "^2.0.0"
   }
 }

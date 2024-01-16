@@ -6,9 +6,14 @@ import {glslify} from 'vite-plugin-glslify'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [
-    glslify(),
+    glslify({
+      exclude: 'src/lib/three.terrain.js'
+    }),
     svelte()
   ],
+  resolve: {
+    dedupe: ['three'],
+  },
   assetsInclude: ['**/*.tif', '**/*.dds'],
   base: process.env.NODE_ENV === 'production'
     ? `/${pkg.name}/`
