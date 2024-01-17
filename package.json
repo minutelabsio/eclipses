@@ -32,6 +32,8 @@
     "intween": "1.0.0-beta.7",
     "lil-gui": "^0.18.2",
     "lodash": "^4.17.21",
+    "noisejs": "^2.1.0",
+    "perlin-noise-3d": "^0.5.4",
     "postprocessing": "^6.33.4",
     "pug": "^3.0.2",
     "sass": "^1.66.1",
