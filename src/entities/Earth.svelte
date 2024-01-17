@@ -64,6 +64,7 @@ const textures = useLoader(TextureLoader).load({
       normalMap={$textures.normalMap}
       specularMap={$textures.specularMap}
       shininess={0}
+      fog={false}
     />
   </T.Mesh>
 </T.LOD>

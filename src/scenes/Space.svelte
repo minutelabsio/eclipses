@@ -405,11 +405,11 @@
 </T.PerspectiveCamera>
 
 <!-- Sun -->
-<T.PointLight
+<!-- <T.PointLight
   position={sunPosition}
   intensity={4e14 * sunIntensity}
   color="white"
-/>
+/> -->
 <T.Mesh
   visible={false}
   position={sunPosition}
