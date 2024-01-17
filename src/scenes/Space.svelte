@@ -241,7 +241,7 @@
 
   let sunBrightness = 1
   $: sunIntensity = sunBrightness * 10000000 * Lsol / (4 * Math.PI * Math.pow(sunDistance, 2))
-  $: sunsetBrightness = MathUtils.clamp(MathUtils.inverseLerp(-10, 20, elevation / DEG), 0, 1)
+  $: sunsetBrightness = MathUtils.clamp(MathUtils.inverseLerp(-10, 10, elevation / DEG), 0, 1)
 
   const createExpotentialIn = (a) => {
     return (x) => Math.pow(2, a * x - a) * x
