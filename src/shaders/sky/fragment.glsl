@@ -95,23 +95,6 @@ vec2 opticalDepths(vec3 start, vec3 end, vec2 scaleHeights, float planetRadius, 
   return od;
 }
 
-vec2 getOpticalDepths(vec3 start, vec3 s, vec2 scaleHeights, float planetRadius, float atmosphereRadius) {
-  // float ah = atmosphereRadius - planetRadius;
-  float h = max(0.0, length(start) - planetRadius);
-  float v = (1. - exp(-h / scaleHeights.x));
-  // vec3 s = normalize(end - start);
-  start = normalize(start);
-  float angle = acos(dot(start, s));
-  // Math.PI * (4 * (t - 0.5) ^ 3 + 0.5)
-  float u = angle / PI;
-  // float c = 0.5 - abs(0.5 - angle / PI);
-  // float u = asin(1. - cos(PI * c)) / PI;
-  float halfStep = 0.5 / opticalDepthMapSize;
-  vec2 texCoord = vec2(u + halfStep, v + halfStep);
-  vec2 data = texture2D(opticalDepthMap, texCoord).rg;
-  return data;
-}
-
 vec2 raySphereIntersection(vec3 origin, vec3 ray, float radius) {
   // ray = normalize(ray);
   // ray-sphere intersection that assumes
