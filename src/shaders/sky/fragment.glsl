@@ -37,6 +37,11 @@ uniform float cloudThickness;
 uniform float cloudThreshold;
 
 #define PI 3.1415926535897932384626433832795
+#pragma glslify: fbm = require(./fbm)
+#pragma glslify: snoise2 = require(glsl-noise/simplex/2d)
+#pragma glslify: snoise3 = require(glsl-noise/simplex/3d)
+#pragma glslify: cnoise2 = require(glsl-noise/classic/2d)
+#pragma glslify: cnoise3 = require(glsl-noise/classic/3d)
 
 const float ONE_OVER_E = exp(-1.0);
 const float THREE_OVER_16_PI = 3.0 / (16.0 * PI);
@@ -206,11 +211,6 @@ float noise(vec2 p) {
   return res * res;
 }
 
-#pragma glslify: snoise3 = require(glsl-noise/simplex/3d)
-#pragma glslify: cnoise3 = require(glsl-noise/classic/3d)
-#pragma glslify: cnoise2 = require(glsl-noise/classic/2d)
-
-
 vec3 sunMoon(vec3 rayDir, vec3 sSun, float sunAngularRadius, vec3 sMoon, float moonAngularRadius, float I0){
   float mu = dot(rayDir, sSun);
   if (mu < 0.999){
@@ -313,16 +313,18 @@ float sunMoonIntensity(vec3 rayDir, vec3 sSun, float sunAngularRadius, vec3 sMoo
   vec2 moonxy = squash(sMoon, sSun);
   vec2 rayxy = squash(rayDir, sSun);
 
-  float distFromSunEdge = circleEdge(rayxy, sunAngularRadius, moonxy, moonAngularRadius);
+  vec2 moonRay = rayxy - moonxy;
+  float x = 0.05 * smoothstep(0.0008, 0., length(moonxy));
+  vec2 seed = 1000. * moonRay + 15.;
+  float f = 1.0 - x * smoothstep(0., 1., cnoise2(seed));
+  float distFromSunEdge = circleEdge(rayxy, sunAngularRadius, moonxy, f * moonAngularRadius);
   distFromSunEdge = max(0.0, distFromSunEdge);
+  // distFromSunEdge = distFromSunEdge * step(0.0009 * (cnoise2(4000. * vUv) - 0.5), distFromSunEdge);
 
   // TODO: should also account for thickness of segment for more bloom
-
   float bloom = min(1.0, bloomFactor / sqrt(distFromSunEdge));
   return step(0.001, bloom) * bloom * I0;
 }
-
-#pragma glslify: fbm = require(./fbm)
 
 vec4 scattering(
   vec3 rayOrigin,
