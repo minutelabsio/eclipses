@@ -74,6 +74,13 @@ export default () => {
     exposure: 1.0,
     iSteps: 6,
     jSteps: 5,
+    // clouds
+    cloudZ: 0.2,
+    cloudThickness: 4.,
+    cloudSize: 1.,
+    cloudMie: 0.85,
+    cloudThreshold: 0.4,
+    windSpeed: 8e-2,
   }
 
   const api = { shader }
@@ -159,6 +166,11 @@ export default () => {
   refreshOpticalDepthMap()
   shader.uniforms.opticalDepthMap = { value: opticalDepthMapTexture }
   shader.uniforms.opticalDepthMapSize = { value: dimension }
+  shader.uniforms.time = { value: 0 }
+  api.update = (dt) => {
+    shader.uniforms.time.value += dt
+    shader.uniforms.time.needsUpdate = true
+  }
 
   return api
 }

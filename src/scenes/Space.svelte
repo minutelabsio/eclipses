@@ -141,6 +141,20 @@
     set mieScaleHeight(v){ return Sky.mieScaleHeight = v },
     get mieDirectional(){ return Sky.mieDirectional },
     set mieDirectional(v){ return Sky.mieDirectional = v },
+    // clouds
+    get cloudZ(){ return Sky.cloudZ },
+    set cloudZ(v){ return Sky.cloudZ = v },
+    get cloudThickness(){ return Sky.cloudThickness },
+    set cloudThickness(v){ return Sky.cloudThickness = v },
+    get cloudSize(){ return Sky.cloudSize },
+    set cloudSize(v){ return Sky.cloudSize = v },
+    get cloudMie(){ return Sky.cloudMie },
+    set cloudMie(v){ return Sky.cloudMie = v },
+    get cloudThreshold(){ return Sky.cloudThreshold },
+    set cloudThreshold(v){ return Sky.cloudThreshold = v },
+    get windSpeed(){ return Sky.windSpeed },
+    set windSpeed(v){ return Sky.windSpeed = v },
+
     get iSteps(){ return Sky.iSteps },
     set iSteps(v){ return Sky.iSteps = v },
     get jSteps(){ return Sky.jSteps },
@@ -168,11 +182,13 @@
     perspectiveSettings.add(eclipseState, 'altitude', 0, 1, 0.01)
     perspectiveSettings.add(eclipseState, 'lookAtSun')
     perspectiveSettings.add(eclipseState, 'lookAtEarth')
+
     const eclipseSettings = appSettings.addFolder('Eclipse')
     eclipseSettings.add(eclipseState, 'doAnimation')
     eclipseSettings.add(eclipseState, 'progress', 0, 1, 0.01)
     eclipseSettings.add(eclipseState, 'totalityFactor', 0, 1, 0.01)
     eclipseSettings.add(eclipseState, 'elevation', -90, 90, 0.001)
+
     const planetSettings = appSettings.addFolder('Planetary')
     planetSettings.add(eclipseState, 'sunIntensity', 0, 500, 1)
     planetSettings.add(eclipseState, 'planetRadius', 1e6, 1e7, 100)
@@ -184,17 +200,29 @@
     const moonRadiusCtrl = planetSettings.add(eclipseState, 'moonRadius', 1e5, 1e7, 100)
     const moonPerigeeCtrl = planetSettings.add(eclipseState, 'moonPerigee', 1e6, 1e9, 100)
     planetSettings.add(eclipseState, 'moonApogee', 1e7, 1e9, 100)
+
     const atmosSettings = appSettings.addFolder('Atmosphere')
     atmosSettings.add(eclipseState, 'atmosphereThickness', 0, 1000000, 1)
+
     const rayleighSettings = atmosSettings.addFolder('Rayleigh')
     rayleighSettings.add(eclipseState, 'rayleighRed', 0, 1e-4, 1e-7)
     rayleighSettings.add(eclipseState, 'rayleighGreen', 0, 1e-4, 1e-7)
     rayleighSettings.add(eclipseState, 'rayleighBlue', 0, 1e-4, 1e-7)
     rayleighSettings.add(eclipseState, 'rayleighScaleHeight', 0, 100000, 10)
+
     const mieSettings = atmosSettings.addFolder('Mie')
     mieSettings.add(eclipseState, 'mieCoefficient', 0, 1e-4, 1e-7)
     mieSettings.add(eclipseState, 'mieScaleHeight', 0, 10000, 10)
     mieSettings.add(eclipseState, 'mieDirectional', -.999, .999, 0.01)
+
+    const cloudSettings = atmosSettings.addFolder('Clouds')
+    cloudSettings.add(eclipseState, 'cloudZ', 0.01, 0.9, 0.01)
+    cloudSettings.add(eclipseState, 'cloudThickness', 0, 20, 0.1)
+    cloudSettings.add(eclipseState, 'cloudSize', 0, 10, 0.1)
+    cloudSettings.add(eclipseState, 'cloudMie', 0, .999, 1e-7)
+    cloudSettings.add(eclipseState, 'cloudThreshold', 0, 1, 0.01)
+    cloudSettings.add(eclipseState, 'windSpeed', 0, 1, 0.01)
+
     const precisionSettings = atmosSettings.addFolder('Precision').close()
     precisionSettings.add(eclipseState, 'iSteps', 1, 32, 1)
     precisionSettings.add(eclipseState, 'jSteps', 1, 32, 1)
@@ -276,6 +304,7 @@
   let time = 0
   useFrame((ctx, dt) => {
     // frame
+    Sky.update(dt)
     if (eclipseState.doAnimation) {
       time += dt * 1000
     } else {
