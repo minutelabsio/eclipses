@@ -6,6 +6,7 @@
   import { Noise } from 'noisejs'
 
   export let color = 0x000000
+  export let visible = true
 
   const size = 4
   const xS = 63 * size
@@ -88,4 +89,4 @@
   $: material.color.set(color)
 </script>
 
-<T is={terrainScene} />
+<T is={terrainScene} visible={visible} />

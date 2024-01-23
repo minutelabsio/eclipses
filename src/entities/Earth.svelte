@@ -11,6 +11,8 @@ export let sunBrightness = 1
 export let planetRadius = 1
 export let position = [0, 0, 0]
 export let planetColor = 0x886666
+export let planetVisible = true
+export let mountainsVisible = true
 
 const textures = useLoader(TextureLoader).load({
   map: earthTextureUrl,
@@ -45,27 +47,31 @@ const textures = useLoader(TextureLoader).load({
       <T.PlaneGeometry args={[1, 1]} />
       <T.MeshStandardMaterial color={planetColor}/>
     </T.Mesh>
-    <Terrain color={planetColor} />
+    <Terrain color={planetColor} visible={mountainsVisible} />
   </T.Group>
-  <T.Mesh
-    position={position}
-    rotation={[Math.PI / 2, 0, -Math.PI / 2]}
-    scale={[planetRadius, planetRadius, planetRadius]}
-    receiveShadow
+  <T.Group
     on:create={({ ref }) => {
       lod.addLevel(ref, planetRadius * 0.01)
     }}
-    renderOrder={1}
   >
-    <T.IcosahedronGeometry args={[1, 64]} />
-    <T.MeshPhongMaterial
-      dithering
-      map={$textures.map}
-      normalMap={$textures.normalMap}
-      specularMap={$textures.specularMap}
-      shininess={0}
-      fog={false}
-    />
-  </T.Mesh>
+    <T.Mesh
+      visible={planetVisible}
+      position={position}
+      rotation={[Math.PI / 2, 0, -Math.PI / 2]}
+      scale={[planetRadius, planetRadius, planetRadius]}
+      receiveShadow
+      renderOrder={1}
+    >
+      <T.IcosahedronGeometry args={[1, 64]} />
+      <T.MeshPhongMaterial
+        dithering
+        map={$textures.map}
+        normalMap={$textures.normalMap}
+        specularMap={$textures.specularMap}
+        shininess={0}
+        fog={false}
+      />
+    </T.Mesh>
+  </T.Group>
 </T.LOD>
 {/if}

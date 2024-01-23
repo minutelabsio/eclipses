@@ -90,6 +90,14 @@
   let lockApparentSize = false
   $: moonDistance = MathUtils.lerp(moonPerigee, moonApogee, 1 - totalityFactor)
 
+  // visibility
+  let skyVisible = true
+  let starsVisible = true
+  let mountainsVisible = true
+  let earthVisible = true
+
+  let bloomIntensity = 5
+
   const lookAtSun = () => {
     rig.camera.lookAt(sun.position)
   }
@@ -105,6 +113,8 @@
     set exposure(v){
       exposure = v
     },
+    get bloomIntensity(){ return bloomIntensity },
+    set bloomIntensity(v){ return bloomIntensity = v },
     get totalityFactor(){ return totalityFactor },
     set totalityFactor(value){ totalityFactor = value },
     doAnimation: true,
@@ -159,6 +169,17 @@
     set iSteps(v){ return Sky.iSteps = v },
     get jSteps(){ return Sky.jSteps },
     set jSteps(v){ return Sky.jSteps = v },
+
+    // visibility
+    get skyVisible(){ return skyVisible },
+    set skyVisible(v){ return skyVisible = v },
+    get starsVisible(){ return starsVisible },
+    set starsVisible(v){ return starsVisible = v },
+    get mountainsVisible(){ return mountainsVisible },
+    set mountainsVisible(v){ return mountainsVisible = v },
+    get earthVisible(){ return earthVisible },
+    set earthVisible(v){ return earthVisible = v },
+
     lookAtSun: lookAtSun,
     lookAtEarth: lookAtEarth,
   }
@@ -179,6 +200,7 @@
     const perspectiveSettings = appSettings.addFolder('Perspective')
     perspectiveSettings.add(eclipseState, 'FOV', 1, 180, 1)
     perspectiveSettings.add(eclipseState, 'exposure', 0.01, 10, 0.01)
+    perspectiveSettings.add(eclipseState, 'bloomIntensity', 0, 50, 0.01)
     perspectiveSettings.add(eclipseState, 'altitude', 0, 1, 0.01)
     perspectiveSettings.add(eclipseState, 'lookAtSun')
     perspectiveSettings.add(eclipseState, 'lookAtEarth')
@@ -223,9 +245,15 @@
     cloudSettings.add(eclipseState, 'cloudThreshold', 0, 1, 0.01)
     cloudSettings.add(eclipseState, 'windSpeed', 0, 1, 0.01)
 
-    const precisionSettings = atmosSettings.addFolder('Precision').close()
-    precisionSettings.add(eclipseState, 'iSteps', 1, 32, 1)
-    precisionSettings.add(eclipseState, 'jSteps', 1, 32, 1)
+    const performanceSettings = atmosSettings.addFolder('performance').close()
+    performanceSettings.add(eclipseState, 'iSteps', 1, 32, 1)
+    performanceSettings.add(eclipseState, 'jSteps', 1, 32, 1)
+
+    const visibilitySettings = appSettings.addFolder('Visibility').close()
+    visibilitySettings.add(eclipseState, 'skyVisible')
+    visibilitySettings.add(eclipseState, 'starsVisible')
+    visibilitySettings.add(eclipseState, 'mountainsVisible')
+    visibilitySettings.add(eclipseState, 'earthVisible')
 
     moonRadiusCtrl.onChange(r => {
       if (lockApparentSize){
@@ -330,14 +358,16 @@
     multisampling: 0
   })
 
+  let bloom = {}
+
   const setupEffectComposer = async (camera) => {
     if (!camera) return
     composer.removeAllPasses()
     const renderpass = new RenderPass(scene, camera)
     composer.addPass(renderpass)
 
-    const bloom = new SelectiveBloomEffect(scene, camera, {
-      intensity: 1,
+    bloom = new SelectiveBloomEffect(scene, camera, {
+      intensity: bloomIntensity,
       luminanceThreshold: 1.2, //0.5,
       luminanceSmoothing: 0.7,
       blendFunction: BlendFunction.ADD,
@@ -351,13 +381,13 @@
     composer.addPass(
       new EffectPass(
         camera,
+        bloom,
         new SMAAEffect({
           preset: SMAAPreset.HIGH,
           edgeDetectionMode: EdgeDetectionMode.LUMA,
           // edgeDetectionMode: EdgeDetectionMode.DEPTH,
           blendFunction: BlendFunction.SCREEN
         }),
-        bloom,
         new ToneMappingEffect({
           // blendFunction: BlendFunction.NORMAL,
           // mode: ToneMappingMode.ACES_FILMIC,
@@ -377,6 +407,7 @@
   // We need to set up the passes according to the camera in use
   $: setupEffectComposer($camera)
   $: composer.setSize($size.width, $size.height)
+  $: bloom.intensity = bloomIntensity
   useTask((delta) => {
     composer.render(delta)
   }, { stage: renderStage, autoInvalidate: false })
@@ -392,10 +423,11 @@
   position={[0, 50, 0]}
 /> -->
 {#await Stars then Stars}
-<T is={Stars} renderOrder={0}/>
+<T is={Stars} renderOrder={0} visible={starsVisible}/>
 {/await}
 
 <T.Mesh
+  visible={skyVisible}
   bind:ref={skyMesh}
   scale={[AU, AU, AU]}
   renderOrder={2}
@@ -484,6 +516,8 @@
   <T.MeshStandardMaterial color='#888' dithering/>
 </T.Mesh> -->
 <Earth
+  planetVisible={earthVisible}
+  mountainsVisible={mountainsVisible}
   planetRadius={planetRadius}
   position={[0, -planetRadius, 0]}
   sunBrightness={sunBrightness}
