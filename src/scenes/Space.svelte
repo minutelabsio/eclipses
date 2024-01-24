@@ -523,3 +523,8 @@
   sunBrightness={sunBrightness}
   sunPosition={sunPosition}
 />
+
+<Jupiter
+  position={skyPosition(4.217e8, 5 * DEG, 40 * DEG)}
+  radius={7.1492e7}
+/>
