@@ -7,6 +7,8 @@
 
   export let color = 0x000000
   export let visible = true
+  export let layers = 0
+  export let renderOrder = 0
 
   const size = 4
   const xS = 63 * size
@@ -83,10 +85,10 @@
     ySize: 1024 * 32 * size,
   })
 
-  terrainScene.children[0].castShadow = true
-  terrainScene.children[0].receiveShadow = true
+  // terrainScene.children[0].castShadow = true
+  // terrainScene.children[0].receiveShadow = true
   terrainScene.children[0].geometry.computeVertexNormals()
   $: material.color.set(color)
 </script>
 
-<T is={terrainScene} visible={visible} />
+<T is={terrainScene} visible={visible} children.0.layers={layers} renderOrder={renderOrder} />

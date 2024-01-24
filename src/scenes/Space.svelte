@@ -17,12 +17,14 @@
     BlendFunction,
     ToneMappingEffect,
     ToneMappingMode,
+    Selection,
   } from 'postprocessing'
   import { CameraRig, FreeMovementControls } from 'three-story-controls'
   import createCorona from '../shaders/corona/Corona'
   import createSky from '../shaders/sky/Sky'
   import createStars from '../shaders/stars/Stars'
   import Earth from '../entities/Earth.svelte'
+  import Jupiter from '../entities/Jupiter.svelte'
   import { onMount } from 'svelte'
 
   const { scene, renderer, camera, size, autoRender, renderStage } = useThrelte()
@@ -80,7 +82,7 @@
   let moonRadius = 0.2727 * Re
 
   let planetRadius = Re
-  let altitudeFactor = 0.0
+  let altitudeFactor = 0.001
   let atmosphereThickness = Sky.atmosphereThickness
 
   let exposure = 1
@@ -278,7 +280,7 @@
     }
   })
 
-  const setAltitude = (f, Rp) => {
+  const setAltitude = (rig, f, Rp) => {
     const alt = (5 * Math.pow(Rp, f) - 1)
     Sky.altitude = alt
     if (rig){
@@ -289,7 +291,7 @@
     return alt
   }
 
-  $: setAltitude(altitudeFactor, planetRadius)
+  $: setAltitude(rig, altitudeFactor, planetRadius)
   $: Sky.planetRadius = planetRadius
   $: sunPosition = skyPosition(sunDistance, elevation, 0)
 
@@ -351,7 +353,7 @@
   $: moonPosition = skyPosition(moonDistance, elevation, 0, new Vector3()).applyAxisAngle(moonAxis, moonDec)
   $: Sky.moonPosition.set(...moonPosition).sub(r0).multiplyScalar(1 / METER)
   $: Sky.moonRadius = moonRadius / METER
-  $: fog?.color.setHSL(200, 0.2, Easing.sinIn(sunBrightness) * 0.15)
+  $: fog?.color.setHSL(200 / 360, .2, Easing.sinIn(sunBrightness) * 0.3)
 
   const composer = new EffectComposer(renderer, {
     frameBufferType: THREE.HalfFloatType,
@@ -364,7 +366,12 @@
     if (!camera) return
     composer.removeAllPasses()
     const renderpass = new RenderPass(scene, camera)
+    renderpass.selection = new Selection([], 0)
     composer.addPass(renderpass)
+    const renderpass2 = new RenderPass(scene, camera)
+    renderpass2.clear = false
+    renderpass2.selection = new Selection([], 9)
+    composer.addPass(renderpass2)
 
     bloom = new SelectiveBloomEffect(scene, camera, {
       intensity: bloomIntensity,
@@ -382,12 +389,12 @@
       new EffectPass(
         camera,
         bloom,
-        new SMAAEffect({
-          preset: SMAAPreset.HIGH,
-          edgeDetectionMode: EdgeDetectionMode.LUMA,
-          // edgeDetectionMode: EdgeDetectionMode.DEPTH,
-          blendFunction: BlendFunction.SCREEN
-        }),
+        // new SMAAEffect({
+        //   preset: SMAAPreset.LOW,
+        //   edgeDetectionMode: EdgeDetectionMode.LUMA,
+        //   // edgeDetectionMode: EdgeDetectionMode.DEPTH,
+        //   blendFunction: BlendFunction.SCREEN
+        // }),
         new ToneMappingEffect({
           // blendFunction: BlendFunction.NORMAL,
           // mode: ToneMappingMode.ACES_FILMIC,
@@ -408,15 +415,24 @@
   $: setupEffectComposer($camera)
   $: composer.setSize($size.width, $size.height)
   $: bloom.intensity = bloomIntensity
+
+  // $: { renderer && (renderer.autoClear = false) }
   useTask((delta) => {
+    if (!renderer){ return }
+    // renderer.clear()
+    // $camera.layers.set(0)
+    // renderer.render(scene, $camera)
+    // $camera.layers.set(9)
+    // renderer.render(scene, $camera)
+    // $camera.layers.set(8)
     composer.render(delta)
   }, { stage: renderStage, autoInvalidate: false })
 </script>
 
 <Stats />
 
-<T.AmbientLight intensity={0.02}/>
-<T.FogExp2 attach="fog" bind:ref={fog} far={90000} density={2.5e-5}/>
+<!-- <T.AmbientLight intensity={0.02}/> -->
+<T.FogExp2 attach="fog" bind:ref={fog} density={1.5e-5} layers={9}/>
 <!-- <Sky elevation={0.1} /> -->
 <!-- <T.HemisphereLight
   intensity={sunBrightness * 0.2}
@@ -441,7 +457,7 @@
   position.z={-2}
   fov={FOV}
   near={1}
-  far={1.2 * sunDistance}
+  far={1.2 * moonDistance}
   makeDefault
   on:create={({ ref }) => {
     ref.lookAt(sun.position)
@@ -499,11 +515,12 @@
   position={moonPosition.toArray()}
   rotation={[180 * DEG, 0, 0]}
   castShadow
+  fog={false}
 >
   <!-- <T.SphereGeometry args={[moonRadius, 32, 32]} /> -->
   <T.IcosahedronGeometry args={[moonRadius, 32]} />
   <!-- <T.CircleGeometry args={[moonRadius, 32]} /> -->
-  <T.MeshBasicMaterial color="black" dithering />
+  <T.MeshBasicMaterial color="red" dithering />
 </T.Mesh>
 
 <!-- Ground -->
@@ -515,6 +532,12 @@
   <T.IcosahedronGeometry args={[planetRadius+1, 256]} />
   <T.MeshStandardMaterial color='#888' dithering/>
 </T.Mesh> -->
+
+<T.DirectionalLight
+  intensity={1}
+  position={sunPosition}
+/>
+
 <Earth
   planetVisible={earthVisible}
   mountainsVisible={mountainsVisible}

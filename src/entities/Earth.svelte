@@ -13,6 +13,8 @@ export let position = [0, 0, 0]
 export let planetColor = 0x886666
 export let planetVisible = true
 export let mountainsVisible = true
+export let skyColor = 0x71bce1
+export let groundColor = 0x71bce1
 
 const textures = useLoader(TextureLoader).load({
   map: earthTextureUrl,
@@ -28,26 +30,32 @@ const textures = useLoader(TextureLoader).load({
       lod.addLevel(ref, 100)
     }}
     renderOrder={2}
+    layers={9}
   >
     <T.HemisphereLight
-      intensity={sunBrightness * 0.25 + 0.1}
-      position={[0, 100, 0]}
+      intensity={sunBrightness + .15}
+      skyColor={skyColor}
+      groundColor={groundColor}
+      layers={9}
+      castShadow={false}
     />
     <T.DirectionalLight
-      castShadow
-      intensity={sunBrightness}
+      intensity={sunBrightness * 2}
       position={sunPosition}
+      layers={9}
+      castShadow={false}
     />
     <T.Mesh
-      position={[0, -1, 0]}
-      rotation={[-Math.PI / 2, 0, 0]}
-      receiveShadow
-      scale={[1e6, 1e6, 1]}
+      position={[0, -planetRadius, 0]}
+      rotation={[0, 0, 0]}
+      scale={[planetRadius, planetRadius, planetRadius]}
+      layers={9}
+      renderOrder={1}
     >
-      <T.PlaneGeometry args={[1, 1]} />
+      <T.IcosahedronGeometry args={[1.0, 64]} />
       <T.MeshStandardMaterial color={planetColor}/>
     </T.Mesh>
-    <Terrain color={planetColor} visible={mountainsVisible} />
+    <Terrain color={planetColor} visible={mountainsVisible} layers={9} renderOrder={1} />
   </T.Group>
   <T.Group
     on:create={({ ref }) => {
@@ -62,7 +70,7 @@ const textures = useLoader(TextureLoader).load({
       receiveShadow
       renderOrder={1}
     >
-      <T.IcosahedronGeometry args={[1, 64]} />
+      <T.IcosahedronGeometry args={[0.9999, 64]} />
       <T.MeshPhongMaterial
         dithering
         map={$textures.map}

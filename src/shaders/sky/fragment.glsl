@@ -132,6 +132,10 @@ bool intersectsInside(vec2 intersections) {
   return intersections.x <= intersections.y && intersections.y > 0.0;
 }
 
+bool intersectsInsideOnly(vec2 intersections) {
+  return intersections.x <= intersections.y && intersections.y > 0.0 && intersections.x < 0.0;
+}
+
 float twoCircleIntersection(float r1, float r2, float d) {
   if(d > r1 + r2) {
     return 0.0;
@@ -464,20 +468,26 @@ vec4 scattering(
   vec3 sunDiskColor = sunDisk * transmittance;
 
   // clouds
-  float cloudPhase = miePhase(mu, cloudMie);
-  float cloudHeight = cloudZ * atmosphereThickness;
-  vec2 cloudInt = raySphereIntersection(rayOrigin, rayDir, planetRadius + cloudHeight);
-  vec3 cloudLayer = cloudSize * 900. * (rayDir * (cloudInt.y + 0.2 * atmosphereThickness * noise(vUv))) / atmosphereRadius;
-  float cloudFactor = cloudThickness * (intersectsInside(cloudInt) ? 1. : 0.);
-  float cloudAmount = cloudFactor * smoothstep(0., 1.0, fbm(cloudLayer + windSpeed * time) - cloudThreshold);
-  // float cloudAmount = 2. * getPhases(rayDir, sSun, 0.5 + 0.4 * fbm(cloudLayer * 20.)).y;
-  vec3 cloud = 2e-6 * cloudAmount * cloudPhase * rayleighT;
+  float cloudAmount = 0.0;
+  vec3 cloud = vec3(0.0);
+  if (!intersectsOutside(intPlanet) && cloudThickness >= 0.1){
+    float cloudHeight = cloudZ * atmosphereThickness;
+    vec2 cloudInt = raySphereIntersection(rayOrigin, rayDir, planetRadius + cloudHeight);
+    if (intersectsInsideOnly(cloudInt)){
+      float cloudPhase = miePhase(mu, cloudMie);
+      vec3 cloudLayer = cloudSize * 900. * (rayDir * (cloudInt.y + 0.2 * atmosphereThickness * noise(vUv))) / atmosphereRadius;
+      float cloudFactor = cloudThickness * (intersectsInsideOnly(cloudInt) ? 1. : 0.);
+      cloudAmount = cloudFactor * smoothstep(0., 1.0, fbm(cloudLayer + windSpeed * time) - cloudThreshold);
+      // float cloudAmount = 2. * getPhases(rayDir, sSun, 0.5 + 0.4 * fbm(cloudLayer * 20.)).y;
+      cloud = 1e-6 * I0 * cloudAmount * cloudPhase * rayleighT;
+    }
+  }
 
   // final scattering
-  vec3 scatter = rayleighT * phases.x * scatteringCoefficients.xyz + mieT * phases.y * scatteringCoefficients.w;
+  vec3 scatter = I0 * rayleighT * phases.x * scatteringCoefficients.xyz + I0 * mieT * phases.y * scatteringCoefficients.w;
   // opacity of the atmosphere
   float opacity = dot(primaryDepth, vec2(0.2 * length(rayleighCoefficients), mieCoefficient)) + cloudAmount;
-  return vec4(I0 * scatter + sunDiskColor + cloud, clamp(opacity, 0.0, 1.0));
+  return vec4(scatter + sunDiskColor + cloud, clamp(opacity, 0.0, 1.0));
 }
 
 void main() {
