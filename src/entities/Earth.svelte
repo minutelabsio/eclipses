@@ -33,7 +33,7 @@ const textures = useLoader(TextureLoader).load({
     layers={9}
   >
     <T.HemisphereLight
-      intensity={sunBrightness + .15}
+      intensity={sunBrightness + .1}
       skyColor={skyColor}
       groundColor={groundColor}
       layers={9}
