@@ -100,6 +100,7 @@ vec2 opticalDepths(vec3 start, vec3 end, vec2 scaleHeights, float planetRadius, 
   return od;
 }
 
+const vec2 NO_INTERSECTION = vec2(1e-5, -1e-5);
 vec2 raySphereIntersection(vec3 origin, vec3 ray, float radius) {
   // ray = normalize(ray);
   // ray-sphere intersection that assumes
@@ -112,16 +113,12 @@ vec2 raySphereIntersection(vec3 origin, vec3 ray, float radius) {
   float c = dot(origin, origin) - (radius * radius);
   float d = b * b - c;
   if(d < 0.0) {
-    return vec2(1e-5, -1e-5);
+    return NO_INTERSECTION;
   }
   float sqrtd = sqrt(d);
   float x0 = -b - sqrtd;
   float x1 = -b + sqrtd;
-  if(x0 > x1) {
-    return vec2(x1, x0);
-  } else {
-    return vec2(x0, x1);
-  }
+  return vec2(min(x0, x1), max(x0, x1));
 }
 
 bool intersectsOutside(vec2 intersections){
@@ -137,7 +134,7 @@ bool intersectsInsideOnly(vec2 intersections) {
 }
 
 float twoCircleIntersection(float r1, float r2, float d) {
-  if(d > r1 + r2) {
+  if(d > (r1 + r2)) {
     return 0.0;
   } else if(d <= abs(r1 - r2)) {
     float r = min(r1, r2);
@@ -149,7 +146,8 @@ float twoCircleIntersection(float r1, float r2, float d) {
   float r12mr22 = dot(rs2, vec2(1., -1.));
   float twod = 2.0 * d;
   float twod2 = 2.0 * d2;
-  float area = dot(rs2, acos(vec2(d2 + r12mr22, d2 - r12mr22) / (twod * rs))) - 0.5 * sqrt(dot(vec4(-r12mr22, twod2, twod2, -d2), vec4(r12mr22, rs2, d2)));
+  float area = dot(rs2, acos(vec2(d2 + r12mr22, d2 - r12mr22) / (twod * rs)))
+    - 0.5 * sqrt(dot(vec4(-r12mr22, twod2, twod2, -d2), vec4(r12mr22, rs2, d2)));
   return area;
 }
 
@@ -190,7 +188,8 @@ float miePhase(float mu, float g){
   // phases
   float mumu = mu * mu;
   float gg = g * g;
-  return THREE_OVER_8_PI * ((1.0 - gg) * (mumu + 1.0)) / (pow(1.0 + gg - 2.0 * mu * g, 1.5) * (2.0 + gg));
+  return THREE_OVER_8_PI * (pow(1.0 - gg, 2.)) / (pow(1.0 + gg - 2.0 * mu * g, 1.5));
+  // return THREE_OVER_8_PI * ((1.0 - gg) * (mumu + 1.0)) / (pow(1.0 + gg - 2.0 * mu * g, 1.5) * (2.0 + gg));
 }
 
 vec2 getPhases(float mu, float g){
@@ -198,7 +197,9 @@ vec2 getPhases(float mu, float g){
   float mumu = mu * mu;
   float gg = g * g;
   float rayleighP = THREE_OVER_16_PI + THREE_OVER_16_PI * mumu;
-  float mieP = THREE_OVER_8_PI * ((1.0 - gg) * (mumu + 1.0)) / (pow(1.0 + gg - 2.0 * mu * g, 1.5) * (2.0 + gg));
+  // alternate mie that may be better
+  float mieP = THREE_OVER_8_PI * (pow(1.0 - gg, 2.)) / (pow(1.0 + gg - 2.0 * mu * g, 1.5));
+  // float mieP = THREE_OVER_8_PI * ((1.0 - gg) * (mumu + 1.0)) / (pow(1.0 + gg - 2.0 * mu * g, 1.5) * (2.0 + gg));
   return vec2(rayleighP, mieP);
 }
 
@@ -330,6 +331,16 @@ float sunMoonIntensity(vec3 rayDir, vec3 sSun, float sunAngularRadius, vec3 sMoo
   return step(0.001, bloom) * bloom * I0;
 }
 
+float nextStep(const float d, const float ds, const int i) {
+  float current = float(i) * ds;
+  if (current > d) {
+    return -1.0;
+  }
+  float next = current + ds;
+  // steps up until the last are just ds
+  return next > d ? d - current : ds;
+}
+
 vec4 scattering(
   vec3 rayOrigin,
   vec3 rayDir,
@@ -412,7 +423,8 @@ vec4 scattering(
 
   float fsteps = float(steps.x);
   float d = (path.y - path.x);
-  float ds = d / fsteps;
+  // float ds = d / fsteps;
+  float ds = max(0.5 * atmosphereThickness, d / (fsteps - 1.));
 
   vec3 rayleighT = vec3(0.0);
   vec3 mieT = vec3(0.0);
@@ -420,42 +432,38 @@ vec4 scattering(
   vec2 primaryDepth = vec2(0.0);
 
   vec3 dr = rayDir * ds;
-  vec3 pos = start - 0.5 * dr;
+  // vec3 pos = start - 0.5 * dr;
+  vec3 pos = start - 0.5 * rayDir * ds;
 
-  for (int i = 0; i < steps.x; i++){
+  for (int i = 0; ; i++){
+    float step = nextStep(d - ds, ds, i);
+    if(step < 0.0) {
+      break;
+    }
+    vec3 dr = rayDir * step;
     pos += dr;
-    vec2 odStep = opticalDensity(length(pos), scaleHeights, planetRadius) * ds;
+    vec2 odStep = opticalDensity(length(pos), scaleHeights, planetRadius) * step;
     primaryDepth += odStep;
     vec2 intPlanet2 = raySphereIntersection(pos, sSun, planetRadius);
     // if the ray intersects the planet, no light comes this way
+    if (!intersectsOutside(intPlanet2)) {
+      float u = umbra(pos, rApparentSun, sunPosition, rApparentMoon, moonPosition);
+      // u = intersectsOutside(intPlanet2) ? 0.0 : u;
 
-    float u = umbra(pos, rApparentSun, sunPosition, rApparentMoon, moonPosition);
+      vec2 intAtmosphere2 = raySphereIntersection(pos, sSun, atmosphereRadius);
+      vec3 exit = pos + intAtmosphere2.y * sSun;
 
-    u = intersectsOutside(intPlanet2) ? 0.0 : u;
+      vec2 secondaryDepth = opticalDepths(pos, exit, scaleHeights, planetRadius, steps.y);
+      // vec2 secondaryDepth = getOpticalDepths(pos, normalize(exit - pos), scaleHeights, planetRadius, atmosphereRadius);
+      // vec2 secondaryDepth = vec2(0.0);
+      vec2 depth = primaryDepth + secondaryDepth;
+      vec4 alpha = vec4(vec3(depth.x), depth.y) * scatteringCoefficients;
+      vec3 transmittance = exp(- alpha.xyz - alpha.w);
+      vec3 scatter = u * transmittance;
 
-    // if(intersectsOutside(intPlanet2)) {
-    //   // continue;
-    //   u = 0.0;
-    //   // exit = pos + intPlanet2.x * sSun;
-    //   // earthShadow = 0.01;
-    // }
-
-    // float approachDepth = closestApproachDepth(pos, sSun, planetRadius);
-    // float earthShadow = 1.0; //clampMix(1.0, 0.0, approachDepth / ds);
-
-    vec2 intAtmosphere2 = raySphereIntersection(pos, sSun, atmosphereRadius);
-    vec3 exit = pos + intAtmosphere2.y * sSun;
-
-    vec2 secondaryDepth = opticalDepths(pos, exit, scaleHeights, planetRadius, steps.y);
-    // vec2 secondaryDepth = getOpticalDepths(pos, normalize(exit - pos), scaleHeights, planetRadius, atmosphereRadius);
-    // vec2 secondaryDepth = vec2(0.0);
-    vec2 depth = primaryDepth + secondaryDepth;
-    vec4 alpha = vec4(vec3(depth.x), depth.y) * scatteringCoefficients;
-    vec3 transmittance = exp(- alpha.xyz - alpha.w);
-    vec3 scatter = u * transmittance;
-
-    rayleighT += scatter * odStep.x;
-    mieT += scatter * odStep.y;
+      rayleighT += scatter * odStep.x;
+      mieT += scatter * odStep.y;
+    }
   }
 
   float mu = dot(rayDir, sSun);
@@ -476,8 +484,7 @@ vec4 scattering(
     if (intersectsInsideOnly(cloudInt)){
       float cloudPhase = miePhase(mu, cloudMie);
       vec3 cloudLayer = cloudSize * 900. * (rayDir * (cloudInt.y + 0.2 * atmosphereThickness * noise(vUv))) / atmosphereRadius;
-      float cloudFactor = cloudThickness * (intersectsInsideOnly(cloudInt) ? 1. : 0.);
-      cloudAmount = cloudFactor * smoothstep(0., 1.0, fbm(cloudLayer + windSpeed * time) - cloudThreshold);
+      cloudAmount = cloudThickness * smoothstep(0., 1.0, fbm(cloudLayer + windSpeed * time) - cloudThreshold);
       // float cloudAmount = 2. * getPhases(rayDir, sSun, 0.5 + 0.4 * fbm(cloudLayer * 20.)).y;
       cloud = 1e-6 * I0 * cloudAmount * cloudPhase * rayleighT;
     }

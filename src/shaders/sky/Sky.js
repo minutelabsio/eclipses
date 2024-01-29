@@ -30,7 +30,7 @@ export default () => {
     moonPosition: new THREE.Vector3(0, 0, 0),
     moonRadius: 0.2727 * Re,
     altitude: 0,
-    sunIntensity: 16,
+    sunIntensity: 25,
     sunPosition: new THREE.Vector3(0, 0, -sunDistance),
     sunRadius,
     planetRadius: 6371e3,
