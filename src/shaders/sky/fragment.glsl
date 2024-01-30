@@ -436,6 +436,7 @@ vec4 scattering(
   vec3 pos = start - 0.5 * rayDir * ds;
 
   for (int i = 0; ; i++){
+    // this way of stepping creates bands when looking from orbit
     float step = nextStep(d - ds, ds, i);
     if(step < 0.0) {
       break;
