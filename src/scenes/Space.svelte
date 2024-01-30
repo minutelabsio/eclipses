@@ -1,12 +1,10 @@
 <script>
-  import { useThrelte, useTask, useFrame } from '@threlte/core'
+  import { useThrelte, useFrame } from '@threlte/core'
   import { Easing, Tween } from 'intween'
   import Stats from '../components/Stats.svelte'
   import { T } from '@threlte/core'
-  import * as THREE from 'three'
   import GUI from 'lil-gui'
-  import { PlaneGeometry, SphereGeometry, Vector3, MathUtils, Mesh, HemisphereLight } from 'three'
-  import { CameraRig, FreeMovementControls } from 'three-story-controls'
+  import { Vector3, MathUtils } from 'three'
   import createCorona from '../shaders/corona/Corona'
   import createSky from '../shaders/sky/Sky'
   import createStars from '../shaders/stars/Stars'
@@ -14,9 +12,9 @@
   import Jupiter from '../entities/Jupiter.svelte'
   import { onMount } from 'svelte'
   import Renderer from '../components/Renderer.svelte'
+  import Camera from '../components/Camera.svelte'
 
   import {
-    FOV,
     planetRadius,
     atmosphereThickness,
     elevationRad,
@@ -50,6 +48,7 @@
     skyVisible,
     mountainsVisible,
     earthVisible,
+    altitude,
   } from '../store/environment'
   import {
     DEG,
@@ -66,7 +65,6 @@
   let moon
   let corona
   let skyMesh
-  let rig
   let controls
 
   const Corona = createCorona({
@@ -79,11 +77,13 @@
   const Stars = createStars().then(s => starsPoints = s)
 
   const lookAtSun = () => {
-    rig.camera.lookAt(sun.position)
+    const [x, y, z] = $sunPosition
+    const [ox, oy, oz] = controls.camera.position.toArray()
+    controls.lookInDirectionOf(x - ox, y - oy, z - oz, true)
   }
 
   const lookAtEarth = () => {
-    rig.camera.lookAt(new Vector3(0, -$planetRadius, 0))
+    controls.lookInDirectionOf(0, $planetRadius, 0, true)
   }
 
   const eclipseState = {
@@ -91,7 +91,7 @@
     progress: 0,
     lockApparentSize: false,
     // scale factor
-    altitude: 0.001,
+    altitude: Math.log(($altitude + 1) / 5) / Math.log($planetRadius),
 
     lookAtSun: lookAtSun,
     lookAtEarth: lookAtEarth,
@@ -103,15 +103,10 @@
 
   let lastApparentSize = apparentSize($moonRadius, $moonPerigee)
 
-  const setAltitude = (rig, f, Rp) => {
+  const setAltitude = (f, Rp) => {
     const alt = (5 * Math.pow(Rp, f) - 1)
     Sky.altitude = alt
-    if (rig){
-      let { position, quaternion } = rig.getWorldCoordinates()
-      position.y = alt
-      rig.setWorldCoordinates({ position, quaternion })
-    }
-    return alt
+    altitude.set(alt)
   }
 
   onMount(() => {
@@ -123,8 +118,8 @@
     perspectiveSettings.add(state, 'FOV', 1, 180, 1)
     perspectiveSettings.add(state, 'exposure', 0.01, 10, 0.01)
     perspectiveSettings.add(state, 'bloomIntensity', 0, 50, 0.01)
-    perspectiveSettings.add(eclipseState, 'altitude', 0, 1, 0.01).onChange(v => {
-      setAltitude(rig, v, $planetRadius)
+    perspectiveSettings.add(eclipseState, 'altitude', 0.2, 1, 0.01).onChange(v => {
+      setAltitude(v, $planetRadius)
     })
     perspectiveSettings.add(eclipseState, 'lookAtSun')
     perspectiveSettings.add(eclipseState, 'lookAtEarth')
@@ -244,7 +239,7 @@
     } else {
       time = eclipseState.progress * moonMove.duration
     }
-    controls?.update(window.performance.now())
+    // controls?.update(window.performance.now())
     const state = moonMove.at(time / 2)
     moonDec.set(state.theta * DEG)
     sunBrightness = state.brightness * sunsetBrightness
@@ -298,28 +293,7 @@
   <T is={Sky.shader} />
 </T.Mesh>
 
-
-<T.PerspectiveCamera
-  position.z={-2}
-  fov={$FOV}
-  near={1}
-  far={1.2 * $moonDistance}
-  makeDefault
-  on:create={({ ref }) => {
-    ref.lookAt(sun.position)
-    rig = new CameraRig(ref, scene)
-    controls = new FreeMovementControls(rig, {
-      domElement: renderer.domElement.parentNode,
-      tiltDegreeFactor: Math.PI / 6,
-      panDegreeFactor: Math.PI / 6,
-    })
-    controls.enable()
-  }}
-  on:destroy={() => {
-    controls.disable()
-  }}
->
-</T.PerspectiveCamera>
+<Camera makeDefault bind:controls={controls} />
 
 <!-- Sun -->
 <!-- <T.PointLight

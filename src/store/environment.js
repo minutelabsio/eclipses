@@ -12,7 +12,7 @@ export const FOV = writable(26.5)
 export const exposure = writable(1.0)
 export const bloomIntensity = writable(5)
 
-export const altitude = writable(1)
+export const altitude = writable(400)
 export const planetRadius = writable(Re)
 export const atmosphereThickness = writable(7 * 8e3)
 export const elevation = writable(2)

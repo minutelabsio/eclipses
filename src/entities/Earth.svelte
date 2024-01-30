@@ -27,7 +27,7 @@ const textures = useLoader(TextureLoader).load({
 <T.LOD let:ref={lod}>
   <T.Group
     on:create={({ ref }) => {
-      lod.addLevel(ref, 100)
+      lod.addLevel(ref, 4000)
     }}
     renderOrder={2}
     layers={9}
