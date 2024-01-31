@@ -26,6 +26,9 @@ export const exposure = writable(1.0)
 export const bloomIntensity = writable(5)
 
 export const altitude = writable(400)
+export const fogHue = writable(200)
+export const eclipseProgress = writable(0)
+export const doAnimation = writable(false)
 export const planetRadius = writable(Re)
 export const planetAxialTilt = writable(23.44 * DEG)
 export const atmosphereThickness = writable(7 * 8e3)
@@ -116,6 +119,10 @@ const state = {
   exposure,
   bloomIntensity,
 
+  altitude,
+  fogHue,
+  eclipseProgress,
+  doAnimation,
   elevation,
   planetRadius,
   planetAxialTilt,

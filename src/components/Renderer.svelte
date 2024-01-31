@@ -14,8 +14,9 @@
     Selection,
   } from 'postprocessing'
   import { exposure, bloomIntensity } from '../store/environment'
+  import { onMount } from 'svelte'
 
-  const { scene, renderer, camera, size, renderStage } = useThrelte()
+  const { scene, renderer, camera, size, renderStage, autoRender } = useThrelte()
   const composer = new EffectComposer(renderer, {
     frameBufferType: THREE.HalfFloatType,
     multisampling: 0
@@ -39,7 +40,7 @@
       luminanceThreshold: 1.2, //0.5,
       luminanceSmoothing: 0.7,
       blendFunction: BlendFunction.ADD,
-      radius: .8, //.99,
+      radius: .9, //.99,
       levels: 10, //40,
       mipmapBlur: true
     })
@@ -64,7 +65,6 @@
           // adaptive: true,
           // resolution: 256,
           // middleGrey: 0.6,
-          // resolution: 512,
           whitePoint: 2,
           minLuminance: 0.005,
           adaptationRate: 2
@@ -77,6 +77,15 @@
   $: composer.setSize($size.width, $size.height)
   $: bloom.intensity = $bloomIntensity
   $: renderer.toneMappingExposure = $exposure
+
+  onMount(() => {
+    let auto = autoRender.current
+    autoRender.set(false)
+
+    return () => {
+      autoRender.set(auto)
+    }
+  })
 
   useTask((delta) => {
     if (!renderer){ return }

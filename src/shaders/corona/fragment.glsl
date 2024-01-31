@@ -3,6 +3,7 @@ varying vec3 vNormal;
 varying vec2 vUv;
 uniform sampler2D uCoronaTexture;
 uniform float uOpacity;
+uniform float uSunIntensity;
 
 void main(){
   vec3 view = normalize(cameraPosition - vPosition);
@@ -16,5 +17,6 @@ void main(){
   if (alpha < cutoff){
     alpha = 0.0;
   }
-  gl_FragColor = vec4(corona.xyz, alpha * uOpacity); //vec4(1.0, 0.0, 0.0, 1.0);
+  float intensity = 1e-2 * uSunIntensity;
+  gl_FragColor = intensity * vec4(corona.xyz, alpha * uOpacity); //vec4(1.0, 0.0, 0.0, 1.0);
 }

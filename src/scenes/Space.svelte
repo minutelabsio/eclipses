@@ -1,21 +1,22 @@
 <script>
-  import { useThrelte, useFrame } from '@threlte/core'
+  import { useFrame } from '@threlte/core'
   import { Easing, Tween } from 'intween'
   import Stats from '../components/Stats.svelte'
   import { T } from '@threlte/core'
-  import GUI from 'lil-gui'
   import { Vector3, MathUtils } from 'three'
   import createCorona from '../shaders/corona/Corona'
   import createSky from '../shaders/sky/Sky'
   import createStars from '../shaders/stars/Stars'
   import Earth from '../entities/Earth.svelte'
   import Jupiter from '../entities/Jupiter.svelte'
-  import { onMount } from 'svelte'
   import Renderer from '../components/Renderer.svelte'
   import Camera from '../components/Camera.svelte'
+  import DebugControls from '../components/DebugControls.svelte'
 
   import {
     planetRadius,
+    eclipseProgress,
+    doAnimation,
     atmosphereThickness,
     elevationRad,
     totalityFactor,
@@ -50,6 +51,7 @@
     earthVisible,
     altitude,
     elevation,
+    fogHue,
   } from '../store/environment'
   import {
     DEG,
@@ -57,16 +59,6 @@
     AU,
   } from '../lib/units'
   import { skyPosition } from '../lib/sky-position'
-
-  const { scene, renderer, autoRender } = useThrelte()
-
-  let sunMaterial
-  let sunlight
-  let sun
-  let moon
-  let corona
-  let skyMesh
-  let controls
 
   const Corona = createCorona({
     opacity: 0.5
@@ -76,125 +68,6 @@
 
   let starsPoints
   const Stars = createStars().then(s => starsPoints = s)
-
-  const lookAtSun = () => {
-    const [x, y, z] = $sunPosition
-    controls.lookInDirectionOf(x, y, z, true)
-  }
-
-  const lookAtEarth = () => {
-    controls.lookInDirectionOf(0, -$planetRadius, 0, true)
-  }
-
-  const eclipseState = {
-    doAnimation: false,
-    progress: 0,
-    lockApparentSize: false,
-    // scale factor
-    altitude: Math.log(($altitude + 1) / 5) / Math.log($planetRadius),
-
-    lookAtSun: lookAtSun,
-    lookAtEarth: lookAtEarth,
-  }
-
-  const apparentSize = (r, d) => {
-    return 2 * Math.asin(r / d) * DEG
-  }
-
-  let lastApparentSize = apparentSize($moonRadius, $moonPerigee)
-
-  const setAltitude = (f, Rp) => {
-    const alt = (5 * Math.pow(Rp, f) - 1)
-    altitude.set(alt)
-  }
-
-  onMount(() => {
-    const state = getDatGuiState()
-    const appSettings = new GUI({
-      width: 400
-    })
-    const perspectiveSettings = appSettings.addFolder('Perspective')
-    perspectiveSettings.add(state, 'FOV', 1, 180, 1)
-    perspectiveSettings.add(state, 'exposure', 0.01, 10, 0.01)
-    perspectiveSettings.add(state, 'bloomIntensity', 0, 50, 0.01)
-    perspectiveSettings.add(eclipseState, 'altitude', 0.2, 1, 0.01).onChange(v => {
-      setAltitude(v, $planetRadius)
-    })
-    perspectiveSettings.add(eclipseState, 'lookAtSun')
-    perspectiveSettings.add(eclipseState, 'lookAtEarth')
-
-    const eclipseSettings = appSettings.addFolder('Eclipse')
-    eclipseSettings.add(eclipseState, 'doAnimation')
-    eclipseSettings.add(eclipseState, 'progress', 0, 1, 0.01)
-    eclipseSettings.add(state, 'totalityFactor', 0, 1, 0.01)
-    eclipseSettings.add(state, 'elevation', -90, 90, 0.001)
-
-    const planetSettings = appSettings.addFolder('Planetary')
-    planetSettings.add(state, 'sunIntensity', 0, 500, 1)
-    planetSettings.add(state, 'planetRadius', 1e6, 1e7, 100)
-    planetSettings.add(eclipseState, 'lockApparentSize').onChange(v => {
-      if (v){
-        lastApparentSize = apparentSize($moonRadius, $moonPerigee)
-      }
-    }).name('Lock Size at Perigee')
-    const moonRadiusCtrl = planetSettings.add(state, 'moonRadius', 1e5, 1e7, 100)
-    const moonPerigeeCtrl = planetSettings.add(state, 'moonPerigee', 1e6, 1e9, 100)
-    planetSettings.add(state, 'moonApogee', 1e7, 1e9, 100)
-
-    const atmosSettings = appSettings.addFolder('Atmosphere')
-    atmosSettings.add(state, 'atmosphereThickness', 0, 1000000, 1)
-
-    const rayleighSettings = atmosSettings.addFolder('Rayleigh')
-    rayleighSettings.add(state, 'rayleighRed', 0, 1e-4, 1e-7)
-    rayleighSettings.add(state, 'rayleighGreen', 0, 1e-4, 1e-7)
-    rayleighSettings.add(state, 'rayleighBlue', 0, 1e-4, 1e-7)
-    rayleighSettings.add(state, 'rayleighScaleHeight', 0, 100000, 10)
-
-    const mieSettings = atmosSettings.addFolder('Mie')
-    mieSettings.add(state, 'mieCoefficient', 0, 1e-4, 1e-7)
-    mieSettings.add(state, 'mieScaleHeight', 0, 10000, 10)
-    mieSettings.add(state, 'mieDirectional', -.999, .999, 0.01)
-
-    const cloudSettings = atmosSettings.addFolder('Clouds')
-    cloudSettings.add(state, 'cloudZ', 0.01, 0.9, 0.01)
-    cloudSettings.add(state, 'cloudThickness', 0, 20, 0.1)
-    cloudSettings.add(state, 'cloudSize', 0, 10, 0.1)
-    cloudSettings.add(state, 'cloudMie', 0, .999, 1e-7)
-    cloudSettings.add(state, 'cloudThreshold', 0, 1, 0.01)
-    cloudSettings.add(state, 'windSpeed', 0, 1, 0.01)
-
-    const performanceSettings = atmosSettings.addFolder('performance').close()
-    performanceSettings.add(state, 'iSteps', 1, 32, 1)
-    performanceSettings.add(state, 'jSteps', 1, 32, 1)
-
-    const visibilitySettings = appSettings.addFolder('Visibility').close()
-    visibilitySettings.add(state, 'skyVisible')
-    visibilitySettings.add(state, 'starsVisible')
-    visibilitySettings.add(state, 'mountainsVisible')
-    visibilitySettings.add(state, 'earthVisible')
-
-    moonRadiusCtrl.onChange(r => {
-      if (eclipseState.lockApparentSize){
-        $moonPerigee = (r / Math.sin(lastApparentSize / 2 / DEG))
-        moonPerigeeCtrl.updateDisplay()
-      }
-    })
-
-    moonPerigeeCtrl.onChange(d => {
-      if (eclipseState.lockApparentSize){
-        $moonRadius = d * Math.sin(lastApparentSize / 2 / DEG)
-        moonRadiusCtrl.updateDisplay()
-      }
-    })
-
-    let auto = autoRender.current
-    autoRender.set(false)
-
-    return () => {
-      appSettings.destroy()
-      autoRender.set(auto)
-    }
-  })
 
   let sunBrightness = 1
   $: sunsetBrightness = MathUtils.clamp(MathUtils.inverseLerp(-10, 10, $elevation), 0, 1)
@@ -233,10 +106,10 @@
   useFrame((ctx, dt) => {
     // frame
     Sky.update(dt)
-    if (eclipseState.doAnimation) {
+    if ($doAnimation) {
       time += dt * 1000
     } else {
-      time = eclipseState.progress * moonMove.duration
+      time = $eclipseProgress * moonMove.duration
     }
     // controls?.update(window.performance.now())
     const state = moonMove.at(time / 2)
@@ -264,15 +137,18 @@
   $: Sky.cloudThreshold = $cloudThreshold
   $: Sky.windSpeed = $windSpeed
   $: Sky.atmosphereThickness = $atmosphereThickness
-  // $: Sky.altitude = $altitude
   $: Sky.planetRadius = $planetRadius
   $: Sky.sunPosition.set(...$sunPosition)
   $: Sky.sunRadius = $sunRadius / METER
   $: Sky.moonPosition.copy($moonPosition)
   $: Sky.moonRadius = $moonRadius / METER
-  $: fog?.color.setHSL(200 / 360, .2, Easing.sinIn(sunBrightness) * 0.3)
+  $: fog?.color.setHSL($fogHue / 360, .2, Easing.sinIn(sunBrightness) * 0.3)
+
+  let cameraControls
 </script>
 
+
+<DebugControls cameraControls={cameraControls}/>
 <Renderer/>
 <Stats />
 
@@ -286,9 +162,8 @@
   makeDefault
   near={1}
   far={1.2 * AU}
-  bind:controls={controls}
+  bind:controls={cameraControls}
 />
-
 
 <Earth
   planetVisible={$earthVisible}
@@ -309,11 +184,12 @@
   />
   <!-- Corona -->
   <T.Mesh
-    visible={false}
-    position={[$sunPosition[0], $sunPosition[1], $sunPosition[2]]}
+    visible={true}
+    position={$sunPosition}
+    rotation.x={-$elevationRad}
     rotation.y={Math.PI}
     scale={[$sunRadius, $sunRadius, $sunRadius]}
-    bind:ref={corona}
+    renderOrder={2}
   >
     <T.PlaneGeometry args={[4.4, 4.32]} />
     <T is={Corona}/>
@@ -324,7 +200,6 @@
     scale.x={$planetRadius + $atmosphereThickness}
     scale.y={$planetRadius + $atmosphereThickness}
     scale.z={$planetRadius + $atmosphereThickness}
-    bind:ref={skyMesh}
     renderOrder={2}
   >
     <T.IcosahedronGeometry args={[1, 32]} />
