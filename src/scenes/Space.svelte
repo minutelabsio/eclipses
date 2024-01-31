@@ -49,6 +49,7 @@
     mountainsVisible,
     earthVisible,
     altitude,
+    elevation,
   } from '../store/environment'
   import {
     DEG,
@@ -196,7 +197,7 @@
   })
 
   let sunBrightness = 1
-  $: sunsetBrightness = MathUtils.clamp(MathUtils.inverseLerp(-10, 10, $elevationRad), 0, 1)
+  $: sunsetBrightness = MathUtils.clamp(MathUtils.inverseLerp(-10, 10, $elevation), 0, 1)
 
   const createExpotentialIn = (a) => {
     return (x) => Math.pow(2, a * x - a) * x
@@ -288,37 +289,6 @@
   bind:controls={controls}
 />
 
-<!-- Sun -->
-<!-- <T.PointLight
-  position={$sunPosition}
-  intensity={4e14 * sunIntensity}
-  color="white"
-/> -->
-<T.Mesh
-  visible={false}
-  position={$sunPosition}
-  bind:ref={sun}
->
-  <T.SphereGeometry args={[$sunRadius, 32, 32]} />
-  <T.MeshStandardMaterial emissive="#fdffde" bind:ref={sunMaterial} emissiveIntensity={16} />
-</T.Mesh>
-
-<!-- Corona -->
-<!-- <T.Mesh
-  visible={false}
-  position={[$sunPosition[0], $sunPosition[1], $sunPosition[2]]}
-  rotation.y={Math.PI}
-  scale={[$sunRadius, $sunRadius, $sunRadius]}
-  bind:ref={corona}
->
-  <T.PlaneGeometry args={[4.4, 4.32]} />
-  <T is={Corona}/>
-</T.Mesh> -->
-
-<T.DirectionalLight
-  intensity={1}
-  position={$sunPosition}
-/>
 
 <Earth
   planetVisible={$earthVisible}
@@ -332,6 +302,23 @@
 <T.Group
   position={[0, -$planetRadius, 0]}
 >
+
+  <T.DirectionalLight
+    intensity={1}
+    position={$sunPosition}
+  />
+  <!-- Corona -->
+  <T.Mesh
+    visible={false}
+    position={[$sunPosition[0], $sunPosition[1], $sunPosition[2]]}
+    rotation.y={Math.PI}
+    scale={[$sunRadius, $sunRadius, $sunRadius]}
+    bind:ref={corona}
+  >
+    <T.PlaneGeometry args={[4.4, 4.32]} />
+    <T is={Corona}/>
+  </T.Mesh>
+
   <T.Mesh
     visible={$skyVisible}
     scale.x={$planetRadius + $atmosphereThickness}
@@ -345,7 +332,7 @@
   </T.Mesh>
 
   <Jupiter
-    position={skyPosition(4.217e8, 3 * DEG, 15 * DEG)}
+    position={skyPosition(4.217e8, 13 * DEG, 20 * DEG)}
     radius={7.1492e7}
   />
 

@@ -39,12 +39,16 @@ const textures = useLoader(TextureLoader).load({
       layers={9}
       castShadow={false}
     />
-    <T.DirectionalLight
-      intensity={sunBrightness * 2}
-      position={sunPosition}
-      layers={9}
-      castShadow={false}
-    />
+    <T.Group
+      position={position}
+    >
+      <T.DirectionalLight
+        intensity={sunBrightness * 2}
+        position={sunPosition}
+        layers={9}
+        castShadow={false}
+      />
+    </T.Group>
     <T.Mesh
       position={[0, -planetRadius, 0]}
       rotation={[0, 0, 0]}
