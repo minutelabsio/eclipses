@@ -51,8 +51,9 @@ const textures = useLoader(TextureLoader).load({
       scale={[planetRadius, planetRadius, planetRadius]}
       layers={9}
       renderOrder={1}
+      visible={mountainsVisible}
     >
-      <T.IcosahedronGeometry args={[1.0, 64]} />
+      <T.IcosahedronGeometry args={[1.00005, 64]} />
       <T.MeshStandardMaterial color={planetColor}/>
     </T.Mesh>
     <Terrain color={planetColor} visible={mountainsVisible} layers={9} renderOrder={1} />

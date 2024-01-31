@@ -17,6 +17,12 @@ const beforeRenderStage = useStage({
 })
 
 CameraControls.install( { THREE: THREE } )
+CameraControls.prototype.lookInDirectionOf = function(x, y, z, anim) {
+  const point = new THREE.Vector3(x, y, z);
+  const direction = point.sub( this._targetEnd ).normalize();
+  const position = direction.multiplyScalar( - this._sphericalEnd.radius ).add( this._targetEnd );
+  return this.setPosition( position.x, position.y, position.z, anim );
+}
 extend({ CameraControls })
 export let controls
 
@@ -32,8 +38,6 @@ useTask((dt) => {
 <T.PerspectiveCamera
   position.z={2}
   fov={$FOV}
-  near={1}
-  far={1.2 * $moonDistance}
   bind:this={$component}
   let:ref
   {...$$restProps}
@@ -50,7 +54,6 @@ useTask((dt) => {
     bind:ref={controls}
     on:create={({ ref }) => {
       const [x, y, z] = $sunPosition
-      console.log('look in direction of', x, y, z)
       ref.lookInDirectionOf(x, y, z, false)
     }}
   />

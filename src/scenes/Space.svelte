@@ -24,7 +24,7 @@
     sunRadius,
     moonRadius,
     moonPerigee,
-    moonDec,
+    moonRightAscention,
     moonPosition,
     moonDistance,
     rayleighRed,
@@ -78,12 +78,11 @@
 
   const lookAtSun = () => {
     const [x, y, z] = $sunPosition
-    const [ox, oy, oz] = controls.camera.position.toArray()
-    controls.lookInDirectionOf(x - ox, y - oy, z - oz, true)
+    controls.lookInDirectionOf(x, y, z, true)
   }
 
   const lookAtEarth = () => {
-    controls.lookInDirectionOf(0, $planetRadius, 0, true)
+    controls.lookInDirectionOf(0, -$planetRadius, 0, true)
   }
 
   const eclipseState = {
@@ -105,7 +104,6 @@
 
   const setAltitude = (f, Rp) => {
     const alt = (5 * Math.pow(Rp, f) - 1)
-    Sky.altitude = alt
     altitude.set(alt)
   }
 
@@ -241,7 +239,7 @@
     }
     // controls?.update(window.performance.now())
     const state = moonMove.at(time / 2)
-    moonDec.set(state.theta * DEG)
+    moonRightAscention.set(state.theta * DEG)
     sunBrightness = state.brightness * sunsetBrightness
   })
 
@@ -265,11 +263,11 @@
   $: Sky.cloudThreshold = $cloudThreshold
   $: Sky.windSpeed = $windSpeed
   $: Sky.atmosphereThickness = $atmosphereThickness
+  // $: Sky.altitude = $altitude
   $: Sky.planetRadius = $planetRadius
-  $: r0 = new Vector3(0, -$planetRadius, 0)
-  $: Sky.sunPosition.set(...$sunPosition).sub(r0).multiplyScalar(1 / METER)
+  $: Sky.sunPosition.set(...$sunPosition)
   $: Sky.sunRadius = $sunRadius / METER
-  $: Sky.moonPosition.copy($moonPosition).sub(r0).multiplyScalar(1 / METER)
+  $: Sky.moonPosition.copy($moonPosition)
   $: Sky.moonRadius = $moonRadius / METER
   $: fog?.color.setHSL(200 / 360, .2, Easing.sinIn(sunBrightness) * 0.3)
 </script>
@@ -283,17 +281,12 @@
 <T is={Stars} renderOrder={0} visible={$starsVisible}/>
 {/await}
 
-<T.Mesh
-  visible={$skyVisible}
-  bind:ref={skyMesh}
-  scale={[AU, AU, AU]}
-  renderOrder={2}
->
-  <T.IcosahedronGeometry args={[1, 32]} />
-  <T is={Sky.shader} />
-</T.Mesh>
-
-<Camera makeDefault bind:controls={controls} />
+<Camera
+  makeDefault
+  near={1}
+  far={1.2 * AU}
+  bind:controls={controls}
+/>
 
 <!-- Sun -->
 <!-- <T.PointLight
@@ -322,31 +315,6 @@
   <T is={Corona}/>
 </T.Mesh> -->
 
-<!-- moon -->
-<T.Mesh
-  visible={false}
-  bind:ref={moon}
-  position={$moonPosition.toArray()}
-  rotation={[180 * DEG, 0, 0]}
-  castShadow
-  fog={false}
->
-  <!-- <T.SphereGeometry args={[moonRadius, 32, 32]} /> -->
-  <T.IcosahedronGeometry args={[$moonRadius, 32]} />
-  <!-- <T.CircleGeometry args={[moonRadius, 32]} /> -->
-  <T.MeshBasicMaterial color="red" dithering />
-</T.Mesh>
-
-<!-- Ground -->
-<!-- <T.Mesh
-  position={[0, -$planetRadius, 0]}
-  rotation={[0, 0, 0]}
-  receiveShadow
->
-  <T.IcosahedronGeometry args={[$planetRadius+1, 256]} />
-  <T.MeshStandardMaterial color='#888' dithering/>
-</T.Mesh> -->
-
 <T.DirectionalLight
   intensity={1}
   position={$sunPosition}
@@ -361,7 +329,44 @@
   sunPosition={$sunPosition}
 />
 
-<Jupiter
-  position={skyPosition(4.217e8, 5 * DEG, 40 * DEG)}
-  radius={7.1492e7}
-/>
+<T.Group
+  position={[0, -$planetRadius, 0]}
+>
+  <T.Mesh
+    visible={$skyVisible}
+    scale.x={$planetRadius + $atmosphereThickness}
+    scale.y={$planetRadius + $atmosphereThickness}
+    scale.z={$planetRadius + $atmosphereThickness}
+    bind:ref={skyMesh}
+    renderOrder={2}
+  >
+    <T.IcosahedronGeometry args={[1, 32]} />
+    <T is={Sky.shader} />
+  </T.Mesh>
+
+  <Jupiter
+    position={skyPosition(4.217e8, 3 * DEG, 15 * DEG)}
+    radius={7.1492e7}
+  />
+
+  <!-- moon debug -->
+  <T.Mesh
+    visible={false}
+    position={$moonPosition.toArray()}
+    rotation={[180 * DEG, 0, 0]}
+  >
+    <!-- <T.SphereGeometry args={[moonRadius, 32, 32]} /> -->
+    <T.IcosahedronGeometry args={[$moonRadius, 32]} />
+    <!-- <T.CircleGeometry args={[moonRadius, 32]} /> -->
+    <T.MeshBasicMaterial color="red" dithering fog={false} />
+  </T.Mesh>
+
+  <!-- Sun Debug -->
+  <T.Mesh
+    visible={false}
+    position={$sunPosition}
+  >
+    <T.IcosahedronGeometry args={[$sunRadius, 32]} />
+    <T.MeshBasicMaterial color="green" dithering fog={false} />
+  </T.Mesh>
+</T.Group>

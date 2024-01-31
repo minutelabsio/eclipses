@@ -8,47 +8,83 @@ import {
 } from '../lib/units'
 import { skyPosition } from '../lib/sky-position'
 
+const sphereIntersection = (origin, ray, radius) => {
+  const b = ray.dot(origin)
+  const c = origin.dot(origin) - radius * radius
+  const d = b * b - c
+  if (d < 0) {
+    return null
+  }
+  const sqrtd = Math.sqrt(d)
+  const x0 = -b - sqrtd
+  const x1 = -b + sqrtd
+  return x0 < x1 ? [x0, x1] : [x1, x0]
+}
+
 export const FOV = writable(26.5)
 export const exposure = writable(1.0)
 export const bloomIntensity = writable(5)
 
 export const altitude = writable(400)
 export const planetRadius = writable(Re)
+export const planetAxialTilt = writable(23.44 * DEG)
 export const atmosphereThickness = writable(7 * 8e3)
 export const elevation = writable(2)
 export const elevationRad = derived(
   [elevation],
   ([$elevation]) => $elevation * DEG
 )
-
+export const observerOrigin = derived(
+  [planetRadius],
+  ([$planetRadius]) => new Vector3(0, $planetRadius, 0)
+)
 export const sunDistance = writable(1 * AU)
 export const sunRadius = writable(109 * Re)
 export const sunPosition = derived(
   [sunDistance, elevationRad],
   ([$sunDistance, $elevationRad]) => skyPosition($sunDistance, $elevationRad, 0)
 )
+export const sunDirection = derived(
+  [sunPosition],
+  ([$sunPosition]) => new Vector3().fromArray($sunPosition).normalize()
+)
 
 export const totalityFactor = writable(0.9)
 export const moonRadius = writable(0.2727 * Re)
 export const moonPerigee = writable(356500 * 1000 * METER)
 export const moonApogee = writable(406700 * 1000 * METER)
-export const moonOrbitInclination = writable(5.145 * DEG + 23.44 * DEG)
-export const moonDec = writable(0)
+export const moonOrbitInclination = writable(5.145 * DEG)
+export const moonRightAscention = writable(0)
 export const moonDistance = derived(
   [moonPerigee, moonApogee, totalityFactor],
   ([$moonPerigee, $moonApogee, $totalityFactor]) => MathUtils.lerp($moonPerigee, $moonApogee, 1 - $totalityFactor)
 )
 export const moonAxis = derived(
-  [moonOrbitInclination],
-  ([$moonOrbitInclination]) => new Vector3(1, 0, 0).applyAxisAngle(new Vector3(0, 0, 1), $moonOrbitInclination)
+  [moonOrbitInclination, planetAxialTilt],
+  ([$moonOrbitInclination, $planetAxialTilt]) => new Vector3(1, 0, 0).applyAxisAngle(new Vector3(0, 0, 1), $moonOrbitInclination + $planetAxialTilt)
+)
+export const moonAngleCorrection = derived(
+  [moonDistance, sunDirection, observerOrigin, elevationRad],
+  ([$moonDistance, $sunDirection, $observerOrigin, $elevationRad]) => {
+    const int = sphereIntersection($observerOrigin, $sunDirection, $moonDistance)
+    if (int === null) {
+      return 0
+    }
+    const d = int[1]
+    const m = $moonDistance
+    const m2 = m * m
+    const R = $observerOrigin.length()
+    const R2 = $observerOrigin.lengthSq()
+    const cosa = (R2 + m2 - d * d) / (2 * R * m)
+    return 0.5 * Math.PI - Math.acos(cosa) - $elevationRad
+  }
 )
 export const moonPosition = derived(
-  [moonDistance, elevationRad, moonAxis, moonDec],
-  ([$moonDistance, $elevationRad, $moonAxis, $moonDec]) =>
-    skyPosition($moonDistance, $elevationRad, 0, new Vector3())
-      .applyAxisAngle($moonAxis, $moonDec)
+  [moonDistance, elevationRad, moonAxis, moonRightAscention, moonAngleCorrection],
+  ([$moonDistance, $elevationRad, $moonAxis, $moonRightAscention, $moonAngleCorrection]) =>
+    skyPosition($moonDistance, $elevationRad + $moonAngleCorrection, 0, new Vector3())
+      .applyAxisAngle($moonAxis, $moonRightAscention)
 )
-
 
 export const sunIntensity = writable(25)
 export const rayleighRed = writable(5.5e-6)
@@ -82,6 +118,7 @@ const state = {
 
   elevation,
   planetRadius,
+  planetAxialTilt,
   atmosphereThickness,
 
   sunDistance,
@@ -94,7 +131,7 @@ const state = {
   moonApogee,
 
   moonOrbitInclination,
-  moonDec,
+  moonRightAscention,
   moonPosition,
 
   sunIntensity,

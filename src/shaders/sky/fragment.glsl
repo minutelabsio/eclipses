@@ -4,12 +4,12 @@ varying vec3 vCameraDirection;
 varying vec3 rayOrigin;
 varying float SunAngularRadius;
 varying float MoonAngularRadius;
+varying float altitude;
 
 uniform float time;
 
 uniform sampler2D opticalDepthMap;
 uniform float opticalDepthMapSize;
-uniform float altitude;
 uniform float sunRadius;
 uniform float moonRadius;
 uniform vec3 planetColor;
