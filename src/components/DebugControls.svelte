@@ -8,10 +8,12 @@
     moonPerigee,
     getDatGuiState,
     altitude,
+    load,
   } from '../store/environment'
   import {
     DEG,
   } from '../lib/units'
+  import * as PlanetConfigs from '../configs'
 
   export let cameraControls
 
@@ -25,6 +27,7 @@
   }
 
   const eclipseState = {
+    planet: 'earth',
     lockApparentSize: false,
     // scale factor
     altitude: Math.log(($altitude + 1) / 5) / Math.log($planetRadius),
@@ -48,6 +51,18 @@
     const state = getDatGuiState()
     const appSettings = new GUI({
       width: 400
+    })
+    appSettings.add(eclipseState, 'planet', [
+      // 'venus',
+      'earth',
+      'mars',
+      'jupiter',
+      // 'saturn',
+      // 'uranus',
+      // 'neptune',
+    ]).onChange((v) => {
+      load(PlanetConfigs[v])
+      appSettings.controllersRecursive().forEach(c => c.updateDisplay())
     })
     const perspectiveSettings = appSettings.addFolder('Perspective')
     perspectiveSettings.add(state, 'FOV', 1, 180, 1)

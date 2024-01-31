@@ -49,7 +49,7 @@ export default () => {
     cloudSize: 1.,
     cloudMie: 0.78,
     cloudThreshold: 0.4,
-    windSpeed: 8e-2,
+    windSpeed: 8,
   }
 
   const api = { shader }
@@ -72,7 +72,7 @@ export default () => {
 
   shader.uniforms.time = { value: 0 }
   api.update = (dt) => {
-    shader.uniforms.time.value += dt
+    shader.uniforms.time.value += dt / 1000
     shader.uniforms.time.needsUpdate = true
   }
 
