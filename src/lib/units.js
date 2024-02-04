@@ -10,3 +10,4 @@ export const Isol = 128e3 / 4 / Math.PI
 export const METER = 1
 export const Re = 6378 * 1000 * METER
 export const AU = 149597870700 * METER
+export const mBar = 100 // Pascal

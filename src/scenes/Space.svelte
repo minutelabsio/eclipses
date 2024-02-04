@@ -18,19 +18,16 @@
     eclipseProgress,
     doAnimation,
     atmosphereThickness,
+    airIndexRefraction,
     elevationRad,
     totalityFactor,
     sunIntensity,
     sunPosition,
     sunRadius,
     moonRadius,
-    moonPerigee,
     moonRightAscention,
     moonPosition,
-    moonDistance,
-    rayleighRed,
-    rayleighGreen,
-    rayleighBlue,
+    rayleighCoefficient,
     rayleighScaleHeight,
     mieCoefficient,
     mieScaleHeight,
@@ -44,12 +41,10 @@
     cloudMie,
     cloudThreshold,
     windSpeed,
-    getDatGuiState,
     starsVisible,
     skyVisible,
     mountainsVisible,
     earthVisible,
-    altitude,
     elevation,
     fogHue,
   } from '../store/environment'
@@ -120,9 +115,7 @@
   let fog
 
   $: Sky.sunIntensity = $sunIntensity
-  $: Sky.rayleighCoefficients.x = $rayleighRed
-  $: Sky.rayleighCoefficients.y = $rayleighGreen
-  $: Sky.rayleighCoefficients.z = $rayleighBlue
+  $: Sky.rayleighCoefficients = $rayleighCoefficient
   $: Sky.rayleighScaleHeight = $rayleighScaleHeight
   $: Sky.mieCoefficient = $mieCoefficient
   $: Sky.mieScaleHeight = $mieScaleHeight
@@ -184,7 +177,7 @@
   />
   <!-- Corona -->
   <T.Mesh
-    visible={true}
+    visible={false}
     position={$sunPosition}
     rotation.x={-$elevationRad}
     rotation.y={Math.PI}
@@ -197,9 +190,9 @@
 
   <T.Mesh
     visible={$skyVisible}
-    scale.x={$planetRadius + $atmosphereThickness}
-    scale.y={$planetRadius + $atmosphereThickness}
-    scale.z={$planetRadius + $atmosphereThickness}
+    scale.x={AU}
+    scale.y={AU}
+    scale.z={AU}
     renderOrder={2}
   >
     <T.IcosahedronGeometry args={[1, 32]} />

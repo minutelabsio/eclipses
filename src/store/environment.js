@@ -89,14 +89,47 @@ export const moonPosition = derived(
       .applyAxisAngle($moonAxis, $moonRightAscention)
 )
 
+const getMie = (n, k) => {
+  return k * 1e26 * 8 * Math.pow(Math.PI, 3) * Math.pow((n * n - 1), 2) / 3 / 2.547e+25
+}
+
+const getRayleigh = (n, k) => {
+  const rgb = [680, 510, 440]
+  const corr = 1e10
+  const a = getMie(n, k)
+  const r = new Vector3(
+    corr * a * Math.pow(1 / rgb[0], 4),
+    corr * a * Math.pow(1 / rgb[1], 4),
+    corr * a * Math.pow(1 / rgb[2], 4)
+  )
+  console.log(r, a)
+  return r
+}
+
+const print = (val, ...args) => {
+  console.log(val, ...args)
+  return val
+}
+
 export const sunIntensity = writable(25)
-export const rayleighRed = writable(5.5e-6)
-export const rayleighGreen = writable(13.0e-6)
-export const rayleighBlue = writable(22.4e-6)
+export const rayleighRed = writable(5.802e-6)
+export const rayleighGreen = writable(13.558e-6)
+export const rayleighBlue = writable(33.1e-6)
 export const rayleighScaleHeight = writable(8e3)
-export const mieCoefficient = writable(21e-6)
-export const mieScaleHeight = writable(500)
+export const mieCoefficient = writable(4.4e-6)
+export const mieScaleHeight = writable(1.2e3)
 export const mieDirectional = writable(-0.758)
+export const airIndexRefraction = writable(1.0003)
+export const airSurfacePressure = writable(101.3e3)
+export const airSurfaceTemperature = writable(288)
+export const airDensityFactor = derived(
+  [airSurfacePressure, airSurfaceTemperature],
+  ([$P, $T]) => print((288 / 101.3e3) * ($P / $T), $P, $T)
+)
+export const rayleighCoefficient = derived(
+  [airIndexRefraction, airDensityFactor],
+  ([$n, $air]) => getRayleigh($n, $air)
+)
 // clouds
 export const cloudZ = writable(0.2)
 export const cloudThickness = writable(4)
@@ -127,6 +160,9 @@ const state = {
   planetRadius,
   planetAxialTilt,
   atmosphereThickness,
+  airIndexRefraction,
+  airSurfacePressure,
+  airSurfaceTemperature,
 
   sunDistance,
   sunRadius,

@@ -94,15 +94,17 @@
 
     const atmosSettings = appSettings.addFolder('Atmosphere')
     atmosSettings.add(state, 'atmosphereThickness', 0, 1000000, 1)
+    atmosSettings.add(state, 'airIndexRefraction', 1, 2, 0.001)
+    atmosSettings.add(state, 'airSurfacePressure', 0, 100000, 1)
+    atmosSettings.add(state, 'airSurfaceTemperature', 0, 1000, 1)
 
     const rayleighSettings = atmosSettings.addFolder('Rayleigh')
-    rayleighSettings.add(state, 'rayleighRed', 0, 1e-4, 1e-7)
-    rayleighSettings.add(state, 'rayleighGreen', 0, 1e-4, 1e-7)
-    rayleighSettings.add(state, 'rayleighBlue', 0, 1e-4, 1e-7)
+    // rayleighSettings.add(state, 'rayleighRed', 0, 1e-4, 1e-7)
+    // rayleighSettings.add(state, 'rayleighGreen', 0, 1e-4, 1e-7)
+    // rayleighSettings.add(state, 'rayleighBlue', 0, 1e-4, 1e-7)
     rayleighSettings.add(state, 'rayleighScaleHeight', 0, 100000, 10)
 
     const mieSettings = atmosSettings.addFolder('Mie')
-    mieSettings.add(state, 'mieCoefficient', 0, 1e-4, 1e-7)
     mieSettings.add(state, 'mieScaleHeight', 0, 10000, 10)
     mieSettings.add(state, 'mieDirectional', -.999, .999, 0.01)
 
@@ -112,11 +114,11 @@
     cloudSettings.add(state, 'cloudSize', 0, 10, 0.1)
     cloudSettings.add(state, 'cloudMie', 0, .999, 1e-7)
     cloudSettings.add(state, 'cloudThreshold', 0, 1, 0.01)
-    cloudSettings.add(state, 'windSpeed', 0, 1, 0.01)
+    cloudSettings.add(state, 'windSpeed', 0, 200, 1)
 
     const performanceSettings = atmosSettings.addFolder('performance').close()
-    performanceSettings.add(state, 'iSteps', 1, 32, 1)
-    performanceSettings.add(state, 'jSteps', 1, 32, 1)
+    performanceSettings.add(state, 'iSteps', 1, 32, 1).listen()
+    performanceSettings.add(state, 'jSteps', 1, 32, 1).listen()
 
     const visibilitySettings = appSettings.addFolder('Visibility').close()
     visibilitySettings.add(state, 'skyVisible')

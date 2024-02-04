@@ -2,19 +2,25 @@ import {
   METER,
   Re,
   AU,
-  DEG
+  DEG,
+  mBar
 } from '../lib/units'
+
+const planetRadius = 10.973 * Re
 // jupiter
 export default {
   fogHue: 0,
-  planetRadius: 10.973 * Re,
+  planetRadius,
   planetAxialTilt: 3.13 * DEG,
   rayleighScaleHeight: 27e3 * METER,
-  atmosphereThickness: 7 * 27e3 * METER,
+  atmosphereThickness: 9 * 27e3 * METER,
+  airIndexRefraction: 1.00015,
+  airSurfacePressure: 1000 * mBar,
+  airSurfaceTemperature: 165,
+
   windSpeed: 100,
-  mieCoefficient: 0,
-  mieDirectional: -0.758,
-  mieScaleHeight: 2000,
+  mieDirectional: 0,
+  mieScaleHeight: 0,
   sunDistance: 5.2038 * AU,
   // Callisto
   moonRadius: 0.378 * Re,
