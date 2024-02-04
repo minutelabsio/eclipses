@@ -4,6 +4,7 @@
   import Test from './scenes/Test.svelte'
   import { onMount } from 'svelte'
   import { NoToneMapping } from 'three'
+  import { Suspense } from '@threlte/extras'
 
   const renderOptions = {
     powerPreference: 'high-performance',
@@ -25,8 +26,11 @@
     useLegacyLights={false}
     rendererParameters={renderOptions}
     toneMapping={NoToneMapping}
+    dpr={1}
   >
-    <Space/>
+    <Suspense>
+      <Space/>
+    </Suspense>
     <!-- <Test /> -->
   </Canvas>
 </main>

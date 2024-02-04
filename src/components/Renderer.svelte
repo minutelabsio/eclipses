@@ -1,6 +1,7 @@
 <script>
   import * as THREE from 'three'
   import { useThrelte, useTask } from '@threlte/core'
+  import { useSuspense } from '@threlte/extras'
   import {
     EffectComposer,
     EffectPass,
@@ -12,9 +13,41 @@
     ToneMappingEffect,
     ToneMappingMode,
     Selection,
+    EdgeDetectionMode,
   } from 'postprocessing'
   import { exposure, bloomIntensity } from '../store/environment'
   import { onMount } from 'svelte'
+  import { getGPUTier } from 'detect-gpu'
+  import { iSteps, jSteps } from '../store/environment'
+
+  const detectGpu = async () => {
+    // detect the gpu tier and adjust settings
+    const gpuTier = await getGPUTier()
+    switch (gpuTier.tier){
+      case 3:
+        iSteps.set(12)
+        jSteps.set(12)
+        break
+      case 2:
+        iSteps.set(10)
+        jSteps.set(8)
+        break
+      case 1:
+      default:
+        iSteps.set(6)
+        jSteps.set(5)
+        break
+    }
+
+    // Example output:
+    // {
+    //   "tier": 1,
+    //   "isMobile": false,
+    //   "type": "BENCHMARK",
+    //   "fps": 21,
+    //   "gpu": "intel iris graphics 6100"
+    // }
+  }
 
   const { scene, renderer, camera, size, renderStage, autoRender } = useThrelte()
   const composer = new EffectComposer(renderer, {
@@ -28,6 +61,7 @@
     if (!camera) return
     composer.removeAllPasses()
     const renderpass = new RenderPass(scene, camera)
+    renderpass.skipShadowMapUpdate = true
     renderpass.selection = new Selection([], 0)
     composer.addPass(renderpass)
     const renderpass2 = new RenderPass(scene, camera)
@@ -69,6 +103,11 @@
           minLuminance: 0.005,
           adaptationRate: 2
         }),
+        new SMAAEffect({
+          preset: SMAAPreset.ULTRA,
+          edgeDetectionMode: EdgeDetectionMode.COLOR,
+          // blendFunction: BlendFunction.SCREEN
+        }),
       )
     )
   }
@@ -91,4 +130,7 @@
     if (!renderer){ return }
     composer.render(delta)
   }, { stage: renderStage, autoInvalidate: false })
+
+  const suspend = useSuspense()
+  suspend(detectGpu())
 </script>

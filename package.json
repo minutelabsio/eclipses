@@ -26,6 +26,7 @@
     "camera-controls": "^2.7.3",
     "cousin-it": "0.0.1-alpha.6",
     "d3-scale": "^4.0.2",
+    "detect-gpu": "^5.0.38",
     "glsl-atmosphere": "^2.0.0",
     "glsl-dither": "^1.0.1",
     "glsl-noise": "^0.0.0",

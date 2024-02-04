@@ -321,6 +321,7 @@ float sunMoonIntensity(vec3 rayDir, vec3 sSun, float sunAngularRadius, vec3 sMoo
   vec2 moonRay = rayxy - moonxy;
   float x = 0.05 * smoothstep(0.0008, 0., length(moonxy));
   vec2 seed = 1000. * moonRay + 15.;
+  // this adds little craters when the moon is near totality
   float f = 1.0 - x * smoothstep(0., 1., cnoise2(seed));
   float distFromSunEdge = circleEdge(rayxy, sunAngularRadius, moonxy, f * moonAngularRadius);
   distFromSunEdge = max(0.0, distFromSunEdge);
@@ -368,9 +369,6 @@ vec4 scattering(
   //   return vec4(0.0);
   // }
 
-  float rApparentSun = tan(SunAngularRadius);
-  float rApparentMoon = tan(moonAngularRadius);
-
   float sunDisk = sunMoonIntensity(
     rayDir,
     normalize(sunPosition - rayOrigin),
@@ -380,18 +378,15 @@ vec4 scattering(
     sunIntensity
   );
 
-  // vec2 inter = raySphereIntersection(rayOrigin, rayDir, atmosphereRadius);
-  // // Ray does not intersect the atmosphere (on the way forward) at all;
-  // if(!intersectsInside(inter)) {
-  //   return vec4(0.0);
-  // }
-
   vec2 path = raySphereIntersection(rayOrigin, rayDir, atmosphereRadius);
   // Ray does not intersect the atmosphere (on the way forward) at all;
   // exit early.
   if (!intersectsInside(path)) {
     return vec4(vec3(sunDisk), 0.0);
   }
+
+  float rApparentSun = tan(SunAngularRadius);
+  float rApparentMoon = tan(moonAngularRadius);
 
   // always start atmosphere ray at viewpoint if we start inside atmosphere
   path.x = max(path.x, 0.0);
@@ -410,21 +405,9 @@ vec4 scattering(
 
   vec3 sSun = normalize(sunPosition - start);
 
-  // if the start point and end point is in shadow just return black
-  // vec2 startInt = raySphereIntersection(start, sSun, planetRadius);
-  // vec2 endInt = raySphereIntersection(end, sSun, planetRadius);
-  // if(
-  //   startInt.x < startInt.y &&
-  //   startInt.y > 0.0 &&
-  //   endInt.x < endInt.y &&
-  //   endInt.y > 0.0) {
-  //   // return vec3(0.0);
-  // }
-
   float fsteps = float(steps.x);
   float d = (path.y - path.x);
-  // float ds = d / fsteps;
-  float ds = max(0.5 * atmosphereThickness, d / (fsteps - 1.));
+  float ds = d / fsteps;
 
   vec3 rayleighT = vec3(0.0);
   vec3 mieT = vec3(0.0);
@@ -432,18 +415,11 @@ vec4 scattering(
   vec2 primaryDepth = vec2(0.0);
 
   vec3 dr = rayDir * ds;
-  // vec3 pos = start - 0.5 * dr;
-  vec3 pos = start - 0.5 * rayDir * ds;
+  vec3 pos = start - 0.5 * dr;
 
   for (int i = 0; i < steps.x; i++){
-    // this way of stepping creates bands when looking from orbit
-    float step = nextStep(d - ds, ds, i);
-    if(step < 0.0) {
-      break;
-    }
-    vec3 dr = rayDir * step;
     pos += dr;
-    vec2 odStep = opticalDensity(length(pos), scaleHeights, planetRadius) * step;
+    vec2 odStep = opticalDensity(length(pos), scaleHeights, planetRadius) * ds;
     primaryDepth += odStep;
     vec2 intPlanet2 = raySphereIntersection(pos, sSun, planetRadius);
     // if the ray intersects the planet, no light comes this way
@@ -543,7 +519,7 @@ void main() {
   dither_shift_RGB = mix(2.0 * dither_shift_RGB, -2.0 * dither_shift_RGB, grid_position);
 
   // reduce color banding
-  color.rgb += dither_shift_RGB * length(color.rgb) * 16.;
+  color.rgb += dither_shift_RGB * length(color.rgb) * 4.;
 
   gl_FragColor = color;
 }

@@ -1,4 +1,5 @@
 <script>
+import { useSuspense } from '@threlte/extras'
 import { Group, MeshBasicMaterial, PlaneGeometry, TextureLoader, Vector3 } from 'three'
 import Terrain from '../entities/Terrain.svelte'
 import { T, useLoader } from '@threlte/core'
@@ -16,11 +17,13 @@ export let mountainsVisible = true
 export let skyColor = 0x71bce1
 export let groundColor = 0x71bce1
 
-const textures = useLoader(TextureLoader).load({
+const suspend = useSuspense()
+
+const textures = suspend(useLoader(TextureLoader).load({
   map: earthTextureUrl,
   normalMap: earthNormalUrl,
   specularMap: earthSpecularUrl,
-})
+}))
 </script>
 
 {#if $textures}
