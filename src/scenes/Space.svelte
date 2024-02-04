@@ -24,6 +24,7 @@
     sunIntensity,
     sunPosition,
     sunRadius,
+    sunDistance,
     moonRadius,
     moonRightAscention,
     moonPosition,
@@ -40,6 +41,7 @@
     cloudSize,
     cloudMie,
     cloudThreshold,
+    cloudAbsorption,
     windSpeed,
     starsVisible,
     skyVisible,
@@ -65,7 +67,10 @@
   const Stars = createStars().then(s => starsPoints = s)
 
   let sunBrightness = 1
-  $: sunsetBrightness = MathUtils.clamp(MathUtils.inverseLerp(-10, 10, $elevation), 0, 1)
+  $: sunsetBrightness = MathUtils.clamp(
+      MathUtils.inverseLerp(-10, 10, $elevation) * Math.pow(AU / $sunDistance, 2),
+      0, 1
+    )
 
   const createExpotentialIn = (a) => {
     return (x) => Math.pow(2, a * x - a) * x
@@ -128,6 +133,7 @@
   $: Sky.cloudSize = $cloudSize
   $: Sky.cloudMie = $cloudMie
   $: Sky.cloudThreshold = $cloudThreshold
+  $: Sky.cloudAbsorption = $cloudAbsorption
   $: Sky.windSpeed = $windSpeed
   $: Sky.atmosphereThickness = $atmosphereThickness
   $: Sky.planetRadius = $planetRadius

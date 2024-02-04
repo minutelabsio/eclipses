@@ -49,6 +49,7 @@ export default () => {
     cloudSize: 1.,
     cloudMie: 0.78,
     cloudThreshold: 0.4,
+    cloudAbsorption: 0.2,
     windSpeed: 8,
   }
 

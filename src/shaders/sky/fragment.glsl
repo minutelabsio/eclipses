@@ -35,6 +35,7 @@ uniform float cloudSize;
 uniform float cloudMie;
 uniform float cloudThickness;
 uniform float cloudThreshold;
+uniform float cloudAbsorption;
 
 #define PI 3.1415926535897932384626433832795
 #pragma glslify: fbm = require(./fbm)
@@ -455,6 +456,7 @@ vec4 scattering(
   // clouds
   float cloudAmount = 0.0;
   vec3 cloud = vec3(0.0);
+  float cloudAbsorptionAmount = 0.0;
   if (!intersectsOutside(intPlanet) && cloudThickness >= 0.1){
     float cloudHeight = cloudZ * atmosphereThickness;
     vec2 cloudInt = raySphereIntersection(rayOrigin, rayDir, planetRadius + cloudHeight);
@@ -464,14 +466,15 @@ vec4 scattering(
       cloudAmount = cloudThickness * smoothstep(0., 1.0, fbm(cloudLayer + windSpeed * time) - cloudThreshold);
       // float cloudAmount = 2. * getPhases(rayDir, sSun, 0.5 + 0.4 * fbm(cloudLayer * 20.)).y;
       cloud = 1e-6 * I0 * cloudAmount * cloudPhase * rayleighT;
+      cloudAbsorptionAmount = cloudAbsorption * cloudAmount;
     }
   }
 
   // final scattering
   vec3 scatter = I0 * rayleighT * phases.x * scatteringCoefficients.xyz + I0 * mieT * phases.y * scatteringCoefficients.w;
   // opacity of the atmosphere
-  float opacity = dot(primaryDepth, vec2(0.2 * length(rayleighCoefficients), mieCoefficient)) + cloudAmount;
-  return vec4(scatter + sunDiskColor + cloud, clamp(opacity, 0.0, 1.0));
+  float opacity = dot(primaryDepth, vec2(0.2 * length(rayleighCoefficients), mieCoefficient)) + cloudAbsorptionAmount;
+  return vec4((1. - cloudAbsorptionAmount) * (scatter + sunDiskColor) + cloud, clamp(opacity, 0.0, 1.0));
 }
 
 void main() {

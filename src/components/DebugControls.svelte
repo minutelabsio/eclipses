@@ -99,9 +99,10 @@
     atmosSettings.add(state, 'airSurfaceTemperature', 0, 1000, 1)
 
     const rayleighSettings = atmosSettings.addFolder('Rayleigh')
-    // rayleighSettings.add(state, 'rayleighRed', 0, 1e-4, 1e-7)
-    // rayleighSettings.add(state, 'rayleighGreen', 0, 1e-4, 1e-7)
-    // rayleighSettings.add(state, 'rayleighBlue', 0, 1e-4, 1e-7)
+    rayleighSettings.add(state, 'overrideRayleigh')
+    rayleighSettings.add(state, 'rayleighRed', 0, 40, 0.1)
+    rayleighSettings.add(state, 'rayleighGreen', 0, 40, 0.1)
+    rayleighSettings.add(state, 'rayleighBlue', 0, 40, 0.1)
     rayleighSettings.add(state, 'rayleighScaleHeight', 0, 100000, 10)
 
     const mieSettings = atmosSettings.addFolder('Mie')
@@ -114,6 +115,7 @@
     cloudSettings.add(state, 'cloudSize', 0, 10, 0.1)
     cloudSettings.add(state, 'cloudMie', 0, .999, 1e-7)
     cloudSettings.add(state, 'cloudThreshold', 0, 1, 0.01)
+    cloudSettings.add(state, 'cloudAbsorption', 0, 1, 0.01)
     cloudSettings.add(state, 'windSpeed', 0, 200, 1)
 
     const performanceSettings = atmosSettings.addFolder('performance').close()

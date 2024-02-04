@@ -112,9 +112,11 @@ const print = (val, ...args) => {
 }
 
 export const sunIntensity = writable(25)
-export const rayleighRed = writable(5.802e-6)
-export const rayleighGreen = writable(13.558e-6)
-export const rayleighBlue = writable(33.1e-6)
+export const overrideRayleigh = writable(false)
+// 5.5e-6, 13.0e-6, 22.4e-6
+export const rayleighRed = writable(5.5)
+export const rayleighGreen = writable(13)
+export const rayleighBlue = writable(22.4)
 export const rayleighScaleHeight = writable(8e3)
 export const mieCoefficient = writable(4.4e-6)
 export const mieScaleHeight = writable(1.2e3)
@@ -127,8 +129,13 @@ export const airDensityFactor = derived(
   ([$P, $T]) => print((288 / 101.3e3) * ($P / $T), $P, $T)
 )
 export const rayleighCoefficient = derived(
-  [airIndexRefraction, airDensityFactor],
-  ([$n, $air]) => getRayleigh($n, $air)
+  [airIndexRefraction, airDensityFactor, overrideRayleigh, rayleighRed, rayleighGreen, rayleighBlue],
+  ([$n, $air, $overrideRayleigh, $rayleighRed, $rayleighGreen, $rayleighBlue]) => {
+    if ($overrideRayleigh) {
+      return new Vector3($rayleighRed * 1e-6, $rayleighGreen * 1e-6, $rayleighBlue * 1e-6)
+    }
+    return getRayleigh($n, $air)
+  }
 )
 // clouds
 export const cloudZ = writable(0.2)
@@ -136,6 +143,7 @@ export const cloudThickness = writable(4)
 export const cloudSize = writable(1)
 export const cloudMie = writable(0.78)
 export const cloudThreshold = writable(0.4)
+export const cloudAbsorption = writable(0.2)
 export const windSpeed = writable(0.08)
 
 export const iSteps = writable(6)
@@ -179,6 +187,7 @@ const state = {
 
   sunIntensity,
 
+  overrideRayleigh,
   rayleighRed,
   rayleighGreen,
   rayleighBlue,
@@ -193,6 +202,7 @@ const state = {
   cloudSize,
   cloudMie,
   cloudThreshold,
+  cloudAbsorption,
   windSpeed,
 
   iSteps,
