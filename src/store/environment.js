@@ -89,20 +89,24 @@ export const moonPosition = derived(
       .applyAxisAngle($moonAxis, $moonRightAscention)
 )
 
-const getMie = (n, k) => {
+const getScatteringScale = (n, k) => {
   return k * 1e26 * 8 * Math.pow(Math.PI, 3) * Math.pow((n * n - 1), 2) / 3 / 2.547e+25
+}
+
+const getMie = (n, k) => {
+  const a = getScatteringScale(n, k)
+  return 0.01 * a
 }
 
 const getRayleigh = (n, k) => {
   const rgb = [680, 510, 440]
   const corr = 1e10
-  const a = getMie(n, k)
+  const a = getScatteringScale(n, k)
   const r = new Vector3(
     corr * a * Math.pow(1 / rgb[0], 4),
     corr * a * Math.pow(1 / rgb[1], 4),
     corr * a * Math.pow(1 / rgb[2], 4)
   )
-  console.log(r, a)
   return r
 }
 
@@ -112,15 +116,6 @@ const print = (val, ...args) => {
 }
 
 export const sunIntensity = writable(25)
-export const overrideRayleigh = writable(false)
-// 5.5e-6, 13.0e-6, 22.4e-6
-export const rayleighRed = writable(5.5)
-export const rayleighGreen = writable(13)
-export const rayleighBlue = writable(22.4)
-export const rayleighScaleHeight = writable(8e3)
-export const mieCoefficient = writable(4.4e-6)
-export const mieScaleHeight = writable(1.2e3)
-export const mieDirectional = writable(-0.758)
 export const airIndexRefraction = writable(1.0003)
 export const airSurfacePressure = writable(101.3e3)
 export const airSurfaceTemperature = writable(288)
@@ -128,6 +123,21 @@ export const airDensityFactor = derived(
   [airSurfacePressure, airSurfaceTemperature],
   ([$P, $T]) => print((288 / 101.3e3) * ($P / $T), $P, $T)
 )
+export const overrideRayleigh = writable(false)
+// 5.5e-6, 13.0e-6, 22.4e-6
+export const rayleighRed = writable(5.5)
+export const rayleighGreen = writable(13)
+export const rayleighBlue = writable(22.4)
+export const rayleighScaleHeight = writable(8e3)
+export const mieCoefficient = derived(
+  [airIndexRefraction, airDensityFactor],
+  ([$n, $air]) => {
+    const m = getMie($n, $air)
+    return m //new Vector3(m, m, m)
+  }
+)
+export const mieScaleHeight = writable(1.2e3)
+export const mieDirectional = writable(0.758)
 export const rayleighCoefficient = derived(
   [airIndexRefraction, airDensityFactor, overrideRayleigh, rayleighRed, rayleighGreen, rayleighBlue],
   ([$n, $air, $overrideRayleigh, $rayleighRed, $rayleighGreen, $rayleighBlue]) => {

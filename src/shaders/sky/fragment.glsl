@@ -189,8 +189,8 @@ float miePhase(float mu, float g){
   // phases
   float mumu = mu * mu;
   float gg = g * g;
-  return THREE_OVER_8_PI * (pow(1.0 - gg, 2.)) / (pow(1.0 + gg - 2.0 * mu * g, 1.5));
-  // return THREE_OVER_8_PI * ((1.0 - gg) * (mumu + 1.0)) / (pow(1.0 + gg - 2.0 * mu * g, 1.5) * (2.0 + gg));
+  // return THREE_OVER_8_PI * (pow(1.0 - gg, 2.)) / (pow(1.0 + gg - 2.0 * mu * g, 1.5));
+  return THREE_OVER_8_PI * ((1.0 - gg) * (mumu + 1.0)) / (pow(1.0 + gg - 2.0 * mu * g, 1.5) * (2.0 + gg));
 }
 
 vec2 getPhases(float mu, float g){
@@ -199,8 +199,8 @@ vec2 getPhases(float mu, float g){
   float gg = g * g;
   float rayleighP = THREE_OVER_16_PI + THREE_OVER_16_PI * mumu;
   // alternate mie that may be better
-  float mieP = THREE_OVER_8_PI * (pow(1.0 - gg, 2.)) / (pow(1.0 + gg - 2.0 * mu * g, 1.5));
-  // float mieP = THREE_OVER_8_PI * ((1.0 - gg) * (mumu + 1.0)) / (pow(1.0 + gg - 2.0 * mu * g, 1.5) * (2.0 + gg));
+  // float mieP = THREE_OVER_8_PI * (pow(1.0 - gg, 2.)) / (pow(1.0 + gg - 2.0 * mu * g, 1.5));
+  float mieP = THREE_OVER_8_PI * ((1.0 - gg) * (mumu + 1.0)) / (pow(1.0 + gg - 2.0 * mu * g, 1.5) * (2.0 + gg));
   return vec2(rayleighP, mieP);
 }
 
@@ -422,26 +422,27 @@ vec4 scattering(
     pos += dr;
     vec2 odStep = opticalDensity(length(pos), scaleHeights, planetRadius) * ds;
     primaryDepth += odStep;
-    vec2 intPlanet2 = raySphereIntersection(pos, sSun, planetRadius);
-    // if the ray intersects the planet, no light comes this way
-    if (!intersectsOutside(intPlanet2)) {
-      float u = umbra(pos, rApparentSun, sunPosition, rApparentMoon, moonPosition);
-      // u = intersectsOutside(intPlanet2) ? 0.0 : u;
 
-      vec2 intAtmosphere2 = raySphereIntersection(pos, sSun, atmosphereRadius);
-      vec3 exit = pos + intAtmosphere2.y * sSun;
+    // if the ray intersects the planet, no light comes this way...but..
+    // I tried doing this and it created lines in the atmosphere
+    // vec2 intPlanet2 = raySphereIntersection(pos, sSun, planetRadius);
 
-      vec2 secondaryDepth = opticalDepths(pos, exit, scaleHeights, planetRadius, steps.y);
-      // vec2 secondaryDepth = getOpticalDepths(pos, normalize(exit - pos), scaleHeights, planetRadius, atmosphereRadius);
-      // vec2 secondaryDepth = vec2(0.0);
-      vec2 depth = primaryDepth + secondaryDepth;
-      vec4 alpha = vec4(vec3(depth.x), depth.y) * scatteringCoefficients;
-      vec3 transmittance = exp(- alpha.xyz - alpha.w);
-      vec3 scatter = u * transmittance;
+    float u = umbra(pos, rApparentSun, sunPosition, rApparentMoon, moonPosition);
+    // u = intersectsOutside(intPlanet2) ? 0.0 : u;
 
-      rayleighT += scatter * odStep.x;
-      mieT += scatter * odStep.y;
-    }
+    vec2 intAtmosphere2 = raySphereIntersection(pos, sSun, atmosphereRadius);
+    vec3 exit = pos + intAtmosphere2.y * sSun;
+
+    vec2 secondaryDepth = opticalDepths(pos, exit, scaleHeights, planetRadius, steps.y);
+    // vec2 secondaryDepth = getOpticalDepths(pos, normalize(exit - pos), scaleHeights, planetRadius, atmosphereRadius);
+    // vec2 secondaryDepth = vec2(0.0);
+    vec2 depth = primaryDepth + secondaryDepth;
+    vec4 alpha = vec4(vec3(depth.x), depth.y) * scatteringCoefficients;
+    vec3 transmittance = exp(- alpha.xyz - alpha.w);
+    vec3 scatter = u * transmittance;
+
+    rayleighT += scatter * odStep.x;
+    mieT += scatter * odStep.y;
   }
 
   float mu = dot(rayDir, sSun);
@@ -462,19 +463,20 @@ vec4 scattering(
     vec2 cloudInt = raySphereIntersection(rayOrigin, rayDir, planetRadius + cloudHeight);
     if (intersectsInsideOnly(cloudInt)){
       float cloudPhase = miePhase(mu, cloudMie);
-      vec3 cloudLayer = cloudSize * 900. * (rayDir * (cloudInt.y + 0.2 * atmosphereThickness * noise(vUv))) / atmosphereRadius;
+      vec3 cloudLayer = cloudSize * 900. * (rayDir * (cloudInt.y + 0.2 * atmosphereThickness)) / atmosphereRadius;
       cloudAmount = cloudThickness * smoothstep(0., 1.0, fbm(cloudLayer + windSpeed * time) - cloudThreshold);
       // float cloudAmount = 2. * getPhases(rayDir, sSun, 0.5 + 0.4 * fbm(cloudLayer * 20.)).y;
-      cloud = 1e-6 * I0 * cloudAmount * cloudPhase * rayleighT;
       cloudAbsorptionAmount = cloudAbsorption * cloudAmount;
+      cloud = 1e-6 * I0 * cloudAmount * cloudPhase * rayleighT;
     }
   }
 
   // final scattering
-  vec3 scatter = I0 * rayleighT * phases.x * scatteringCoefficients.xyz + I0 * mieT * phases.y * scatteringCoefficients.w;
+  vec3 scatter = I0 * rayleighT * phases.x * scatteringCoefficients.xyz + I0 * mieT * (phases.y * scatteringCoefficients.w - cloudAbsorption * 1e-6);
+  scatter = clamp(scatter, 0.0, I0);
   // opacity of the atmosphere
   float opacity = dot(primaryDepth, vec2(0.2 * length(rayleighCoefficients), mieCoefficient)) + cloudAbsorptionAmount;
-  return vec4((1. - cloudAbsorptionAmount) * (scatter + sunDiskColor) + cloud, clamp(opacity, 0.0, 1.0));
+  return vec4((1. - cloudAbsorptionAmount) * (scatter + sunDiskColor + cloud), clamp(opacity, 0.0, 1.0));
 }
 
 void main() {

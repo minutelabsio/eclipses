@@ -196,9 +196,9 @@
 
   <T.Mesh
     visible={$skyVisible}
-    scale.x={AU}
-    scale.y={AU}
-    scale.z={AU}
+    scale.x={$planetRadius + $atmosphereThickness}
+    scale.y={$planetRadius + $atmosphereThickness}
+    scale.z={$planetRadius + $atmosphereThickness}
     renderOrder={2}
   >
     <T.IcosahedronGeometry args={[1, 32]} />

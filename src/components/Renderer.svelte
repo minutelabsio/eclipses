@@ -71,7 +71,7 @@
 
     bloom = new SelectiveBloomEffect(scene, camera, {
       intensity: $bloomIntensity,
-      luminanceThreshold: 1.2, //0.5,
+      luminanceThreshold: 1.5, //0.5,
       luminanceSmoothing: 0.7,
       blendFunction: BlendFunction.ADD,
       radius: .9, //.99,
