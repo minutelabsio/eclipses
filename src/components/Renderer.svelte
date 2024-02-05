@@ -25,11 +25,11 @@
     const gpuTier = await getGPUTier()
     switch (gpuTier.tier){
       case 3:
-        iSteps.set(12)
-        jSteps.set(12)
+        iSteps.set(10)
+        jSteps.set(10)
         break
       case 2:
-        iSteps.set(10)
+        iSteps.set(9)
         jSteps.set(8)
         break
       case 1:
@@ -99,7 +99,7 @@
           // adaptive: true,
           // resolution: 256,
           // middleGrey: 0.6,
-          whitePoint: 2,
+          whitePoint: 4,
           minLuminance: 0.005,
           adaptationRate: 2
         }),

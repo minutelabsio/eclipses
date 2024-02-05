@@ -12,6 +12,7 @@ export default {
   fogHue: 0,
   planetRadius,
   planetAxialTilt: 3.13 * DEG,
+  overrideRayleigh: false,
   rayleighScaleHeight: 27e3 * METER,
   atmosphereThickness: 9 * 27e3 * METER,
   airIndexRefraction: 1.00015,

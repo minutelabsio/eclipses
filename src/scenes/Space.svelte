@@ -122,7 +122,7 @@
   $: Sky.sunIntensity = $sunIntensity
   $: Sky.rayleighCoefficients = $rayleighCoefficient
   $: Sky.rayleighScaleHeight = $rayleighScaleHeight
-  $: Sky.mieCoefficient = $mieCoefficient
+  $: Sky.mieCoefficients = $mieCoefficient
   $: Sky.mieScaleHeight = $mieScaleHeight
   $: Sky.mieDirectional = $mieDirectional
   $: Sky.exposure = $exposure

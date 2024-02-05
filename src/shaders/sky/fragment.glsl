@@ -22,7 +22,7 @@ uniform float planetRadius;
 uniform float atmosphereThickness;
 uniform vec3 rayleighCoefficients;
 uniform float rayleighScaleHeight;
-uniform float mieCoefficient;
+uniform vec3 mieCoefficients;
 uniform float mieScaleHeight;
 uniform float mieDirectional;
 uniform float exposure;
@@ -347,7 +347,8 @@ vec4 scattering(
   vec3 rayOrigin,
   vec3 rayDir,
   // rayleigh xyz, mie w
-  vec4 scatteringCoefficients,
+  vec3 rayleighCoefficients,
+  vec3 mieCoefficients,
   vec2 scaleHeights,
   // mie directional g
   float g,
@@ -437,8 +438,8 @@ vec4 scattering(
     // vec2 secondaryDepth = getOpticalDepths(pos, normalize(exit - pos), scaleHeights, planetRadius, atmosphereRadius);
     // vec2 secondaryDepth = vec2(0.0);
     vec2 depth = primaryDepth + secondaryDepth;
-    vec4 alpha = vec4(vec3(depth.x), depth.y) * scatteringCoefficients;
-    vec3 transmittance = exp(- alpha.xyz - alpha.w);
+    vec3 alpha = depth.x * rayleighCoefficients + depth.y * mieCoefficients;
+    vec3 transmittance = exp(-alpha);
     vec3 scatter = u * transmittance;
 
     rayleighT += scatter * odStep.x;
@@ -450,8 +451,8 @@ vec4 scattering(
   vec2 phases = getPhases(mu, g);
 
   // scatter direct light from the sundisk
-  vec4 alpha = vec4(vec3(primaryDepth.x), primaryDepth.y) * scatteringCoefficients;
-  vec3 transmittance = exp(-alpha.xyz - alpha.w);
+  vec3 alpha = primaryDepth.x * rayleighCoefficients + primaryDepth.y * mieCoefficients;
+  vec3 transmittance = exp(-alpha);
   vec3 sunDiskColor = sunDisk * transmittance;
 
   // clouds
@@ -472,10 +473,10 @@ vec4 scattering(
   }
 
   // final scattering
-  vec3 scatter = I0 * rayleighT * phases.x * scatteringCoefficients.xyz + I0 * mieT * (phases.y * scatteringCoefficients.w - cloudAbsorption * 1e-6);
-  scatter = clamp(scatter, 0.0, I0);
+  vec3 scatter = I0 * rayleighT * phases.x * rayleighCoefficients + I0 * mieT * ((phases.y * mieCoefficients) * (1. - cloudAbsorption) - cloudAbsorption * 1e-6);
+  scatter = clamp(scatter, vec3(0.0), vec3(I0));
   // opacity of the atmosphere
-  float opacity = dot(primaryDepth, vec2(0.2 * length(rayleighCoefficients), mieCoefficient)) + cloudAbsorptionAmount;
+  float opacity = dot(primaryDepth, vec2(0.2 * length(rayleighCoefficients), length(mieCoefficients))) + cloudAbsorptionAmount;
   return vec4((1. - cloudAbsorptionAmount) * (scatter + sunDiskColor + cloud), clamp(opacity, 0.0, 1.0));
 }
 
@@ -495,7 +496,8 @@ void main() {
   vec4 color = scattering(
     rayOrigin,
     rayDir,
-    vec4(rayleighCoefficients, mieCoefficient),
+    rayleighCoefficients,
+    mieCoefficients,
     vec2(rayleighScaleHeight, mieScaleHeight),
     mieDirectional,
     planetRadius,

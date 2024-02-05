@@ -93,11 +93,6 @@ const getScatteringScale = (n, k) => {
   return k * 1e26 * 8 * Math.pow(Math.PI, 3) * Math.pow((n * n - 1), 2) / 3 / 2.547e+25
 }
 
-const getMie = (n, k) => {
-  const a = getScatteringScale(n, k)
-  return 0.01 * a
-}
-
 const getRayleigh = (n, k) => {
   const rgb = [680, 510, 440]
   const corr = 1e10
@@ -129,11 +124,14 @@ export const rayleighRed = writable(5.5)
 export const rayleighGreen = writable(13)
 export const rayleighBlue = writable(22.4)
 export const rayleighScaleHeight = writable(8e3)
+
+export const mieRed = writable(0.002)
+export const mieGreen = writable(0.002)
+export const mieBlue = writable(0.002)
 export const mieCoefficient = derived(
-  [airIndexRefraction, airDensityFactor],
-  ([$n, $air]) => {
-    const m = getMie($n, $air)
-    return m //new Vector3(m, m, m)
+  [mieRed, mieGreen, mieBlue],
+  ([$mieRed, $mieGreen, $mieBlue]) => {
+    return new Vector3($mieRed * 1e-6, $mieGreen * 1e-6, $mieBlue * 1e-6)
   }
 )
 export const mieScaleHeight = writable(1.2e3)
@@ -203,7 +201,9 @@ const state = {
   rayleighBlue,
   rayleighScaleHeight,
 
-  mieCoefficient,
+  mieRed,
+  mieGreen,
+  mieBlue,
   mieScaleHeight,
   mieDirectional,
 
