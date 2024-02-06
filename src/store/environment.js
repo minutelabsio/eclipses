@@ -21,9 +21,10 @@ const sphereIntersection = (origin, ray, radius) => {
   return x0 < x1 ? [x0, x1] : [x1, x0]
 }
 
+export const planet = writable('earth')
 export const FOV = writable(26.5)
 export const exposure = writable(1.0)
-export const bloomIntensity = writable(5)
+export const bloomIntensity = writable(2.5)
 
 export const altitude = writable(400)
 export const fogHue = writable(200)
@@ -174,6 +175,7 @@ export const mountainsVisible = writable(true)
 export const earthVisible = writable(true)
 
 const state = {
+  planet,
   FOV,
   exposure,
   bloomIntensity,

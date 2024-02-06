@@ -7,6 +7,7 @@
   import createCorona from '../shaders/corona/Corona'
   import createSky from '../shaders/sky/Sky'
   import createStars from '../shaders/stars/Stars'
+  import Mars from '../entities/Mars.svelte'
   import Earth from '../entities/Earth.svelte'
   import Jupiter from '../entities/Jupiter.svelte'
   import Renderer from '../components/Renderer.svelte'
@@ -14,6 +15,7 @@
   import DebugControls from '../components/DebugControls.svelte'
 
   import {
+    planet,
     planetRadius,
     eclipseProgress,
     doAnimation,
@@ -69,7 +71,7 @@
 
   let sunBrightness = 1
   $: sunsetBrightness = MathUtils.clamp(
-      MathUtils.inverseLerp(-10, 10, $elevation) * Math.pow(AU / $sunDistance, 2),
+      MathUtils.inverseLerp(-10, 3, $elevation),
       0, 1
     )
 
@@ -166,19 +168,37 @@
   bind:controls={cameraControls}
 />
 
+{#if $planet === 'earth'}
 <Earth
-  planetVisible={$earthVisible}
+  visible={$earthVisible}
   mountainsVisible={$mountainsVisible}
   planetRadius={$planetRadius}
   position={[0, -$planetRadius, 0]}
   sunBrightness={sunBrightness}
   sunPosition={$sunPosition}
 />
+{/if}
+{#if $planet === 'mars'}
+<Mars
+  visible={$earthVisible}
+  mountainsVisible={$mountainsVisible}
+  planetRadius={$planetRadius}
+  position={[0, -$planetRadius, 0]}
+  sunBrightness={sunBrightness}
+  sunPosition={$sunPosition}
+/>
+{/if}
+{#if $planet === 'jupiter'}
+<Jupiter
+  visible={$earthVisible}
+  planetRadius={$planetRadius}
+  position={[0, -$planetRadius, 0]}
+/>
+{/if}
 
 <T.Group
   position={[0, -$planetRadius, 0]}
 >
-
   <T.DirectionalLight
     intensity={1}
     position={$sunPosition}
@@ -196,11 +216,12 @@
     <T is={Corona}/>
   </T.Mesh>
 
+  <!-- Sky -->
   <T.Mesh
     visible={$skyVisible}
-    scale.x={$planetRadius + $atmosphereThickness}
-    scale.y={$planetRadius + $atmosphereThickness}
-    scale.z={$planetRadius + $atmosphereThickness}
+    scale.x={0.5 * AU}
+    scale.y={0.5 * AU}
+    scale.z={0.5 * AU}
     renderOrder={2}
   >
     <T.IcosahedronGeometry args={[1, 32]} />
@@ -209,7 +230,8 @@
 
   <Jupiter
     position={skyPosition(4.217e8, 13 * DEG, 20 * DEG)}
-    radius={7.1492e7}
+    rotation={[0, 0, 0]}
+    planetRadius={7.1492e7}
   />
 
   <!-- moon debug -->

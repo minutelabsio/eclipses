@@ -22,7 +22,7 @@
     cameraControls.lookInDirectionOf(x, y, z, true)
   }
 
-  const lookAtEarth = () => {
+  const lookAtPlanet = () => {
     cameraControls.lookInDirectionOf(0, -$planetRadius, 0, true)
   }
 
@@ -33,7 +33,7 @@
     altitude: Math.log(($altitude + 1) / 5) / Math.log($planetRadius),
 
     lookAtSun: lookAtSun,
-    lookAtEarth: lookAtEarth,
+    lookAtPlanet: lookAtPlanet,
   }
 
   const apparentSize = (r, d) => {
@@ -64,6 +64,7 @@
       // 'neptune',
     ]).onChange((v) => {
       load(PlanetConfigs[v])
+      setAltitude(eclipseState.altitude, $planetRadius)
       appSettings.controllersRecursive().forEach(c => c.updateDisplay())
     })
     const perspectiveSettings = appSettings.addFolder('Perspective')
@@ -74,7 +75,7 @@
       setAltitude(v, $planetRadius)
     })
     perspectiveSettings.add(eclipseState, 'lookAtSun')
-    perspectiveSettings.add(eclipseState, 'lookAtEarth')
+    perspectiveSettings.add(eclipseState, 'lookAtPlanet')
 
     const eclipseSettings = appSettings.addFolder('Eclipse')
     eclipseSettings.add(state, 'doAnimation')

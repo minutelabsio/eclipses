@@ -1,18 +1,16 @@
 <script>
 import { useSuspense } from '@threlte/extras'
-import { Color, Group, MeshBasicMaterial, PlaneGeometry, TextureLoader, Vector3 } from 'three'
+import { TextureLoader } from 'three'
 import Terrain from '../entities/Terrain.svelte'
 import { T, useLoader } from '@threlte/core'
-import earthTextureUrl from '../assets/earth/Earth.png'
-import earthNormalUrl from '../assets/earth/normal/hires/EarthNormal.png'
-import earthSpecularUrl from '../assets/earth/spec/hires/EarthSpec.png'
+import marsTextureUrl from '../assets/mars/mars_1k_color.jpg'
+import marsNormalUrl from '../assets/mars/mars_1k_normal.jpg'
 
 export let sunPosition = [0, 0, 0]
 export let sunBrightness = 1
 export let planetRadius = 1
 export let position = [0, 0, 0]
-export let planetColor = 0x886666
-export let waterColor = 0x69a8fE
+export let planetColor = 0x724242
 export let visible = true
 export let mountainsVisible = true
 export let skyColor = 0x71bce1
@@ -21,9 +19,8 @@ export let groundColor = 0x71bce1
 const suspend = useSuspense()
 
 const textures = suspend(useLoader(TextureLoader).load({
-  map: earthTextureUrl,
-  normalMap: earthNormalUrl,
-  specularMap: earthSpecularUrl,
+  map: marsTextureUrl,
+  normalMap: marsNormalUrl,
 }))
 </script>
 
@@ -54,7 +51,7 @@ const textures = suspend(useLoader(TextureLoader).load({
       />
     </T.Group>
     <T.Mesh
-      position={[0, -planetRadius - 50, 0]}
+      position={[0, -planetRadius, 0]}
       rotation={[0, 0, 0]}
       scale={[planetRadius, planetRadius, planetRadius]}
       layers={9}
@@ -62,7 +59,7 @@ const textures = suspend(useLoader(TextureLoader).load({
       visible={mountainsVisible}
     >
       <T.IcosahedronGeometry args={[1.00005, 64]} />
-      <T.MeshStandardMaterial color={waterColor}/>
+      <T.MeshStandardMaterial color={planetColor}/>
     </T.Mesh>
     <Terrain color={planetColor} visible={mountainsVisible} layers={9} renderOrder={1} />
   </T.Group>
@@ -74,19 +71,19 @@ const textures = suspend(useLoader(TextureLoader).load({
     <T.Mesh
       visible={visible}
       position={position}
-      rotation={[Math.PI / 2, 0, -Math.PI / 2]}
+      rotation={[2.5, 0, -Math.PI / 2]}
       scale={[planetRadius, planetRadius, planetRadius]}
       receiveShadow
       renderOrder={1}
     >
       <T.IcosahedronGeometry args={[0.9999, 64]} />
-      <T.MeshPhongMaterial
+      <T.MeshStandardMaterial
         dithering
         map={$textures.map}
         normalMap={$textures.normalMap}
-        specularMap={$textures.specularMap}
         shininess={0}
         fog={false}
+        color={"#ffffff"}
       />
     </T.Mesh>
   </T.Group>

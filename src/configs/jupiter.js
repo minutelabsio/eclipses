@@ -9,6 +9,7 @@ import {
 const planetRadius = 10.973 * Re
 // jupiter
 export default {
+  sunIntensity: 10,
   fogHue: 0,
   planetRadius,
   planetAxialTilt: 3.13 * DEG,

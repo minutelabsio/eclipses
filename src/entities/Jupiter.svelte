@@ -2,14 +2,17 @@
 import { TextureLoader } from 'three'
 import { T, useLoader } from '@threlte/core'
 import textureUrl from '../assets/jupiter/jupiter_nasa_4k.jpg'
+import { useSuspense } from '@threlte/extras'
 
-export let radius = 1
+export let planetRadius = 1
 export let position = [0, 0, 0]
+export let rotation = [2.5, 0, -Math.PI / 2]
 export let visible = true
 
-const textures = useLoader(TextureLoader).load({
+const suspend = useSuspense()
+const textures = suspend(useLoader(TextureLoader).load({
   map: textureUrl,
-})
+}))
 </script>
 
 {#if $textures}
@@ -17,12 +20,12 @@ const textures = useLoader(TextureLoader).load({
   <T.Mesh
     visible={visible}
     position={position}
-    rotation={[0, 0, 0]}
-    scale={[radius, radius, radius]}
+    rotation={rotation}
+    scale={[planetRadius, planetRadius, planetRadius]}
     receiveShadow
     renderOrder={1}
   >
-    <T.IcosahedronGeometry args={[1, 64]} />
+    <T.IcosahedronGeometry args={[0.9999, 64]} />
     <T.MeshStandardMaterial
       dithering
       map={$textures.map}

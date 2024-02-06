@@ -9,12 +9,13 @@ const atmosphereThickness = 9 * 8.5e3
 
 export default {
   fogHue: 200,
+  sunIntensity: 25,
   planetRadius: Re,
   planetAxialTilt: 23.44 * DEG,
   atmosphereThickness,
   cloudZ: 1000 * METER / atmosphereThickness,
   cloudSize: 5,
-  cloudThickness: 5.2,
+  cloudThickness: 2,
   cloudMie: 0.62,
   cloudThreshold: 0.35,
   cloudAbsorption: 0.17,

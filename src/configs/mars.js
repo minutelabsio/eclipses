@@ -8,6 +8,7 @@ import {
 
 export default {
   fogHue: 0,
+  sunIntensity: 15,
   planetRadius: 0.53 * Re,
   planetAxialTilt: 25.19 * DEG,
   rayleighScaleHeight: 11.1e3,
