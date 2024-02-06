@@ -432,7 +432,7 @@ vec4 scattering(
   // Ray does not intersect the atmosphere (on the way forward) at all;
   // exit early.
   if (!intersectsInside(path)) {
-    return vec4(vec3(sunDisk), 0.0);
+    return vec4(vec3(sunDisk), step(0.01, length(sunDisk)));
   }
 
   float rApparentSun = tan(SunAngularRadius);
@@ -516,12 +516,15 @@ vec4 scattering(
     vec2 cloudInt = raySphereIntersection(rayOrigin, rayDir, planetRadius + cloudHeight);
     if (intersectsInsideOnly(cloudInt)){
       float cloudPhase = miePhase(mu, cloudMie);
+      vec3 cloudPoint = rayOrigin + cloudInt.y * rayDir;
+      vec2 planetInt = raySphereIntersection(cloudPoint, sSun, planetRadius);
+      float cloudMinBrightness = mix(1e-5, 0., remap(planetInt.y - abs(planetInt.x), 0., 0.03 * planetRadius, 0., 1.));
       vec3 cloudLayer = cloudSize * 900. * (rayDir * (cloudInt.y + 0.2 * atmosphereThickness)) / atmosphereRadius;
       cloudAmount = cloudThickness * smoothstep(0., 1.0, fbm(cloudLayer + windSpeed * time) - cloudThreshold);
       // float cloudAmount = 2. * getPhases(rayDir, sSun, 0.5 + 0.4 * fbm(cloudLayer * 20.)).y;
       cloudAbsorptionAmount = clamp(cloudAbsorption * cloudAmount, 0., 1.);
       // cloud = 1e-6 * I0 * cloudAmount * cloudPhase * rayleighT;
-      cloud = I0 * clamp(0.1 * length(mieCoefficients) * cloudAmount * cloudPhase * rayleighT, 0., 1.);
+      cloud = I0 * clamp(0.1 * cloudAmount * max(length(mieCoefficients) * (cloudPhase + (1. - cloudAbsorptionAmount) * phases.x), cloudMinBrightness) * rayleighT, 0., 1.);
     }
   }
 
@@ -530,7 +533,7 @@ vec4 scattering(
   // scatter = clamp(scatter, vec3(0.0), vec3(I0)) / sqrt(fsteps);
   // opacity of the atmosphere
   float opacity = dot(primaryDepth, vec2(0.2 * length(rayleighCoefficients), length(mieCoefficients))) + cloudAbsorptionAmount;
-  return vec4((1. - cloudAbsorptionAmount) * (scatter + sunDiskColor + cloud), clamp(opacity, 0.0, 1.0));
+  return vec4((1. - cloudAbsorptionAmount) * (scatter + sunDiskColor) + cloud, clamp(opacity, 0.0, 1.0));
 }
 
 void main() {
