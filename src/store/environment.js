@@ -94,7 +94,7 @@ const getScatteringScale = (n, k) => {
 }
 
 const getRayleigh = (n, k) => {
-  const rgb = [680, 510, 440]
+  const rgb = [680, 520, 440]
   const corr = 1e10
   const a = getScatteringScale(n, k)
   const r = new Vector3(
@@ -128,10 +128,20 @@ export const rayleighScaleHeight = writable(8e3)
 export const mieRed = writable(0.002)
 export const mieGreen = writable(0.002)
 export const mieBlue = writable(0.002)
+export const mieAmount = writable(1e-6)
 export const mieCoefficient = derived(
-  [mieRed, mieGreen, mieBlue],
-  ([$mieRed, $mieGreen, $mieBlue]) => {
-    return new Vector3($mieRed * 1e-6, $mieGreen * 1e-6, $mieBlue * 1e-6)
+  [mieRed, mieGreen, mieBlue, mieAmount],
+  ([$mieRed, $mieGreen, $mieBlue, $mieAmount]) => {
+    return new Vector3($mieRed * $mieAmount, $mieGreen * $mieAmount, $mieBlue * $mieAmount)
+  }
+)
+export const mieWavelengthRed = writable(0.2)
+export const mieWavelengthGreen = writable(0.2)
+export const mieWavelengthBlue = writable(0.2)
+export const mieWavelengthResponse = derived(
+  [mieWavelengthRed, mieWavelengthGreen, mieWavelengthBlue],
+  ([$mieWavelengthRed, $mieWavelengthGreen, $mieWavelengthBlue]) => {
+    return new Vector3($mieWavelengthRed, $mieWavelengthGreen, $mieWavelengthBlue)
   }
 )
 export const mieScaleHeight = writable(1.2e3)
@@ -204,7 +214,11 @@ const state = {
   mieRed,
   mieGreen,
   mieBlue,
+  mieAmount,
   mieScaleHeight,
+  mieWavelengthRed,
+  mieWavelengthGreen,
+  mieWavelengthBlue,
   mieDirectional,
 
   cloudZ,

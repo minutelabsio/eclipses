@@ -38,6 +38,7 @@ export default () => {
     rayleighCoefficients: new THREE.Vector3(5.5e-6, 13.0e-6, 22.4e-6),
     rayleighScaleHeight: 8e3,
     mieCoefficients: new THREE.Vector3(21e-6, 21e-6, 21e-6),
+    mieWavelengthResponse: new THREE.Vector3(0.2),
     mieScaleHeight: 500,
     mieDirectional: -0.758,
     exposure: 1.0,

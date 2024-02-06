@@ -112,7 +112,11 @@
     mieSettings.add(state, 'mieGreen', 0, 40, 0.1)
     mieSettings.add(state, 'mieBlue', 0, 40, 0.1)
     mieSettings.add(state, 'mieScaleHeight', 0, 10000, 10)
-    mieSettings.add(state, 'mieDirectional', -.999, .999, 0.01)
+    mieSettings.add(state, 'mieAmount', 0, 1e-4, 1e-10)
+    mieSettings.add(state, 'mieWavelengthRed', 0, 1, 1e-2)
+    mieSettings.add(state, 'mieWavelengthGreen', 0, 1, 1e-2)
+    mieSettings.add(state, 'mieWavelengthBlue', 0, 1, 1e-2)
+    mieSettings.add(state, 'mieDirectional', -.999, .999, 0.000001)
 
     const cloudSettings = atmosSettings.addFolder('Clouds')
     cloudSettings.add(state, 'cloudZ', 0.01, 0.9, 0.01)

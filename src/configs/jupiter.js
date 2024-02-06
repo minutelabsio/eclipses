@@ -20,6 +20,7 @@ export default {
   airSurfaceTemperature: 165,
 
   windSpeed: 100,
+  mieAmount: 0.0,
   mieDirectional: 0,
   mieScaleHeight: 0,
   sunDistance: 5.2038 * AU,

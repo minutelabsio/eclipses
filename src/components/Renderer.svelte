@@ -99,7 +99,7 @@
           // adaptive: true,
           // resolution: 256,
           // middleGrey: 0.6,
-          whitePoint: 4,
+          whitePoint: 50,
           minLuminance: 0.005,
           adaptationRate: 2
         }),

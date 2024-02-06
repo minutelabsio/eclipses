@@ -31,6 +31,7 @@
     rayleighCoefficient,
     rayleighScaleHeight,
     mieCoefficient,
+    mieWavelengthResponse,
     mieScaleHeight,
     mieDirectional,
     exposure,
@@ -123,6 +124,7 @@
   $: Sky.rayleighCoefficients = $rayleighCoefficient
   $: Sky.rayleighScaleHeight = $rayleighScaleHeight
   $: Sky.mieCoefficients = $mieCoefficient
+  $: Sky.mieWavelengthResponse = $mieWavelengthResponse
   $: Sky.mieScaleHeight = $mieScaleHeight
   $: Sky.mieDirectional = $mieDirectional
   $: Sky.exposure = $exposure

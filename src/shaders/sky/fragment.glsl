@@ -23,6 +23,7 @@ uniform float atmosphereThickness;
 uniform vec3 rayleighCoefficients;
 uniform float rayleighScaleHeight;
 uniform vec3 mieCoefficients;
+uniform vec3 mieWavelengthResponse;
 uniform float mieScaleHeight;
 uniform float mieDirectional;
 uniform float exposure;
@@ -47,6 +48,7 @@ uniform float cloudAbsorption;
 const float ONE_OVER_E = exp(-1.0);
 const float THREE_OVER_16_PI = 3.0 / (16.0 * PI);
 const float THREE_OVER_8_PI = 3.0 / (8.0 * PI);
+const float ONE_OVER_FOUR_PI = 1.0 / (4.0 * PI);
 const float MIN_STEP_SIZE = 1e4;
 
 float invLerp(float a, float b, float v) {
@@ -185,22 +187,68 @@ float expScale(float x){
   return exp(x) * ONE_OVER_E - 1.0;
 }
 
+float rayleighPhase(float mu){
+  return THREE_OVER_16_PI + THREE_OVER_16_PI * mu * mu;
+}
+
+float drainPhase(float mu,float alpha, float g){
+  float gg = g * g;
+  float mumu = mu * mu;
+  return ONE_OVER_FOUR_PI * (1.0 - gg) / (1.0 + alpha * (1.0 + 2.0 * gg) / 3.0) *
+    (1.0 + alpha * mumu) / pow(1.0 + gg - 2.0 * mu * g, 1.5);
+}
+
 float miePhase(float mu, float g){
   // phases
   float mumu = mu * mu;
   float gg = g * g;
-  // return THREE_OVER_8_PI * (pow(1.0 - gg, 2.)) / (pow(1.0 + gg - 2.0 * mu * g, 1.5));
   return THREE_OVER_8_PI * ((1.0 - gg) * (mumu + 1.0)) / (pow(1.0 + gg - 2.0 * mu * g, 1.5) * (2.0 + gg));
+}
+
+float phaseHGD(float mu, float ghg, float gd, float alpha, float wd){
+  return (1. - wd) * drainPhase(mu, 0., ghg) + wd * drainPhase(mu, alpha, gd);
+}
+
+// new phase function from https://research.nvidia.com/labs/rtr/approximate-mie/publications/approximate-mie.pdf
+// d is particle size from 5 - 50 in microns
+float getMieHGD(float mu, float d){
+  float ghg = exp(-0.0990567 / (d - 1.67154));
+  float gd = exp(-2.20679 / (d + 3.91029) - 0.428934);
+  float alpha = exp(3.62489 - 8.29288 / (d + 5.52825));
+  float wd = exp(-0.599085 / (d - 0.641583) - 0.665888);
+  float mieP = phaseHGD(mu, ghg, gd, alpha, wd);
+  return mieP;
+}
+
+vec2 getPhasesHGD(float mu, float d){
+  // phases
+  float mumu = mu * mu;
+  float rayleighP = rayleighPhase(mu);
+  float mieP = getMieHGD(mu, d);
+  return vec2(rayleighP, mieP);
+}
+
+vec3 angleDependentMie(vec3 response, float mu, float g){
+  float ghg = 0.37;
+  float gd = 0.96;
+  float alpha = 1.18;
+  vec3 wd = response;
+  vec3 miePhase = g * vec3(
+    // miePhaseHGD(mu, ghg, gd, alpha, wd.x),
+    // miePhaseHGD(mu, ghg, gd, alpha, wd.y),
+    // miePhaseHGD(mu, ghg, gd, alpha, wd.z)
+    miePhase(mu, wd.x),
+    miePhase(mu, wd.y),
+    miePhase(mu, wd.z)
+  );
+  return miePhase;
 }
 
 vec2 getPhases(float mu, float g){
   // phases
   float mumu = mu * mu;
-  float gg = g * g;
   float rayleighP = THREE_OVER_16_PI + THREE_OVER_16_PI * mumu;
-  // alternate mie that may be better
-  // float mieP = THREE_OVER_8_PI * (pow(1.0 - gg, 2.)) / (pow(1.0 + gg - 2.0 * mu * g, 1.5));
-  float mieP = THREE_OVER_8_PI * ((1.0 - gg) * (mumu + 1.0)) / (pow(1.0 + gg - 2.0 * mu * g, 1.5) * (2.0 + gg));
+  float mieP = miePhase(mu, g);
   return vec2(rayleighP, mieP);
 }
 
@@ -389,6 +437,7 @@ vec4 scattering(
 
   float rApparentSun = tan(SunAngularRadius);
   float rApparentMoon = tan(moonAngularRadius);
+  float mieAbsorption = cloudAbsorption * length(mieCoefficients);
 
   // always start atmosphere ray at viewpoint if we start inside atmosphere
   path.x = max(path.x, 0.0);
@@ -438,7 +487,7 @@ vec4 scattering(
     // vec2 secondaryDepth = getOpticalDepths(pos, normalize(exit - pos), scaleHeights, planetRadius, atmosphereRadius);
     // vec2 secondaryDepth = vec2(0.0);
     vec2 depth = primaryDepth + secondaryDepth;
-    vec3 alpha = depth.x * rayleighCoefficients + depth.y * mieCoefficients;
+    vec3 alpha = depth.x * rayleighCoefficients + depth.y * mieCoefficients * (1. - mieAbsorption) + depth.y * mieAbsorption;
     vec3 transmittance = exp(-alpha);
     vec3 scatter = u * transmittance;
 
@@ -446,14 +495,17 @@ vec4 scattering(
     mieT += scatter * odStep.y;
   }
 
-  float mu = dot(rayDir, sSun);
-  // phases
-  vec2 phases = getPhases(mu, g);
-
   // scatter direct light from the sundisk
-  vec3 alpha = primaryDepth.x * rayleighCoefficients + primaryDepth.y * mieCoefficients;
+  vec3 alpha = primaryDepth.x * rayleighCoefficients + primaryDepth.y * mieCoefficients * (1. - mieAbsorption) + primaryDepth.y * mieAbsorption;
   vec3 transmittance = exp(-alpha);
   vec3 sunDiskColor = sunDisk * transmittance;
+
+  // phases
+  float mu = dot(rayDir, sSun);
+  vec2 phases = vec2(rayleighPhase(mu), clamp(1e2 * g, 0., 1. / length(mieCoefficients)));
+  float mieNorm = length(angleDependentMie(mieWavelengthResponse, 1., g));
+  mieNorm = mieNorm == 0.0 ? 1.0 : mieNorm;
+  mieCoefficients *= angleDependentMie(mieWavelengthResponse, mu, g) / mieNorm;
 
   // clouds
   float cloudAmount = 0.0;
@@ -467,14 +519,15 @@ vec4 scattering(
       vec3 cloudLayer = cloudSize * 900. * (rayDir * (cloudInt.y + 0.2 * atmosphereThickness)) / atmosphereRadius;
       cloudAmount = cloudThickness * smoothstep(0., 1.0, fbm(cloudLayer + windSpeed * time) - cloudThreshold);
       // float cloudAmount = 2. * getPhases(rayDir, sSun, 0.5 + 0.4 * fbm(cloudLayer * 20.)).y;
-      cloudAbsorptionAmount = cloudAbsorption * cloudAmount;
-      cloud = 1e-6 * I0 * cloudAmount * cloudPhase * rayleighT;
+      cloudAbsorptionAmount = clamp(cloudAbsorption * cloudAmount, 0., 1.);
+      // cloud = 1e-6 * I0 * cloudAmount * cloudPhase * rayleighT;
+      cloud = I0 * clamp(0.1 * length(mieCoefficients) * cloudAmount * cloudPhase * rayleighT, 0., 1.);
     }
   }
 
   // final scattering
-  vec3 scatter = I0 * rayleighT * phases.x * rayleighCoefficients + I0 * mieT * ((phases.y * mieCoefficients) * (1. - cloudAbsorption) - cloudAbsorption * 1e-6);
-  scatter = clamp(scatter, vec3(0.0), vec3(I0));
+  vec3 scatter = I0 * rayleighT * phases.x * rayleighCoefficients + I0 * mieT * phases.y * mieCoefficients;
+  // scatter = clamp(scatter, vec3(0.0), vec3(I0)) / sqrt(fsteps);
   // opacity of the atmosphere
   float opacity = dot(primaryDepth, vec2(0.2 * length(rayleighCoefficients), length(mieCoefficients))) + cloudAbsorptionAmount;
   return vec4((1. - cloudAbsorptionAmount) * (scatter + sunDiskColor + cloud), clamp(opacity, 0.0, 1.0));
@@ -517,6 +570,9 @@ void main() {
   } else {
     // color = color * (1.0 + 0.8 * fbm(vUv * 100.));
   }
+
+  // hdr
+  // color.rgb = 4. * (1. - exp(-color.rgb * 1.0));
 
   // Dithering by hornet: https://www.shadertoy.com/view/MslGR8
   float dither_bit = 8.0;
