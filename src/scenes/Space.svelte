@@ -10,6 +10,9 @@
   import Mars from '../entities/Mars.svelte'
   import Earth from '../entities/Earth.svelte'
   import Jupiter from '../entities/Jupiter.svelte'
+  import Saturn from '../entities/Saturn.svelte'
+  import Neptune from '../entities/Neptune.svelte'
+  import Uranus from '../entities/Uranus.svelte'
   import Renderer from '../components/Renderer.svelte'
   import Camera from '../components/Camera.svelte'
   import DebugControls from '../components/DebugControls.svelte'
@@ -190,6 +193,27 @@
 {/if}
 {#if $planet === 'jupiter'}
 <Jupiter
+  visible={$earthVisible}
+  planetRadius={$planetRadius}
+  position={[0, -$planetRadius, 0]}
+/>
+{/if}
+{#if $planet === 'saturn'}
+<Saturn
+  visible={$earthVisible}
+  planetRadius={$planetRadius}
+  position={[0, -$planetRadius, 0]}
+/>
+{/if}
+{#if $planet === 'neptune'}
+<Neptune
+  visible={$earthVisible}
+  planetRadius={$planetRadius}
+  position={[0, -$planetRadius, 0]}
+/>
+{/if}
+{#if $planet === 'uranus'}
+<Uranus
   visible={$earthVisible}
   planetRadius={$planetRadius}
   position={[0, -$planetRadius, 0]}
