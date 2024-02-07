@@ -54,14 +54,15 @@ export const sunDirection = derived(
 )
 
 export const totalityFactor = writable(0.9)
+export const selectedMoon = writable('luna')
 export const moonRadius = writable(0.2727 * Re)
-export const moonPerigee = writable(356500 * 1000 * METER)
-export const moonApogee = writable(406700 * 1000 * METER)
+export const moonPeriapsis = writable(356500 * 1000 * METER)
+export const moonApoapsis = writable(406700 * 1000 * METER)
 export const moonOrbitInclination = writable(5.145 * DEG)
 export const moonRightAscention = writable(0)
 export const moonDistance = derived(
-  [moonPerigee, moonApogee, totalityFactor],
-  ([$moonPerigee, $moonApogee, $totalityFactor]) => MathUtils.lerp($moonPerigee, $moonApogee, 1 - $totalityFactor)
+  [moonPeriapsis, moonApoapsis, totalityFactor],
+  ([$moonPeriapsis, $moonApoapsis, $totalityFactor]) => MathUtils.lerp($moonPeriapsis, $moonApoapsis, 1 - $totalityFactor)
 )
 export const moonAxis = derived(
   [moonOrbitInclination, planetAxialTilt],
@@ -197,9 +198,10 @@ const state = {
 
   totalityFactor,
 
+  selectedMoon,
   moonRadius,
-  moonPerigee,
-  moonApogee,
+  moonPeriapsis,
+  moonApoapsis,
 
   moonOrbitInclination,
   moonRightAscention,

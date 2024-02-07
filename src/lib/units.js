@@ -11,3 +11,6 @@ export const METER = 1
 export const Re = 6378 * 1000 * METER
 export const AU = 149597870700 * METER
 export const mBar = 100 // Pascal
+
+export const HOURS = 60 * 60
+export const DAYS = 24 * HOURS

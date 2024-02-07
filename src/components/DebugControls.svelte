@@ -5,7 +5,7 @@
     planetRadius,
     sunPosition,
     moonRadius,
-    moonPerigee,
+    moonPeriapsis,
     getDatGuiState,
     altitude,
     load,
@@ -40,7 +40,7 @@
     return 2 * Math.asin(r / d) * DEG
   }
 
-  let lastApparentSize = apparentSize($moonRadius, $moonPerigee)
+  let lastApparentSize = apparentSize($moonRadius, $moonPeriapsis)
 
   const setAltitude = (f, Rp) => {
     const alt = (5 * Math.pow(Rp, f) - 1)
@@ -54,16 +54,28 @@
     const appSettings = new GUI({
       width: 400
     })
-    appSettings.add(eclipseState, 'planet', [
+    const planetFolder = appSettings.addFolder('Planet')
+    let moonSelector = planetFolder.add(state, 'selectedMoon', ['luna']).onChange((v) => {
+      load(PlanetConfigs[eclipseState.planet].moons[v])
+      appSettings.controllersRecursive().forEach(c => c.updateDisplay())
+    }).listen()
+    planetFolder.add(eclipseState, 'planet', [
       // 'venus',
       'earth',
       'mars',
       'jupiter',
-      // 'saturn',
-      // 'uranus',
-      // 'neptune',
+      'saturn',
+      'uranus',
+      'neptune',
     ]).onChange((v) => {
+      const moons = Object.keys(PlanetConfigs[v].moons)
+      moonSelector = moonSelector.options(moons).onChange((v) => {
+        load(PlanetConfigs[eclipseState.planet].moons[v])
+        appSettings.controllersRecursive().forEach(c => c.updateDisplay())
+      }).listen()
+      state.selectedMoon = moons[0]
       load(PlanetConfigs[v])
+      load(PlanetConfigs[v].moons[moons[0]])
       setAltitude(eclipseState.altitude, $planetRadius)
       appSettings.controllersRecursive().forEach(c => c.updateDisplay())
     })
@@ -71,7 +83,7 @@
     perspectiveSettings.add(state, 'FOV', 1, 180, 1)
     perspectiveSettings.add(state, 'exposure', 0.01, 10, 0.01)
     perspectiveSettings.add(state, 'bloomIntensity', 0, 50, 0.01)
-    perspectiveSettings.add(eclipseState, 'altitude', 0.2, 1, 0.01).onChange(v => {
+    perspectiveSettings.add(eclipseState, 'altitude', 0.2, 1, 0.001).onChange(v => {
       setAltitude(v, $planetRadius)
     })
     perspectiveSettings.add(eclipseState, 'lookAtSun')
@@ -85,20 +97,20 @@
 
     const planetSettings = appSettings.addFolder('Planetary')
     planetSettings.add(state, 'sunIntensity', 0, 500, 1)
-    planetSettings.add(state, 'planetRadius', 1e6, 1e7, 100)
+    planetSettings.add(state, 'planetRadius', 1e6, 1e8, 100)
     planetSettings.add(eclipseState, 'lockApparentSize').onChange(v => {
       if (v){
-        lastApparentSize = apparentSize($moonRadius, $moonPerigee)
+        lastApparentSize = apparentSize($moonRadius, $moonPeriapsis)
       }
-    }).name('Lock Size at Perigee')
-    const moonRadiusCtrl = planetSettings.add(state, 'moonRadius', 1e5, 1e7, 100)
-    const moonPerigeeCtrl = planetSettings.add(state, 'moonPerigee', 1e6, 1e9, 100)
-    planetSettings.add(state, 'moonApogee', 1e7, 1e9, 100)
+    }).name('Lock Size at Periapsis')
+    const moonRadiusCtrl = planetSettings.add(state, 'moonRadius', 1e2, 2e9, 100)
+    const moonPeriapsisCtrl = planetSettings.add(state, 'moonPeriapsis', 1e6, 1e10, 100)
+    planetSettings.add(state, 'moonApoapsis', 1e7, 1e10, 100)
 
     const atmosSettings = appSettings.addFolder('Atmosphere')
     atmosSettings.add(state, 'atmosphereThickness', 0, 1000000, 1)
-    atmosSettings.add(state, 'airIndexRefraction', 1, 2, 0.001)
-    atmosSettings.add(state, 'airSurfacePressure', 0, 100000, 1)
+    atmosSettings.add(state, 'airIndexRefraction', 1, 1.004, 0.001)
+    atmosSettings.add(state, 'airSurfacePressure', 0, 200000, 1)
     atmosSettings.add(state, 'airSurfaceTemperature', 0, 1000, 1)
 
     const rayleighSettings = atmosSettings.addFolder('Rayleigh')
@@ -140,12 +152,12 @@
 
     moonRadiusCtrl.onChange(r => {
       if (eclipseState.lockApparentSize){
-        $moonPerigee = (r / Math.sin(lastApparentSize / 2 / DEG))
-        moonPerigeeCtrl.updateDisplay()
+        $moonPeriapsis = (r / Math.sin(lastApparentSize / 2 / DEG))
+        moonPeriapsisCtrl.updateDisplay()
       }
     })
 
-    moonPerigeeCtrl.onChange(d => {
+    moonPeriapsisCtrl.onChange(d => {
       if (eclipseState.lockApparentSize){
         $moonRadius = d * Math.sin(lastApparentSize / 2 / DEG)
         moonRadiusCtrl.updateDisplay()

@@ -1,22 +1,43 @@
+import { bothApsis } from '../lib/orbit'
 import {
   METER,
   Re,
   AU,
   DEG,
-  mBar
+  mBar,
+  DAYS,
+  HOURS
 } from '../lib/units'
+
+const moons = {
+  phobos: {
+    moonRadius: 11.1e3 * METER,
+    moonOrbitInclination: 1.08 * DEG,
+    moonOrbitPeriod: 0.31891 * DAYS,
+    ...bothApsis(9378 * 1000 * METER, 0.0151, 'moon')
+  },
+  deimos: {
+    moonRadius: 6.2e3 * METER,
+    moonOrbitInclination: 1.788 * DEG,
+    moonOrbitPeriod: 1.263 * DAYS,
+    ...bothApsis(23459 * 1000 * METER, 0.0005, 'moon')
+  },
+}
 
 export default {
   fogHue: 0,
+  sunDistance: 1.52 * AU,
   sunIntensity: 15,
+  dayLength: 24.6597 * HOURS,
+
   planetRadius: 0.53 * Re,
   planetAxialTilt: 25.19 * DEG,
-  rayleighScaleHeight: 11.1e3,
-  atmosphereThickness: 9 * 11.1e3,
   windSpeed: 10,
   cloudThickness: 0.01,
   cloudAbsorption: 0.04,
 
+  rayleighScaleHeight: 11.1e3,
+  atmosphereThickness: 9 * 11.1e3,
   overrideRayleigh: true,
   rayleighRed: 10.9,
   rayleighGreen: 7.4,
@@ -47,7 +68,7 @@ export default {
   mieScaleHeight: 1200,
 
   cloudZ: 0.01,
-  cloudThickness: 5.8,
+  cloudThickness: 0.9,
   cloudSize: 3.6,
   cloudMie: 0.31,
   cloudThreshold: 0.34,
@@ -57,9 +78,6 @@ export default {
   airSurfacePressure: 6.36 * mBar,
   airSurfaceTemperature: 210,
 
-  sunDistance: 1.52 * AU,
-  moonRadius: 11.08e3 * METER,
-  moonPerigee: 9234.42 * 1000 * METER,
-  moonApogee: 9517.58 * 1000 * METER,
-  moonOrbitInclination: 26.04 * DEG,
+  ...moons.phobos,
+  moons,
 }
