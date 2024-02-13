@@ -62,17 +62,27 @@ export default {
   rayleighScaleHeight: 27.7e3 * METER,
   atmosphereThickness,
   // i don't know if this is the right way to do this...
-  airIndexRefraction: 1.00013881 * .825 + 1.000034388 * (1 - .825),
+  airIndexRefraction: 1.00013881 * 0.825 + 1.000034388 * 0.152 + 1.00043650 * 0.023,
   airSurfacePressure: 1000 * mBar,
   airSurfaceTemperature: 76,
 
-  windSpeed: 100,
   mieAmount: 0.0,
   mieDirectional: 0,
   mieScaleHeight: 0,
+
+  ozoneRed: 0,
+  ozoneGreen: 0,
+  ozoneBlue: 0,
+
   // moon
   ...moons.miranda,
   moons,
 
-  cloudZ: -200e3 / atmosphereThickness, // below observer
+  windSpeed: 100,
+  cloudZ: 0.2,
+  cloudThickness: 4.2,
+  cloudSize: 0.1,
+  cloudMie: 0.35,
+  cloudThreshold: 0.49,
+  cloudAbsorption: 0.49,
 }

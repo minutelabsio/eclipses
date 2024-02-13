@@ -131,6 +131,13 @@
     mieSettings.add(state, 'mieWavelengthBlue', 0, 1, 1e-2)
     mieSettings.add(state, 'mieDirectional', -.999, .999, 0.000001)
 
+    const ozoneSettings = atmosSettings.addFolder('Ozone')
+    ozoneSettings.add(state, 'ozoneLayerHeight', 0, 100000, 10)
+    ozoneSettings.add(state, 'ozoneLayerWidth', 0, 100000, 10)
+    ozoneSettings.add(state, 'ozoneRed', 0, 40, 0.1)
+    ozoneSettings.add(state, 'ozoneGreen', 0, 40, 0.1)
+    ozoneSettings.add(state, 'ozoneBlue', 0, 40, 0.1)
+
     const cloudSettings = atmosSettings.addFolder('Clouds')
     cloudSettings.add(state, 'cloudZ', 0.01, 0.9, 0.01)
     cloudSettings.add(state, 'cloudThickness', 0, 20, 0.1)

@@ -63,9 +63,13 @@ export default {
   mieWavelengthGreen: 0.85,
   mieWavelengthBlue: 0.89,
 
-  mieAmount: 5e-7,
+  mieAmount: 2e-7,
   mieDirectional: 0.01,
-  mieScaleHeight: 1200,
+  mieScaleHeight: 5000,
+
+  ozoneRed: 0,
+  ozoneGreen: 0,
+  ozoneBlue: 0,
 
   cloudZ: 0.01,
   cloudThickness: 0.9,

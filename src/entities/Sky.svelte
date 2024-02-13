@@ -16,6 +16,9 @@
     mieWavelengthResponse,
     mieScaleHeight,
     mieDirectional,
+    ozoneLayerHeight,
+    ozoneLayerWidth,
+    ozoneCoefficients,
     exposure,
     iSteps,
     jSteps,
@@ -46,6 +49,9 @@
   $: Sky.mieWavelengthResponse = $mieWavelengthResponse
   $: Sky.mieScaleHeight = $mieScaleHeight
   $: Sky.mieDirectional = $mieDirectional
+  $: Sky.ozoneLayerHeight = $ozoneLayerHeight
+  $: Sky.ozoneLayerWidth = $ozoneLayerWidth
+  $: Sky.ozoneCoefficients = $ozoneCoefficients
   $: Sky.exposure = $exposure
   $: Sky.iSteps = $iSteps
   $: Sky.jSteps = $jSteps

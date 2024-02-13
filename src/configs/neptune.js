@@ -84,17 +84,27 @@ export default {
   rayleighScaleHeight: 20e3 * METER,
   atmosphereThickness,
   // i don't know if this is the right way to do this...
-  airIndexRefraction: 1.00013881 * .8 + 1.000034388 * .2,
+  airIndexRefraction: 1.00013881 * 0.8 + 1.000034388 * 0.185 + 1.00043650 * 0.015,
   airSurfacePressure: 1000 * mBar,
   airSurfaceTemperature: 72,
 
-  windSpeed: 100,
   mieAmount: 0.0,
   mieDirectional: 0,
   mieScaleHeight: 0,
+
+  ozoneRed: 0,
+  ozoneGreen: 0,
+  ozoneBlue: 0,
+
   // moon
   ...moons.niaid,
   moons,
 
-  cloudZ: 0.01,
+  windSpeed: 100,
+  cloudZ: 0.5,
+  cloudThickness: 0.8,
+  cloudSize: 0.1,
+  cloudMie: 0.35,
+  cloudThreshold: 0,
+  cloudAbsorption: 0.8,
 }

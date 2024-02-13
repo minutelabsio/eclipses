@@ -87,17 +87,30 @@ export default {
   airSurfaceTemperature: 134,
 
 
-  mieRed: 10,
-  mieGreen: 16.8,
-  mieBlue: 21.6,
+  // mieRed: 10,
+  // mieGreen: 16.8,
+  // mieBlue: 21.6,
+  mieRed: 1.6,
+  mieGreen: 4.3,
+  mieBlue: 9.2,
 
-  mieWavelengthRed: 0.79,
-  mieWavelengthGreen: 0.87,
-  mieWavelengthBlue: 0.96,
+  // mieWavelengthRed: 0.79,
+  // mieWavelengthGreen: 0.87,
+  // mieWavelengthBlue: 0.96,
+  mieWavelengthRed: 0.13,
+  mieWavelengthGreen: 0.47,
+  mieWavelengthBlue: 0.91,
 
-  mieAmount: 6.133e-7,
-  mieDirectional: 0.013785,
-  mieScaleHeight: 10000,
+  // mieAmount: 6.133e-7,
+  // mieDirectional: 0.013785,
+  // mieScaleHeight: 10000,
+  mieAmount: 5.6e-5,
+  mieDirectional: 0.05,
+  mieScaleHeight: 9000,
+
+  ozoneRed: 0,
+  ozoneGreen: 0,
+  ozoneBlue: 0,
 
   // moon
   ...moons.titan,
@@ -105,9 +118,9 @@ export default {
 
   windSpeed: 600,
   cloudZ: 0.01, // i think the cloud layer is actually lower...?
-  cloudThickness: 3.5,
+  cloudThickness: 0.1,
   cloudSize: 1.3,
-  cloudMie: 0.5,
+  cloudMie: 0.2,
   cloudThreshold: 0.35,
   cloudAbsorption: 0.05,
 }

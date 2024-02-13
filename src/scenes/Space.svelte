@@ -51,7 +51,7 @@
 
   let sunBrightness = 1
   $: sunsetBrightness = MathUtils.clamp(
-      MathUtils.inverseLerp(-10, 3, $elevation),
+      MathUtils.inverseLerp(-6, 3, $elevation),
       0, 1
     )
 

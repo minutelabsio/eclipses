@@ -61,13 +61,33 @@ export default {
   airSurfacePressure: 1000 * mBar,
   airSurfaceTemperature: 165,
 
-  windSpeed: 100,
-  mieAmount: 0.0,
-  mieDirectional: 0,
-  mieScaleHeight: 0,
+  mieRed: 0.8,
+  mieGreen: 5.9,
+  mieBlue: 32.5,
+
+  mieWavelengthRed: 0.8,
+  mieWavelengthGreen: 0.85,
+  mieWavelengthBlue: 0.9,
+
+  mieAmount: 2e-5,
+  mieDirectional: 1e-5,
+  mieScaleHeight: 11000,
+
+  ozoneLayerHeight: 27e3 * METER,
+  ozoneLayerWidth: 27e3 * METER,
+  ozoneRed: 4.3,
+  ozoneGreen: 14.6,
+  ozoneBlue: 40,
+
   // moon
   ...moons.amalthea,
   moons,
 
-  cloudZ: 130e3 * METER / atmosphereThickness
+  windSpeed: 100,
+  cloudZ: 100e3 * METER / atmosphereThickness,
+  cloudThickness: 0.4,
+  cloudSize: 0.1,
+  cloudMie: 0.2,
+  cloudThreshold: 0.2,
+  cloudAbsorption: 0.05,
 }

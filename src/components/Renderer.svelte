@@ -99,8 +99,8 @@
           // adaptive: true,
           // resolution: 256,
           // middleGrey: 0.6,
-          whitePoint: 2,
-          minLuminance: 0.001, //0.0000025,
+          whitePoint: 10,
+          minLuminance: 0.0005, //0.0000025,
           adaptationRate: 2
         }),
         new SMAAEffect({
