@@ -12,6 +12,7 @@ export default () => {
     blendEquation: THREE.AddEquation,
     blendSrc: THREE.OneFactor,
     blendDst: THREE.OneMinusSrcAlphaFactor,
+    transparent: true,
     // dithering: true,
     side: THREE.BackSide,
     depthTest: false,

@@ -86,13 +86,28 @@ export default {
   airSurfacePressure: 1000 * mBar,
   airSurfaceTemperature: 134,
 
-  windSpeed: 200,
-  mieAmount: 0.0,
-  mieDirectional: 0,
-  mieScaleHeight: 0,
+
+  mieRed: 10,
+  mieGreen: 16.8,
+  mieBlue: 21.6,
+
+  mieWavelengthRed: 0.79,
+  mieWavelengthGreen: 0.87,
+  mieWavelengthBlue: 0.96,
+
+  mieAmount: 6.133e-7,
+  mieDirectional: 0.013785,
+  mieScaleHeight: 10000,
+
   // moon
   ...moons.titan,
   moons,
 
-  cloudZ: -0.01, // below observer
+  windSpeed: 600,
+  cloudZ: 0.01, // i think the cloud layer is actually lower...?
+  cloudThickness: 3.5,
+  cloudSize: 1.3,
+  cloudMie: 0.5,
+  cloudThreshold: 0.35,
+  cloudAbsorption: 0.05,
 }

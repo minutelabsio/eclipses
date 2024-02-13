@@ -5,8 +5,8 @@
   import { T } from '@threlte/core'
   import { Vector3, MathUtils } from 'three'
   import createCorona from '../shaders/corona/Corona'
-  import createSky from '../shaders/sky/Sky'
   import createStars from '../shaders/stars/Stars'
+  import Sky from '../entities/Sky.svelte'
   import Mars from '../entities/Mars.svelte'
   import Earth from '../entities/Earth.svelte'
   import Jupiter from '../entities/Jupiter.svelte'
@@ -22,35 +22,14 @@
     planetRadius,
     eclipseProgress,
     doAnimation,
-    atmosphereThickness,
-    airIndexRefraction,
     elevationRad,
     totalityFactor,
-    sunIntensity,
     sunPosition,
     sunRadius,
-    sunDistance,
     moonRadius,
     moonRightAscention,
     moonPosition,
-    rayleighCoefficient,
-    rayleighScaleHeight,
-    mieCoefficient,
-    mieWavelengthResponse,
-    mieScaleHeight,
-    mieDirectional,
-    exposure,
-    iSteps,
-    jSteps,
-    cloudZ,
-    cloudThickness,
-    cloudSize,
-    cloudMie,
-    cloudThreshold,
-    cloudAbsorption,
-    windSpeed,
     starsVisible,
-    skyVisible,
     mountainsVisible,
     earthVisible,
     elevation,
@@ -66,8 +45,6 @@
   const Corona = createCorona({
     opacity: 0.5
   })
-
-  const Sky = createSky()
 
   let starsPoints
   const Stars = createStars().then(s => starsPoints = s)
@@ -111,7 +88,6 @@
   let time = 0
   useFrame((ctx, dt) => {
     // frame
-    Sky.update(dt)
     if ($doAnimation) {
       time += dt * 1000
     } else {
@@ -124,33 +100,8 @@
   })
 
   let fog
-
-  $: Sky.sunIntensity = $sunIntensity
-  $: Sky.rayleighCoefficients = $rayleighCoefficient
-  $: Sky.rayleighScaleHeight = $rayleighScaleHeight
-  $: Sky.mieCoefficients = $mieCoefficient
-  $: Sky.mieWavelengthResponse = $mieWavelengthResponse
-  $: Sky.mieScaleHeight = $mieScaleHeight
-  $: Sky.mieDirectional = $mieDirectional
-  $: Sky.exposure = $exposure
-  $: Sky.iSteps = $iSteps
-  $: Sky.jSteps = $jSteps
-  $: Sky.cloudZ = $cloudZ
-  $: Sky.cloudThickness = $cloudThickness
-  $: Sky.cloudSize = $cloudSize
-  $: Sky.cloudMie = $cloudMie
-  $: Sky.cloudThreshold = $cloudThreshold
-  $: Sky.cloudAbsorption = $cloudAbsorption
-  $: Sky.windSpeed = $windSpeed
-  $: Sky.atmosphereThickness = $atmosphereThickness
-  $: Sky.planetRadius = $planetRadius
-  $: Sky.sunPosition.set(...$sunPosition)
-  $: Sky.sunRadius = $sunRadius / METER
-  $: Sky.moonPosition.copy($moonPosition)
-  $: Sky.moonRadius = $moonRadius / METER
-  $: fog?.color.setHSL($fogHue / 360, .2, Easing.sinIn(sunBrightness) * 0.3)
-
   let cameraControls
+  $: fog?.color.setHSL($fogHue / 360, .2, Easing.sinIn(sunBrightness) * 0.3)
 </script>
 
 
@@ -241,18 +192,9 @@
   </T.Mesh>
 
   <!-- Sky -->
-  <T.Mesh
-    visible={$skyVisible}
-    scale.x={0.5 * AU}
-    scale.y={0.5 * AU}
-    scale.z={0.5 * AU}
-    renderOrder={2}
-  >
-    <T.IcosahedronGeometry args={[1, 32]} />
-    <T is={Sky.shader} />
-  </T.Mesh>
+  <Sky/>
 
-  <Jupiter
+  <Saturn
     position={skyPosition(4.217e8, 13 * DEG, 20 * DEG)}
     rotation={[0, 0, 0]}
     planetRadius={7.1492e7}

@@ -1,0 +1,77 @@
+<script>
+  import { useFrame } from '@threlte/core'
+  import createSky from '../shaders/sky/Sky'
+  import { T } from '@threlte/core'
+  import {
+    planetRadius,
+    atmosphereThickness,
+    sunIntensity,
+    sunPosition,
+    sunRadius,
+    moonRadius,
+    moonPosition,
+    rayleighCoefficient,
+    rayleighScaleHeight,
+    mieCoefficient,
+    mieWavelengthResponse,
+    mieScaleHeight,
+    mieDirectional,
+    exposure,
+    iSteps,
+    jSteps,
+    cloudZ,
+    cloudThickness,
+    cloudSize,
+    cloudMie,
+    cloudThreshold,
+    cloudAbsorption,
+    windSpeed,
+    skyVisible,
+  } from '../store/environment'
+  import {
+    METER,
+    AU,
+  } from '../lib/units'
+
+  const Sky = createSky()
+
+  useFrame((ctx, dt) => {
+    Sky.update(dt)
+  })
+
+  $: Sky.sunIntensity = $sunIntensity
+  $: Sky.rayleighCoefficients = $rayleighCoefficient
+  $: Sky.rayleighScaleHeight = $rayleighScaleHeight
+  $: Sky.mieCoefficients = $mieCoefficient
+  $: Sky.mieWavelengthResponse = $mieWavelengthResponse
+  $: Sky.mieScaleHeight = $mieScaleHeight
+  $: Sky.mieDirectional = $mieDirectional
+  $: Sky.exposure = $exposure
+  $: Sky.iSteps = $iSteps
+  $: Sky.jSteps = $jSteps
+  $: Sky.cloudZ = $cloudZ
+  $: Sky.cloudThickness = $cloudThickness
+  $: Sky.cloudSize = $cloudSize
+  $: Sky.cloudMie = $cloudMie
+  $: Sky.cloudThreshold = $cloudThreshold
+  $: Sky.cloudAbsorption = $cloudAbsorption
+  $: Sky.windSpeed = $windSpeed
+  $: Sky.atmosphereThickness = $atmosphereThickness
+  $: Sky.planetRadius = $planetRadius
+  $: Sky.sunPosition.set(...$sunPosition)
+  $: Sky.sunRadius = $sunRadius / METER
+  $: Sky.moonPosition.copy($moonPosition)
+  $: Sky.moonRadius = $moonRadius / METER
+
+</script>
+
+<T.Mesh
+  visible={$skyVisible}
+  scale.x={0.5 * AU}
+  scale.y={0.5 * AU}
+  scale.z={0.5 * AU}
+  renderOrder={2}
+>
+  <T.IcosahedronGeometry args={[1, 32]} />
+  <T is={Sky.shader} />
+</T.Mesh>

@@ -124,7 +124,7 @@
     mieSettings.add(state, 'mieRed', 0, 40, 0.1)
     mieSettings.add(state, 'mieGreen', 0, 40, 0.1)
     mieSettings.add(state, 'mieBlue', 0, 40, 0.1)
-    mieSettings.add(state, 'mieScaleHeight', 0, 10000, 10)
+    mieSettings.add(state, 'mieScaleHeight', 0, 50000, 10)
     mieSettings.add(state, 'mieAmount', 0, 1e-4, 1e-10)
     mieSettings.add(state, 'mieWavelengthRed', 0, 1, 1e-2)
     mieSettings.add(state, 'mieWavelengthGreen', 0, 1, 1e-2)

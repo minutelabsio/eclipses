@@ -118,7 +118,7 @@ export const airSurfacePressure = writable(101.3e3)
 export const airSurfaceTemperature = writable(288)
 export const airDensityFactor = derived(
   [airSurfacePressure, airSurfaceTemperature],
-  ([$P, $T]) => print((288 / 101.3e3) * ($P / $T), $P, $T)
+  ([$P, $T]) => (288 / 101.3e3) * ($P / $T)
 )
 export const overrideRayleigh = writable(false)
 // 5.5e-6, 13.0e-6, 22.4e-6
