@@ -22,10 +22,16 @@ uniform float planetRadius;
 uniform float atmosphereThickness;
 uniform vec3 rayleighCoefficients;
 uniform float rayleighScaleHeight;
+
 uniform vec3 mieCoefficients;
 uniform vec3 mieWavelengthResponse;
 uniform float mieScaleHeight;
 uniform float mieDirectional;
+
+uniform float ozoneLayerHeight;
+uniform float ozoneLayerWidth;
+uniform vec3 ozoneCoefficients;
+
 uniform float exposure;
 uniform int iSteps;
 uniform int jSteps;
@@ -60,35 +66,24 @@ float remap(float value, float low1, float high1, float low2, float high2) {
   return mix(low2, high2, t);
 }
 
-vec2 opticalDensity(float z, vec2 scaleHeights, float planetRadius) {
-  float h = max(0.0, z - planetRadius);
-  return clamp(exp(-h / scaleHeights), 0., 1.);
+float opticalDensityTent(float x, float height, float width) {
+  return max(0., 1. - 2. * abs(x - height) / width);
+	// The ozone layer is represented as a tent function with a width of 30km, centered around an altitude of 25km.
+  // return max(0., 1. - abs(h - 25000.0) / 15000.0);
 }
 
-float shellDensity(int index, int steps){
-  if (index == steps){
-    return 0.0;
-  } else if (index == 0){
-    return 1.0;
-  } else {
-    return 1. - float(index) / float(steps);
-  }
-}
-
-// spherical shells starting at Re -> Re + atmosphereThickness
-float shellRadius(int index, int steps, float H, float atmosphereThickness, float planetRadius){
-  if (index == steps){
-    return atmosphereThickness + planetRadius;
-  } else if (index == 0){
-    return planetRadius;
-  } else {
-    return planetRadius - H * log(1. - float(index) / float(steps));
-  }
+vec3 opticalDensity(float x) {
+  return clamp(
+    vec3(
+      exp(-x / vec2(rayleighScaleHeight, mieScaleHeight)),
+      opticalDensityTent(x, ozoneLayerHeight, ozoneLayerWidth)
+    ),
+  0., 1.);
 }
 
 // optical depth from start to end in the atmosphere
-vec2 opticalDepths(vec3 start, vec3 end, vec2 scaleHeights, float planetRadius, int steps) {
-  vec2 od = vec2(0.0);
+vec3 opticalDepths(vec3 start, vec3 end, int steps) {
+  vec3 od = vec3(0.0);
   float fsteps = float(steps);
   vec3 r = end - start;
   float d = length(r);
@@ -98,7 +93,7 @@ vec2 opticalDepths(vec3 start, vec3 end, vec2 scaleHeights, float planetRadius, 
   vec3 pos = start - 0.5 * dr;
   for(int i = 0; i < steps; i++) {
     pos += dr;
-    od += opticalDensity(length(pos), scaleHeights, planetRadius) * ds;
+    od += opticalDensity(length(pos) - planetRadius) * ds;
   }
   return od;
 }
@@ -390,7 +385,6 @@ float nextStep(const float d, const float ds, const int i) {
   // steps up until the last are just ds
   return next > d ? d - current : ds;
 }
-
 vec4 scattering(
   vec3 rayOrigin,
   vec3 rayDir,
@@ -456,21 +450,30 @@ vec4 scattering(
 
   vec3 sSun = normalize(sunPosition - start);
 
-  float fsteps = float(steps.x);
-  float d = (path.y - path.x);
-  float ds = d / fsteps;
-
   vec3 rayleighT = vec3(0.0);
   vec3 mieT = vec3(0.0);
   // begin calculating transmittance via optical depth accumulation
-  vec2 primaryDepth = vec2(0.0);
+  vec3 primaryDepth = vec3(0.0);
 
+  float fsteps = float(steps.x);
+  float d = (path.y - path.x);
+  float ds = d / fsteps;
   vec3 dr = rayDir * ds;
-  vec3 pos = start - 0.5 * dr;
+  vec3 pos = start + 0.5 * dr;
+  // trick from https://github.com/Fewes/MinimalAtmosphere/blob/master/Assets/Atmosphere/Shaders/Atmosphere.cginc
+  // We can reduce the number of atmospheric samples required to converge by spacing them exponentially closer to the camera.
+	// This breaks space view however, so let's compensate for that with an exponent that "fades" to 1 as we leave the atmosphere.
+  float observerHeight = length(rayOrigin) - planetRadius;
+  float sampleDistributionExponent = 1. + 8. * clamp(1. - observerHeight / atmosphereThickness, 0., 1.);
+  float prevRayT = 0.0;
 
   for (int i = 0; i < steps.x; i++){
+    float t = d * pow(float(i) / fsteps, sampleDistributionExponent);
+    ds = t - prevRayT;
+    prevRayT = t;
+    dr = rayDir * ds;
     pos += dr;
-    vec2 odStep = opticalDensity(length(pos), scaleHeights, planetRadius) * ds;
+    vec3 odStep = opticalDensity(length(pos) - planetRadius) * ds;
     primaryDepth += odStep;
 
     // if the ray intersects the planet, no light comes this way...but..
@@ -480,14 +483,14 @@ vec4 scattering(
     float u = umbra(pos, rApparentSun, sunPosition, rApparentMoon, moonPosition);
     // u = intersectsOutside(intPlanet2) ? 0.0 : u;
 
-    vec2 intAtmosphere2 = raySphereIntersection(pos, sSun, atmosphereRadius);
-    vec3 exit = pos + intAtmosphere2.y * sSun;
+    vec2 intAtmosOut = raySphereIntersection(pos, sSun, atmosphereRadius);
+    vec3 exit = pos + intAtmosOut.y * sSun;
 
-    vec2 secondaryDepth = opticalDepths(pos, exit, scaleHeights, planetRadius, steps.y);
+    vec3 secondaryDepth = opticalDepths(pos, exit, steps.y);
     // vec2 secondaryDepth = getOpticalDepths(pos, normalize(exit - pos), scaleHeights, planetRadius, atmosphereRadius);
     // vec2 secondaryDepth = vec2(0.0);
-    vec2 depth = primaryDepth + secondaryDepth;
-    vec3 alpha = depth.x * rayleighCoefficients + depth.y * mieCoefficients * (1. - mieAbsorption) + depth.y * mieAbsorption;
+    vec3 depth = primaryDepth + secondaryDepth;
+    vec3 alpha = depth.x * rayleighCoefficients + depth.y * mieCoefficients + depth.z * ozoneCoefficients;
     vec3 transmittance = exp(-alpha);
     vec3 scatter = u * transmittance;
 
@@ -495,10 +498,6 @@ vec4 scattering(
     mieT += scatter * odStep.y;
   }
 
-  // scatter direct light from the sundisk
-  vec3 alpha = primaryDepth.x * rayleighCoefficients + primaryDepth.y * mieCoefficients * (1. - mieAbsorption) + primaryDepth.y * mieAbsorption;
-  vec3 transmittance = exp(-alpha);
-  vec3 sunDiskColor = sunDisk * transmittance;
 
   // phases
   float mu = dot(rayDir, sSun);
@@ -507,6 +506,10 @@ vec4 scattering(
   mieNorm = mieNorm == 0.0 ? 1.0 : mieNorm;
   mieCoefficients *= angleDependentMie(mieWavelengthResponse, mu, g) / mieNorm;
 
+  // scatter direct light from the sundisk
+  vec3 alpha = primaryDepth.x * rayleighCoefficients + primaryDepth.y * mieCoefficients + primaryDepth.z * ozoneCoefficients;
+  vec3 transmittance = exp(-alpha);
+  vec3 sunDiskColor = sunDisk * transmittance;
   // clouds
   float cloudAmount = 0.0;
   vec3 cloud = vec3(0.0);
@@ -532,7 +535,7 @@ vec4 scattering(
   vec3 scatter = I0 * rayleighT * phases.x * rayleighCoefficients + I0 * mieT * phases.y * mieCoefficients;
   // scatter = clamp(scatter, vec3(0.0), vec3(I0)) / sqrt(fsteps);
   // opacity of the atmosphere
-  float opacity = dot(primaryDepth, vec2(0.2 * length(rayleighCoefficients), length(mieCoefficients))) + cloudAbsorptionAmount;
+  float opacity = dot(primaryDepth.xy, vec2(0.2 * length(rayleighCoefficients), length(mieCoefficients))) + cloudAbsorptionAmount;
   return vec4((1. - cloudAbsorptionAmount) * (scatter + sunDiskColor) + cloud, clamp(opacity, 0.0, 1.0));
 }
 

@@ -157,6 +157,17 @@ export const rayleighCoefficient = derived(
     return getRayleigh($n, $air)
   }
 )
+export const ozoneLayerHeight = writable(25e3)
+export const ozoneLayerWidth = writable(30e3)
+export const ozoneRed = writable(1.4)
+export const ozoneGreen = writable(1.2)
+export const ozoneBlue = writable(0.085)
+export const ozoneCoefficients = derived(
+  [ozoneRed, ozoneGreen, ozoneBlue],
+  ([$ozoneRed, $ozoneGreen, $ozoneBlue]) => {
+    return new Vector3($ozoneRed * 1e-6, $ozoneGreen * 1e-6, $ozoneBlue * 1e-6)
+  }
+)
 // clouds
 export const cloudZ = writable(0.2)
 export const cloudThickness = writable(4)
@@ -224,6 +235,12 @@ const state = {
   mieWavelengthGreen,
   mieWavelengthBlue,
   mieDirectional,
+
+  ozoneLayerHeight,
+  ozoneLayerWidth,
+  ozoneRed,
+  ozoneGreen,
+  ozoneBlue,
 
   cloudZ,
   cloudThickness,
