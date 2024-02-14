@@ -4,6 +4,7 @@ varying vec3 vCameraDirection;
 varying vec3 rayOrigin;
 varying float SunAngularRadius;
 varying float MoonAngularRadius;
+varying float MoonAngularRadiusCamera;
 varying float altitude;
 varying vec3 origin;
 
@@ -25,8 +26,10 @@ void main() {
   origin = (modelMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
   rayOrigin = cameraPosition - origin + vec3(0, 1.0, 0);
   altitude = length(rayOrigin) - planetRadius;
+  vec3 groundOrigin = normalize(rayOrigin) * planetRadius;
 
   // angular radii of sun and moon change very little
-  SunAngularRadius = asin(sunRadius / length(sunPosition - rayOrigin));
-  MoonAngularRadius = asin(moonRadius / length(moonPosition - rayOrigin));
+  SunAngularRadius = asin(sunRadius / distance(sunPosition, groundOrigin));
+  MoonAngularRadius = asin(moonRadius / distance(moonPosition, groundOrigin));
+  MoonAngularRadiusCamera = asin(moonRadius / distance(moonPosition, rayOrigin));
 }

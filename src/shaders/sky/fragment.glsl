@@ -4,6 +4,7 @@ varying vec3 vCameraDirection;
 varying vec3 rayOrigin;
 varying float SunAngularRadius;
 varying float MoonAngularRadius;
+varying float MoonAngularRadiusCamera;
 varying float altitude;
 
 uniform float time;
@@ -418,7 +419,7 @@ vec4 scattering(
     normalize(sunPosition - rayOrigin),
     SunAngularRadius,
     normalize(moonPosition - rayOrigin),
-    MoonAngularRadius,
+    MoonAngularRadiusCamera,
     sunIntensity
   );
 
