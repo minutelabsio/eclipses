@@ -1,10 +1,11 @@
 <script>
-import { DoubleSide, RingGeometry, TextureLoader, Vector3 } from 'three'
+import { Color, DoubleSide, RingGeometry, TextureLoader, Vector3 } from 'three'
 import { T, useLoader } from '@threlte/core'
 import textureUrl from '../assets/uranus/uranusmap.jpg'
 import ringTextureUrl from '../assets/uranus/uranusringcolor.jpg'
 import ringOpacityUrl from '../assets/uranus/uranusringtrans.gif'
 import { useSuspense } from '@threlte/extras'
+import { altitude, atmosphereThickness } from '../store/environment'
 
 export let planetRadius = 1
 export let position = [0, 0, 0]
@@ -28,6 +29,8 @@ const textures = suspend(useLoader(TextureLoader).load({
   ring: ringTextureUrl,
   ringOpacity: ringOpacityUrl,
 }))
+
+$: colorFade = new Color(0x000000).lerp(new Color(0xffffff), Math.min(1, $altitude / $atmosphereThickness))
 </script>
 
 {#if $textures}
@@ -45,6 +48,7 @@ const textures = suspend(useLoader(TextureLoader).load({
       map={$textures.map}
       shininess={0}
       fog={false}
+      color={'#' + colorFade.getHexString()}
     />
   </T.Mesh>
   <!-- rings -->

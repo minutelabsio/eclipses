@@ -141,7 +141,7 @@
     const cloudSettings = atmosSettings.addFolder('Clouds')
     cloudSettings.add(state, 'cloudZ', 0.01, 0.9, 0.01)
     cloudSettings.add(state, 'cloudThickness', 0, 20, 0.1)
-    cloudSettings.add(state, 'cloudSize', 0, 10, 0.1)
+    cloudSettings.add(state, 'cloudSize', 0, 10, 0.01)
     cloudSettings.add(state, 'cloudMie', 0, .999, 1e-7)
     cloudSettings.add(state, 'cloudThreshold', 0, 1, 0.01)
     cloudSettings.add(state, 'cloudAbsorption', 0, 1, 0.01)
