@@ -9,13 +9,15 @@
     getDatGuiState,
     altitude,
     load,
+    elevation,
   } from '../store/environment'
   import {
     DEG,
   } from '../lib/units'
   import * as PlanetConfigs from '../configs'
+  import { Player, Tween } from 'intween'
 
-  export let cameraControls
+  export let cameraControls = null
 
   const lookAtSun = () => {
     const [x, y, z] = $sunPosition
@@ -26,6 +28,24 @@
     cameraControls.lookInDirectionOf(0, -$planetRadius, 0, true)
   }
 
+  let tween = new Tween({
+    elevation: -9
+  }).by('20s', { elevation: 10 })
+
+  let player = new Player(tween.duration).seek(12000).pause()
+  player.pipe(tween).subscribe(state => {
+    elevation.set(state.elevation)
+  })
+
+  const animateSunRise = () => {
+    if (player.paused){
+      player.seek(0)
+      player.play()
+    } else {
+      player.pause()
+    }
+  }
+
   const eclipseState = {
     planet: 'earth',
     lockApparentSize: false,
@@ -34,6 +54,7 @@
 
     lookAtSun: lookAtSun,
     lookAtPlanet: lookAtPlanet,
+    animateSunRise: animateSunRise,
   }
 
   const apparentSize = (r, d) => {
@@ -83,11 +104,12 @@
     perspectiveSettings.add(state, 'FOV', 1, 180, 1)
     perspectiveSettings.add(state, 'exposure', 0.01, 10, 0.01)
     perspectiveSettings.add(state, 'bloomIntensity', 0, 50, 0.01)
-    perspectiveSettings.add(eclipseState, 'altitude', 0.2, 1, 0.001).onChange(v => {
+    perspectiveSettings.add(eclipseState, 'altitude', 0.01, 1, 0.001).onChange(v => {
       setAltitude(v, $planetRadius)
     })
     perspectiveSettings.add(eclipseState, 'lookAtSun')
     perspectiveSettings.add(eclipseState, 'lookAtPlanet')
+    perspectiveSettings.add(eclipseState, 'animateSunRise')
 
     const eclipseSettings = appSettings.addFolder('Eclipse')
     eclipseSettings.add(state, 'doAnimation')

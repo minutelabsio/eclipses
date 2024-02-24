@@ -14,7 +14,7 @@ export default () => {
     blendDst: THREE.OneMinusSrcAlphaFactor,
     transparent: true,
     // dithering: true,
-    side: THREE.BackSide,
+    side: THREE.DoubleSide,
     depthTest: false,
   })
   shader.toneMapped = false
@@ -30,7 +30,7 @@ export default () => {
     planetColor: new THREE.Color(0x111111),
     moonPosition: new THREE.Vector3(0, 0, 0),
     moonRadius: 0.2727 * Re,
-    altitude: 0,
+    uAltitude: 0,
     sunIntensity: 25,
     sunPosition: new THREE.Vector3(0, 0, -sunDistance),
     sunRadius,
@@ -56,6 +56,7 @@ export default () => {
     cloudThreshold: 0.4,
     cloudAbsorption: 0.2,
     windSpeed: 8,
+    stereo: false,
   }
 
   const api = { shader }

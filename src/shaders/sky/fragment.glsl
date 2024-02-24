@@ -7,6 +7,7 @@ varying float MoonAngularRadius;
 varying float MoonAngularRadiusCamera;
 varying float altitude;
 
+uniform bool stereo;
 uniform float time;
 
 uniform sampler2D opticalDepthMap;
@@ -228,8 +229,8 @@ vec3 angleDependentMie(vec3 response, float mu, float g){
   float ghg = 0.37;
   float gd = 0.96;
   float alpha = 1.18;
-  vec3 wd = response;
-  vec3 miePhase = g * vec3(
+  vec3 wd = g * response / max(response.x, max(response.y, response.z));
+  vec3 miePhase = vec3(
     // miePhaseHGD(mu, ghg, gd, alpha, wd.x),
     // miePhaseHGD(mu, ghg, gd, alpha, wd.y),
     // miePhaseHGD(mu, ghg, gd, alpha, wd.z)
@@ -359,12 +360,16 @@ float sunMoonIntensity(vec3 rayDir, vec3 sSun, float sunAngularRadius, vec3 sMoo
   if(mu < 0.9995) {
     return 0.0;
   }
+
+  // simple circle sun
+  // return I0 * smoothcircle(rayDir, sunAngularRadius, sSun, 0.01);
+
   // screen space of ray and moon, sun is at origin
   vec2 moonxy = squash(sMoon, sSun);
   vec2 rayxy = squash(rayDir, sSun);
 
   vec2 moonRay = rayxy - moonxy;
-  float x = 0.05 * smoothstep(0.0008, 0., length(moonxy));
+  float x = 0.02 * smoothstep(0.0008, 0., length(moonxy));
   vec2 seed = 1000. * moonRay + 15.;
   // this adds little craters when the moon is near totality
   float f = 1.0 - x * smoothstep(0., 1., cnoise2(seed));
@@ -420,7 +425,7 @@ vec4 scattering(
     SunAngularRadius,
     normalize(moonPosition - rayOrigin),
     MoonAngularRadiusCamera,
-    sunIntensity
+    I0
   );
 
   vec2 path = raySphereIntersection(rayOrigin, rayDir, atmosphereRadius);
@@ -432,7 +437,6 @@ vec4 scattering(
 
   float rApparentSun = tan(SunAngularRadius);
   float rApparentMoon = tan(moonAngularRadius);
-  float mieAbsorption = cloudAbsorption * length(mieCoefficients);
 
   // always start atmosphere ray at viewpoint if we start inside atmosphere
   path.x = max(path.x, 0.0);
@@ -503,7 +507,8 @@ vec4 scattering(
 
   // phases
   float mu = dot(rayDir, sSun);
-  vec2 phases = vec2(rayleighPhase(mu), clamp(1e2 * g, 0., 1. / length(mieCoefficients)));
+  // vec2 phases = vec2(rayleighPhase(mu), clamp(1e2 * g, 0., 1. / length(mieCoefficients)));
+  vec2 phases = vec2(rayleighPhase(mu), 1.);
   float mieNorm = length(angleDependentMie(mieWavelengthResponse, 1., g));
   mieNorm = mieNorm == 0.0 ? 1.0 : mieNorm;
   mieCoefficients *= angleDependentMie(mieWavelengthResponse, mu, g) / mieNorm;
@@ -553,12 +558,27 @@ vec4 scattering(
   vec3 scatter = I0 * rayleighT * phases.x * rayleighCoefficients + I0 * mieT * phases.y * mieCoefficients;
   // scatter = clamp(scatter, vec3(0.0), vec3(I0)) / sqrt(fsteps);
   // opacity of the atmosphere
+  // TODO: fix this
   float opacity = dot(primaryDepth.xy, vec2(0.2 * length(rayleighCoefficients), length(mieCoefficients))) + cloudAbsorptionAmount;
   return vec4((1. - cloudAbsorptionAmount) * (scatter + sunDiskColor) + cloud, clamp(opacity, 0.0, 1.0));
 }
 
 void main() {
   vec3 rayDir = normalize(vWorldPosition);
+  if (stereo){
+    // lay it out on a circle use uvs
+    float r = 1.1 * length(vUv - 0.5); // add a little bit of padding
+    float cosphi = cos(PI * r);
+    float theta = -clamp(atan(vUv.y - 0.5, vUv.x - 0.5), -PI, PI);
+    // float cosphi = remap(r, 0., 1., 1., -1.);
+    float sinphi = sqrt(1. - min(1., cosphi * cosphi));
+    rayDir = vec3(sinphi * cos(theta), cosphi, sinphi * sin(theta));
+    // debug angles
+    // gl_FragColor = vec4(rayDir + 1.0, 1.0);
+    // return;
+
+  }
+
   vec2 intPlanet = raySphereIntersection(rayOrigin, rayDir, planetRadius);
 
   // if the ray intersects the planet, return planet color

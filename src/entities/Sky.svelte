@@ -3,6 +3,7 @@
   import createSky from '../shaders/sky/Sky'
   import { T } from '@threlte/core'
   import {
+    altitude,
     planetRadius,
     atmosphereThickness,
     sunIntensity,
@@ -36,6 +37,8 @@
     AU,
   } from '../lib/units'
 
+  export let stereo = false
+
   const Sky = createSky()
 
   useFrame((ctx, dt) => {
@@ -68,9 +71,21 @@
   $: Sky.sunRadius = $sunRadius / METER
   $: Sky.moonPosition.copy($moonPosition)
   $: Sky.moonRadius = $moonRadius / METER
+  $: Sky.stereo = stereo
+  $: Sky.uAltitude = $altitude
 
 </script>
 
+{#if stereo}
+<T.Mesh
+  visible={$skyVisible}
+  renderOrder={2}
+>
+  <T.PlaneGeometry args={[6, 6]} />
+  <!-- <T.MeshBasicMaterial color={0xff0000} /> -->
+  <T is={Sky.shader} />
+</T.Mesh>
+{:else}
 <T.Mesh
   visible={$skyVisible}
   scale.x={0.5 * AU}
@@ -81,3 +96,4 @@
   <T.IcosahedronGeometry args={[1, 32]} />
   <T is={Sky.shader} />
 </T.Mesh>
+{/if}

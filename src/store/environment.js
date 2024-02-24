@@ -26,7 +26,7 @@ export const FOV = writable(26.5)
 export const exposure = writable(1.0)
 export const bloomIntensity = writable(2.5)
 
-export const altitude = writable(400)
+export const altitude = writable(3)
 export const fogHue = writable(200)
 export const eclipseProgress = writable(0)
 export const doAnimation = writable(false)
@@ -72,7 +72,7 @@ export const moonAngleCorrection = derived(
   [moonDistance, sunDirection, observerOrigin, elevationRad],
   ([$moonDistance, $sunDirection, $observerOrigin, $elevationRad]) => {
     const int = sphereIntersection($observerOrigin, $sunDirection, $moonDistance)
-    if (int === null) {
+    if (!int) {
       return 0
     }
     const d = int[1]

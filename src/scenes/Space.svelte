@@ -194,11 +194,11 @@
   <!-- Sky -->
   <Sky/>
 
-  <Saturn
+  <!-- <Saturn
     position={skyPosition(4.217e8, 13 * DEG, 20 * DEG)}
     rotation={[0, 0, 0]}
     planetRadius={7.1492e7}
-  />
+  /> -->
 
   <!-- moon debug -->
   <T.Mesh

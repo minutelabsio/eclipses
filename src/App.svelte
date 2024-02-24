@@ -2,9 +2,15 @@
   import { Canvas } from '@threlte/core'
   import Space from './scenes/Space.svelte'
   import Test from './scenes/Test.svelte'
+  import { Router } from 'svelte-router-spa'
   import { onMount } from 'svelte'
   import { NoToneMapping } from 'three'
   import { Suspense, HTML, Billboard } from '@threlte/extras'
+
+  const routes = [
+    { name: '/', component: Space },
+    { name: '/sky', component: Test },
+  ]
 
   const renderOptions = {
     powerPreference: 'high-performance',
@@ -34,7 +40,7 @@
           <div class="loading">loading...</div>
         </HTML>
       </Billboard>
-      <Space />
+      <Router {routes} />
     </Suspense>
     <!-- <Test /> -->
   </Canvas>
