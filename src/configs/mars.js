@@ -32,9 +32,6 @@ export default {
 
   planetRadius: 0.53 * Re,
   planetAxialTilt: 25.19 * DEG,
-  windSpeed: 10,
-  cloudThickness: 0.01,
-  cloudAbsorption: 0.04,
 
   rayleighScaleHeight: 11.1e3,
   atmosphereThickness: 9 * 11.1e3,
@@ -60,19 +57,20 @@ export default {
   mieBlue: 7.3,
 
   mieWavelengthRed: 0.47,
-  mieWavelengthGreen: 0.62,
-  mieWavelengthBlue: 0.78,
+  mieWavelengthGreen: 0.52,
+  mieWavelengthBlue: 0.59,
 
-  mieAmount: 6e-7,
-  mieDirectional: 0.48,
+  mieAmount: 6.1e-7,
+  mieDirectional: 0.62,
   mieScaleHeight: 11000,
 
   ozoneRed: 0,
   ozoneGreen: 0,
   ozoneBlue: 0,
 
+  windSpeed: 10,
   cloudZ: 0.01,
-  cloudThickness: 0.9,
+  cloudThickness: 0.3,
   cloudSize: 3.6,
   cloudMie: 0.31,
   cloudThreshold: 0.34,

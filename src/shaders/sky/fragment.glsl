@@ -355,7 +355,7 @@ float circleEdge(vec2 p, float r1, vec2 c2, float r2){
 }
 
 const float bloomFactor = 8e-6;
-float sunMoonIntensity(vec3 rayDir, vec3 sSun, float sunAngularRadius, vec3 sMoon, float moonAngularRadius, float I0){
+float sunMoonIntensity(vec3 rayDir, vec3 sSun, float sunAngularRadius, vec3 sMoon, float moonAngularRadius){
   float mu = dot(rayDir, sSun);
   if(mu < 0.9995) {
     return 0.0;
@@ -379,7 +379,7 @@ float sunMoonIntensity(vec3 rayDir, vec3 sSun, float sunAngularRadius, vec3 sMoo
 
   // TODO: should also account for thickness of segment for more bloom
   float bloom = min(1.0, bloomFactor / sqrt(distFromSunEdge));
-  return step(0.001, bloom) * bloom * I0;
+  return step(0.001, bloom) * bloom;
 }
 
 float nextStep(const float d, const float ds, const int i) {
@@ -424,15 +424,14 @@ vec4 scattering(
     normalize(sunPosition - rayOrigin),
     SunAngularRadius,
     normalize(moonPosition - rayOrigin),
-    MoonAngularRadiusCamera,
-    I0
+    MoonAngularRadiusCamera
   );
 
   vec2 path = raySphereIntersection(rayOrigin, rayDir, atmosphereRadius);
   // Ray does not intersect the atmosphere (on the way forward) at all;
   // exit early.
   if (!intersectsInside(path)) {
-    return vec4(vec3(sunDisk), step(0.01, length(sunDisk)));
+    return vec4(I0 * vec3(sunDisk), step(0.01, length(sunDisk)));
   }
 
   float rApparentSun = tan(SunAngularRadius);
@@ -507,11 +506,11 @@ vec4 scattering(
 
   // phases
   float mu = dot(rayDir, sSun);
+  float rphase = rayleighPhase(mu);
   // vec2 phases = vec2(rayleighPhase(mu), clamp(1e2 * g, 0., 1. / length(mieCoefficients)));
-  vec2 phases = vec2(rayleighPhase(mu), 1.);
   float mieNorm = length(angleDependentMie(mieWavelengthResponse, 1., g));
   mieNorm = mieNorm == 0.0 ? 1.0 : mieNorm;
-  mieCoefficients *= angleDependentMie(mieWavelengthResponse, mu, g) / mieNorm;
+  vec3 mphase = angleDependentMie(mieWavelengthResponse, mu, g) / mieNorm;
 
   // scatter direct light from the sundisk
   vec3 alpha = primaryDepth.x * rayleighCoefficients + primaryDepth.y * mieCoefficients + primaryDepth.z * ozoneCoefficients;
@@ -534,7 +533,7 @@ vec4 scattering(
       // float cloudAmount = 2. * getPhases(rayDir, sSun, 0.5 + 0.4 * fbm(cloudLayer * 20.)).y;
       cloudAbsorptionAmount = clamp(cloudAbsorption * cloudAmount, 0., 1.);
       // cloud = 1e-6 * I0 * cloudAmount * cloudPhase * rayleighT;
-      cloud = I0 * clamp(0.1 * cloudAmount * max(10. * (mieCoefficients) * (cloudPhase + (1. - cloudAbsorptionAmount) * phases.x), cloudMinBrightness) * (rayleighT + mieT), 0., 1.);
+      cloud = clamp(0.1 * cloudAmount * max(10. * (mieCoefficients) * (cloudPhase + (1. - cloudAbsorptionAmount) * rphase), cloudMinBrightness) * (rayleighT + mieT), 0., 1.);
     }
   }
 
@@ -551,16 +550,16 @@ vec4 scattering(
     float k = remap(length(rayOrigin) - planetRadius, 0., atmosphereThickness, 0., 1.);
     cloudAmount = mix(cloudAmount, 0., k);
     cloudAbsorptionAmount = clamp(cloudAbsorption * cloudAmount, 0., 1.);
-    cloud = I0 * clamp(0.1 * cloudAmount * max(10. * (mieCoefficients) * (cloudPhase + (1. - cloudAbsorptionAmount) * phases.x), cloudMinBrightness) * (rayleighT + mieT), 0., 1.);
+    cloud = clamp(0.1 * cloudAmount * max(10. * (mieCoefficients) * (cloudPhase + (1. - cloudAbsorptionAmount) * rphase), cloudMinBrightness) * (rayleighT + mieT), 0., 1.);
   }
 
   // final scattering
-  vec3 scatter = I0 * rayleighT * phases.x * rayleighCoefficients + I0 * mieT * phases.y * mieCoefficients;
+  vec3 scatter = rayleighT * rphase * rayleighCoefficients + mieT * mphase * mieCoefficients;
   // scatter = clamp(scatter, vec3(0.0), vec3(I0)) / sqrt(fsteps);
   // opacity of the atmosphere
-  // TODO: fix this
+  vec3 color = (1. - cloudAbsorptionAmount) * (scatter + sunDiskColor) + cloud;
   float opacity = dot(primaryDepth.xy, vec2(0.2 * length(rayleighCoefficients), length(mieCoefficients))) + cloudAbsorptionAmount;
-  return vec4((1. - cloudAbsorptionAmount) * (scatter + sunDiskColor) + cloud, clamp(opacity, 0.0, 1.0));
+  return vec4(I0 * clamp(color, 0.0, 1.0), clamp(opacity, 0.0, 1.0));
 }
 
 void main() {

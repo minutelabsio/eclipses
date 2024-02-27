@@ -66,9 +66,17 @@ export default {
   airSurfacePressure: 1000 * mBar,
   airSurfaceTemperature: 76,
 
-  mieAmount: 0.0,
-  mieDirectional: 0,
-  mieScaleHeight: 0,
+  mieAmount: 1.7e-5,
+  mieDirectional: 0.36,
+  mieScaleHeight: 13800,
+
+  mieRed: 0.2,
+  mieGreen: 0.8,
+  mieBlue: 2.4,
+
+  mieWavelengthRed: 0.3,
+  mieWavelengthGreen: 0.15,
+  mieWavelengthBlue: 0.13,
 
   ozoneRed: 0,
   ozoneGreen: 0,

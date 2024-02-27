@@ -8,10 +8,10 @@ function vertexShader() {
     attribute vec4 color;
     varying vec4 vColor;
     void main() {
-      vColor = color * size * 0.22;
+      vColor = color * size * 0.42;
       vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
       // gl_PointSize = 6e9 * size * ( 250.0 / -mvPosition.z );
-      gl_PointSize = size;
+      gl_PointSize = size * 1.5;
       gl_Position = projectionMatrix * mvPosition;
     }
   `

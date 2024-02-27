@@ -105,8 +105,9 @@
           // resolution: 256,
           // middleGrey: 0.6,
           whitePoint: 10,
+          // middleGrey: .5,
           minLuminance: 0.0006, //0.0000025,
-          adaptationRate: 2
+          adaptationRate: 2,
         }),
       )
     )

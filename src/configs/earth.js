@@ -42,7 +42,7 @@ export default {
   mieGreen: 15,
   mieBlue: 15,
 
-  mieDirectional: 0.013,
+  mieDirectional: 0.72,
   mieScaleHeight: 1000,
   mieAmount: 1e-6,
   mieWavelengthRed: 0.8,

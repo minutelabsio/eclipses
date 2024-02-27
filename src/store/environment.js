@@ -26,7 +26,7 @@ export const FOV = writable(26.5)
 export const exposure = writable(1.0)
 export const bloomIntensity = writable(2.5)
 
-export const altitude = writable(3)
+export const altitude = writable(10)
 export const fogHue = writable(200)
 export const eclipseProgress = writable(0)
 export const doAnimation = writable(false)
