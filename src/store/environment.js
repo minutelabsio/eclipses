@@ -8,6 +8,11 @@ import {
 } from '../lib/units'
 import { skyPosition } from '../lib/sky-position'
 
+const print = (val, ...args) => {
+  console.log(val, ...args)
+  return val
+}
+
 const sphereIntersection = (origin, ray, radius) => {
   const b = ray.dot(origin)
   const c = origin.dot(origin) - radius * radius
@@ -80,7 +85,7 @@ export const moonAngleCorrection = derived(
     const m2 = m * m
     const R = $observerOrigin.length()
     const R2 = $observerOrigin.lengthSq()
-    const cosa = (R2 + m2 - d * d) / (2 * R * m)
+    const cosa = Math.min(1., (R2 + m2 - d * d) / (2 * R * m))
     return 0.5 * Math.PI - Math.acos(cosa) - $elevationRad
   }
 )
@@ -105,11 +110,6 @@ const getRayleigh = (n, k) => {
     corr * a * Math.pow(1 / rgb[2], 4)
   )
   return r
-}
-
-const print = (val, ...args) => {
-  console.log(val, ...args)
-  return val
 }
 
 export const sunIntensity = writable(25)
