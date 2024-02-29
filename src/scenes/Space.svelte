@@ -41,6 +41,8 @@
     AU,
   } from '../lib/units'
   import { skyPosition } from '../lib/sky-position'
+    import Levetate from '../components/Levetate.svelte';
+    import PlanetSelector from '../components/PlanetSelector.svelte';
 
   const Corona = createCorona({
     opacity: 0.5
@@ -103,8 +105,23 @@
   let cameraControls
   $: fog?.color.setHSL($fogHue / 360, .2, Easing.sinIn(sunBrightness) * 0.3)
 </script>
+<style lang="sass">
+.controls
+  position: fixed
+  bottom: 0
+  left: 50%
+  width: 600px
+  height: 480px
+  transform: translateX(-50%)
+  z-index: 100
+  background: rgba(0, 0, 0, 0.5)
+</style>
 
-
+<Levetate>
+  <div class="controls">
+    <PlanetSelector/>
+  </div>
+</Levetate>
 <DebugControls cameraControls={cameraControls}/>
 <Renderer/>
 <Stats />

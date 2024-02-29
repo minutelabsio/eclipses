@@ -6,11 +6,12 @@
   import { onMount } from 'svelte'
   import { NoToneMapping } from 'three'
   import { Suspense, HTML, Billboard } from '@threlte/extras'
-  import PlanetSelector from './components/PlanetSelector.svelte'
+  import Visualizer from './scenes/Visualizer.svelte'
 
   const routes = [
     { name: '/', component: Space },
     { name: '/sky', component: Test },
+    { name: '/vis', component: Visualizer }
   ]
 
   const renderOptions = {
@@ -46,9 +47,6 @@
     <!-- <Test /> -->
   </Canvas>
 
-  <div class="controls">
-    <PlanetSelector/>
-  </div>
 </main>
 
 <style lang="sass">
@@ -75,17 +73,4 @@
     -o-user-select: none
     -khtml-user-select: none
     -webkit-touch-callout: none
-
-  .controls
-    position: fixed
-    bottom: 0
-    left: 50%
-    width: 600px
-    height: 480px
-    transform: translateX(-50%)
-    z-index: 100
-    background: rgba(0, 0, 0, 0.5)
-    display: flex
-    flex-grow: 1
-    flex: 1
 </style>

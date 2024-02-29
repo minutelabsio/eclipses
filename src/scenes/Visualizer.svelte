@@ -1,0 +1,142 @@
+<script>
+  import { AudioAnalyser, MathUtils } from 'three'
+  import { Easing, Tween } from 'intween'
+  import FileDrop from "filedrop-svelte"
+  import Stats from '../components/Stats.svelte'
+  import { T, useThrelte, useFrame } from '@threlte/core'
+  import { AudioListener, Audio } from '@threlte/extras'
+  import Sky from '../entities/Sky.svelte'
+  import Renderer from '../components/Renderer.svelte'
+  import DebugControls from '../components/DebugControls.svelte'
+  import { eclipseProgress, elevation, totalityFactor, doAnimation, moonRightAscention, cloudMie, cloudThickness, windSpeed } from '../store/environment'
+  import {
+    DEG,
+    METER,
+    AU,
+  } from '../lib/units'
+  import Levetate from '../components/Levetate.svelte'
+
+  const { size } = useThrelte()
+  let files = {}
+  let audio
+  let player = null
+  let isPlaying = false
+  let currentTime = 0
+
+  const play = () => {
+    player.play()
+    isPlaying = true
+  }
+
+  const pause = () => {
+    player.pause()
+    isPlaying = false
+  }
+
+  const handleDrop = (e) => {
+    files = e.detail.files
+    const file = files.accepted[0]
+    const reader = new FileReader()
+    reader.onload = (e) => {
+      const data = e.target.result
+      // now setup audiobuffer
+      const context = new AudioContext()
+      context.decodeAudioData(data, (buffer) => {
+        audio = buffer
+      })
+    }
+    reader.readAsArrayBuffer(file)
+  }
+
+  $: analyzer = player && new AudioAnalyser(player, 32)
+
+  const runningAverage = (win) => {
+    const buf = []
+    const push = (val) => {
+      buf.push(val)
+      if (buf.length > win) {
+        buf.shift()
+      }
+    }
+    const average = () => {
+      return buf.reduce((a, b) => a + b, 0) / buf.length
+    }
+    return { push, average }
+  }
+
+  const state = {
+    mie: runningAverage(12),
+    elevation: runningAverage(4),
+    speed: runningAverage(4),
+  }
+
+  useFrame(() => {
+    if (analyzer) {
+      const data = analyzer.getFrequencyData()
+      state.mie.push(data[6] / 255)
+      // state.mie.push(data[1] / 255)
+      // state.mie.push(data[2] / 255)
+      state.elevation.push(data[0] / 255)
+      state.speed.push(data[10] / 255)
+      windSpeed.set(state.speed.average() * 100)
+      elevation.set(state.elevation.average() * 30)
+      cloudThickness.set(state.mie.average() * 1)
+    }
+  })
+
+  moonRightAscention.set(-1)
+</script>
+<style lang="sass">
+  .filedrop
+    position: absolute
+    bottom: 0
+    left: 0
+    right: 400px
+    padding: 20px
+    background: rgba(255, 255, 255, 0.1)
+    display: flex
+    flex-direction: row
+    justify-content: space-around
+</style>
+
+<Levetate>
+  <div class="filedrop">
+    <div>
+    {#if files.accepted}
+    <h3>Accepted files</h3>
+    <ul>
+      {#each files.accepted as file}
+        <li>{file.name}</li>
+      {/each}
+    </ul>
+    {/if}
+    </div>
+    <FileDrop on:filedrop={handleDrop}/>
+    {#if player}
+    <div class="controls">
+      <!-- play/pause button and playback time -->
+      {#if isPlaying}
+        <button on:click={pause}>Pause</button>
+      {:else}
+        <button on:click={play}>Play</button>
+      {/if}
+    </div>
+    {/if}
+  </div>
+</Levetate>
+
+<DebugControls />
+<Renderer/>
+<Stats />
+
+<T.OrthographicCamera args={[-$size.width / 2, $size.width / 2, $size.height / 2, -$size.height / 2, 1, 10]}>
+  <AudioListener id="audio" />
+</T.OrthographicCamera>
+
+<!-- Sky -->
+<Sky stereo={true}/>
+
+<!-- Audio -->
+{#if audio}
+  <Audio id="audio" src={audio} bind:ref={player}/>
+{/if}

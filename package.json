@@ -27,6 +27,7 @@
     "cousin-it": "0.0.1-alpha.6",
     "d3-scale": "^4.0.2",
     "detect-gpu": "^5.0.38",
+    "filedrop-svelte": "^0.1.2",
     "glsl-atmosphere": "^2.0.0",
     "glsl-dither": "^1.0.1",
     "glsl-noise": "^0.0.0",
