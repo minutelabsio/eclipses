@@ -208,7 +208,7 @@
 </T.Group>
 
 <!-- Sky -->
-<Sky stereo={true}/>
+<Sky fisheye={true}/>
 
 <!-- Audio -->
 {#if audio}
