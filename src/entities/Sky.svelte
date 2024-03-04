@@ -37,7 +37,7 @@
     AU,
   } from '../lib/units'
 
-  export let stereo = false
+  export let fisheye = false
 
   const Sky = createSky()
 
@@ -71,12 +71,12 @@
   $: Sky.sunRadius = $sunRadius / METER
   $: Sky.moonPosition.copy($moonPosition)
   $: Sky.moonRadius = $moonRadius / METER
-  $: Sky.stereo = stereo
+  $: Sky.fisheye = fisheye
   $: Sky.uAltitude = $altitude
 
 </script>
 
-{#if stereo}
+{#if fisheye}
 <T.Mesh
   visible={$skyVisible}
   renderOrder={2}

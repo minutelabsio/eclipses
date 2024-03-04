@@ -73,4 +73,4 @@
 <T.OrthographicCamera args={[-$size.width / 2, $size.width / 2, $size.height / 2, -$size.height / 2, 1, 10]} />
 
 <!-- Sky -->
-<Sky stereo={true}/>
+<Sky fisheye={true}/>

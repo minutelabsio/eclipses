@@ -7,7 +7,7 @@ varying float MoonAngularRadius;
 varying float MoonAngularRadiusCamera;
 varying float altitude;
 
-uniform bool stereo;
+uniform bool fisheye;
 uniform float time;
 
 uniform sampler2D opticalDepthMap;
@@ -564,7 +564,7 @@ vec4 scattering(
 
 void main() {
   vec3 rayDir = normalize(vWorldPosition);
-  if (stereo){
+  if (fisheye){
     // lay it out on a circle use uvs
     float r = 1.1 * length(vUv - 0.5); // add a little bit of padding
     float cosphi = cos(PI * r);

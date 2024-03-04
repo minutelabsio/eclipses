@@ -57,7 +57,7 @@ export default () => {
     cloudThreshold: 0.4,
     cloudAbsorption: 0.2,
     windSpeed: 8,
-    stereo: false,
+    fisheye: false,
   }
 
   const api = { shader }
