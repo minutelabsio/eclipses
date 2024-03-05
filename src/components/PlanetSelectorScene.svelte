@@ -1,72 +1,96 @@
 <script>
   import { T, useFrame } from '@threlte/core'
-  import { interactivity } from '@threlte/extras'
-  import { createDragger } from '../lib/dragger'
   import Jupiter from '../entities/Jupiter.svelte'
   import Saturn from '../entities/Saturn.svelte'
+  import Earth from '../entities/Earth.svelte'
+  import Mars from '../entities/Mars.svelte'
+  import Uranus from '../entities/Uranus.svelte'
+  import Neptune from '../entities/Neptune.svelte'
 
-  const tilt = 0.6
+  export let pos = 0
+
+  const planetAngles = Array.from({ length: 6 }, (_, i) => i * Math.PI / 3)
+  const tilt = 0.4
   const rotation = [0, 0, 0]
-  const drag = createDragger([0, 0], {
-    friction: 0.02,
-    threshold: 1e-4,
-    minFlick: 1e-3,
-    maxFlick: 3e-2,
-  })
-  interactivity({
-    filter: (hits, state) => {
-      // Only return the first hit
-      return hits.slice(0, 1)
-    }
-  })
+  const dollyRadius = 3
 
-  const getPos = (e) => [e.pointer.x, e.pointer.y]
+  const getScales = (pos) => {
+    const theta = -pos % (2 * Math.PI)
+    // based on the current position, scales up the appropriate planet
+    // and scales down the others
+    const scales = planetAngles.map((angle, i) => {
+      let distance = Math.abs(angle - theta)
+      distance = Math.min(distance, Math.abs(2 * Math.PI - distance))
+      return 1 / (1 + distance)
+    })
+    return scales
+  }
 
-  // TODO: Different strategy: use a tween to rotate the group
-  // Calculate the velocity and then the end position
-  //
-  let rot = 0
+  $: scales = getScales(pos)
+
   useFrame(() => {
-    const pos = drag.update()
-    rotation[1] = (pos[0]) % (Math.PI * 2)
+    rotation[1] = pos
   })
 </script>
 
 <T.PerspectiveCamera
   makeDefault={true}
-  position={[0, 0, 3]}
+  position={[0, 0, 8]}
   lookAt={[0, 0, 0]}
-  fov={75}
+  fov={35}
 />
-<T.AmbientLight intensity={0.5} />
-<T.DirectionalLight intensity={1} position={[1, 1, 1]} />
-<svelte:window on:pointerup={() => {
-  drag.stop()
-}} />
+<T.AmbientLight intensity={0.2} />
+<T.DirectionalLight intensity={0.5} position={[0, 1, 5]} />
 <T.Group
   rotation={[tilt, 0, 0]}
-  on:pointerdown={(e) => {
-    drag.start(getPos(e))
-  }}
-  on:pointermove={(e) => {
-    drag.drag(getPos(e))
-  }}
-  on:pointerup={(e) => {
-    drag.stop(getPos(e))
-  }}
 >
   <T.Group
-    position={[0, 0, -3.5]}
+    position={[0, 0, -2.5]}
     rotation={rotation}
   >
-    <Jupiter
-      position={[0, 0, 4]}
-      rotation={[0, Math.PI / 2, 0]}
-    />
-    <Saturn
-      position={[0, 0, -4]}
-      rotation={[Math.PI / 2, Math.PI / 2, 0]}
-    />
-    <T.GridHelper args={[10, 10]} />
+    <T.Group rotation.y={planetAngles[0]}>
+      <T.Group position={[0, 0, dollyRadius]} scale.x={scales[0]} scale.y={scales[0]} scale.z={scales[0]}>
+        <Earth
+          rotation={[0, Math.PI / 2, 0]}
+        />
+      </T.Group>
+    </T.Group>
+    <T.Group rotation.y={planetAngles[1]}>
+      <T.Group position={[0, 0, dollyRadius]} scale.x={scales[1]} scale.y={scales[1]} scale.z={scales[1]}>
+        <Mars
+          rotation={[0, Math.PI / 2, 0]}
+        />
+      </T.Group>
+    </T.Group>
+    <T.Group rotation.y={planetAngles[2]}>
+      <T.Group position={[0, 0, dollyRadius]} scale.x={scales[2]} scale.y={scales[2]} scale.z={scales[2]}>
+        <Jupiter
+          rotation={[0, Math.PI / 2, 0]}
+        />
+      </T.Group>
+    </T.Group>
+    <T.Group rotation.y={planetAngles[3]}>
+      <T.Group position={[0, 0, dollyRadius]} scale.x={scales[3]} scale.y={scales[3]} scale.z={scales[3]}>
+        <Saturn
+          rotation={[Math.PI / 2, Math.PI / 2, 0]}
+        />
+      </T.Group>
+    </T.Group>
+    <T.Group rotation.y={planetAngles[4]}>
+      <T.Group position={[0, 0, dollyRadius]} scale.x={scales[4]} scale.y={scales[4]} scale.z={scales[4]}>
+        <Uranus
+          rotation={[-0.5, Math.PI / 2, 0]}
+        />
+      </T.Group>
+    </T.Group>
+    <T.Group rotation.y={planetAngles[5]}>
+      <T.Group position={[0, 0, dollyRadius]} scale.x={scales[5]} scale.y={scales[5]} scale.z={scales[5]}>
+        <Neptune
+          rotation={[0, Math.PI / 2, 0]}
+        />
+      </T.Group>
+    </T.Group>
+
+    <!-- <T.GridHelper args={[10, 10]} /> -->
   </T.Group>
 </T.Group>

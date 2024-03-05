@@ -1,17 +1,21 @@
 <script>
   import { Canvas } from '@threlte/core'
-  import Space from './scenes/Space.svelte'
-  import Test from './scenes/Test.svelte'
+  import Main from './scenes/Main.svelte'
+  import Fisheye from './scenes/Fisheye.svelte'
   import { Router } from 'svelte-router-spa'
   import { onMount } from 'svelte'
   import { NoToneMapping } from 'three'
   import { Suspense, HTML, Billboard } from '@threlte/extras'
   import Visualizer from './scenes/Visualizer.svelte'
+  import Levetate from './components/Levetate.svelte'
+  import Debug from './scenes/Debug.svelte'
 
   const routes = [
-    { name: '/', component: Space },
-    { name: '/sky', component: Test },
-    { name: '/vis', component: Visualizer }
+    { name: '/', component: Main },
+    { name: '/fisheye', component: Fisheye },
+    { name: '/debug', component: Debug },
+    { name: '/vis', component: Visualizer },
+    { name: '404', redirectTo: '/' }
   ]
 
   const renderOptions = {
@@ -37,14 +41,11 @@
     dpr={1}
   >
     <Suspense>
-      <Billboard slot="fallback">
-        <HTML>
-          <div class="loading">loading...</div>
-        </HTML>
-      </Billboard>
+      <Levetate slot="fallback">
+        <div class="loading">loading...</div>
+      </Levetate>
       <Router {routes} />
     </Suspense>
-    <!-- <Test /> -->
   </Canvas>
 
 </main>

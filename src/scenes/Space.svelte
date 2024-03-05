@@ -1,21 +1,17 @@
 <script>
   import { useFrame } from '@threlte/core'
   import { Easing, Tween } from 'intween'
-  import Stats from '../components/Stats.svelte'
   import { T } from '@threlte/core'
   import { Vector3, MathUtils } from 'three'
   import createCorona from '../shaders/corona/Corona'
   import createStars from '../shaders/stars/Stars'
   import Sky from '../entities/Sky.svelte'
-  import Mars from '../entities/Mars.svelte'
-  import Earth from '../entities/Earth.svelte'
+  import MarsScene from '../entities/MarsScene.svelte'
+  import EarthScene from '../entities/EarthScene.svelte'
   import Jupiter from '../entities/Jupiter.svelte'
   import Saturn from '../entities/Saturn.svelte'
   import Neptune from '../entities/Neptune.svelte'
   import Uranus from '../entities/Uranus.svelte'
-  import Renderer from '../components/Renderer.svelte'
-  import Camera from '../components/Camera.svelte'
-  import DebugControls from '../components/DebugControls.svelte'
 
   import {
     planet,
@@ -37,12 +33,7 @@
   } from '../store/environment'
   import {
     DEG,
-    METER,
-    AU,
   } from '../lib/units'
-  import { skyPosition } from '../lib/sky-position'
-    import Levetate from '../components/Levetate.svelte';
-    import PlanetSelector from '../components/PlanetSelector.svelte';
 
   const Corona = createCorona({
     opacity: 0.5
@@ -102,29 +93,8 @@
   })
 
   let fog
-  let cameraControls
   $: fog?.color.setHSL($fogHue / 360, .2, Easing.sinIn(sunBrightness) * 0.3)
 </script>
-<style lang="sass">
-.controls
-  position: fixed
-  bottom: 0
-  left: 50%
-  width: 600px
-  height: 480px
-  transform: translateX(-50%)
-  z-index: 100
-  background: rgba(0, 0, 0, 0.5)
-</style>
-
-<Levetate>
-  <div class="controls">
-    <PlanetSelector/>
-  </div>
-</Levetate>
-<DebugControls cameraControls={cameraControls}/>
-<Renderer/>
-<Stats />
 
 <T.FogExp2 attach="fog" bind:ref={fog} density={1.5e-5} layers={9}/>
 
@@ -132,15 +102,8 @@
 <T is={Stars} renderOrder={0} visible={$starsVisible}/>
 {/await}
 
-<Camera
-  makeDefault
-  near={1}
-  far={1.2 * AU}
-  bind:controls={cameraControls}
-/>
-
 {#if $planet === 'earth'}
-<Earth
+<EarthScene
   visible={$earthVisible}
   mountainsVisible={$mountainsVisible}
   planetRadius={$planetRadius}
@@ -150,7 +113,7 @@
 />
 {/if}
 {#if $planet === 'mars'}
-<Mars
+<MarsScene
   visible={$earthVisible}
   mountainsVisible={$mountainsVisible}
   planetRadius={$planetRadius}

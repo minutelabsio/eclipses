@@ -48,7 +48,6 @@ $: colorFade = new Color(0x000000).lerp(new Color(0xffffff), Math.min(1, $altitu
       map={$textures.map}
       shininess={0}
       fog={false}
-      color={'#' + colorFade.getHexString()}
     />
   </T.Mesh>
   <!-- rings -->
