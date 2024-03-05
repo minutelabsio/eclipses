@@ -1,5 +1,7 @@
 <script>
+  import { createEventDispatcher } from 'svelte'
   import { T, useFrame } from '@threlte/core'
+  import { interactivity } from '@threlte/extras'
   import Jupiter from '../entities/Jupiter.svelte'
   import Saturn from '../entities/Saturn.svelte'
   import Earth from '../entities/Earth.svelte'
@@ -9,13 +11,22 @@
 
   export let pos = 0
 
+  interactivity()
+
+  const dispatch = createEventDispatcher()
+  const planetClicked = (planet) => (e) => {
+    dispatch('planetClicked', {
+      planet
+    })
+  }
+
   const planetAngles = Array.from({ length: 6 }, (_, i) => i * Math.PI / 3)
   const tilt = 0.4
   const rotation = [0, 0, 0]
   const dollyRadius = 3
 
   const getScales = (pos) => {
-    const theta = -pos % (2 * Math.PI)
+    const theta = -(pos - 2 * Math.PI) % (2 * Math.PI)
     // based on the current position, scales up the appropriate planet
     // and scales down the others
     const scales = planetAngles.map((angle, i) => {
@@ -52,6 +63,7 @@
       <T.Group position={[0, 0, dollyRadius]} scale.x={scales[0]} scale.y={scales[0]} scale.z={scales[0]}>
         <Earth
           rotation={[0, Math.PI / 2, 0]}
+          on:click={planetClicked('earth')}
         />
       </T.Group>
     </T.Group>
@@ -59,6 +71,7 @@
       <T.Group position={[0, 0, dollyRadius]} scale.x={scales[1]} scale.y={scales[1]} scale.z={scales[1]}>
         <Mars
           rotation={[0, Math.PI / 2, 0]}
+          on:click={planetClicked('mars')}
         />
       </T.Group>
     </T.Group>
@@ -66,6 +79,7 @@
       <T.Group position={[0, 0, dollyRadius]} scale.x={scales[2]} scale.y={scales[2]} scale.z={scales[2]}>
         <Jupiter
           rotation={[0, Math.PI / 2, 0]}
+          on:click={planetClicked('jupiter')}
         />
       </T.Group>
     </T.Group>
@@ -73,6 +87,7 @@
       <T.Group position={[0, 0, dollyRadius]} scale.x={scales[3]} scale.y={scales[3]} scale.z={scales[3]}>
         <Saturn
           rotation={[Math.PI / 2, Math.PI / 2, 0]}
+          on:click={planetClicked('saturn')}
         />
       </T.Group>
     </T.Group>
@@ -80,6 +95,7 @@
       <T.Group position={[0, 0, dollyRadius]} scale.x={scales[4]} scale.y={scales[4]} scale.z={scales[4]}>
         <Uranus
           rotation={[-0.5, Math.PI / 2, 0]}
+          on:click={planetClicked('uranus')}
         />
       </T.Group>
     </T.Group>
@@ -87,6 +103,7 @@
       <T.Group position={[0, 0, dollyRadius]} scale.x={scales[5]} scale.y={scales[5]} scale.z={scales[5]}>
         <Neptune
           rotation={[0, Math.PI / 2, 0]}
+          on:click={planetClicked('neptune')}
         />
       </T.Group>
     </T.Group>

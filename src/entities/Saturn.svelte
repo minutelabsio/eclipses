@@ -1,10 +1,12 @@
 <script>
 import { DoubleSide, TextureLoader, RingGeometry, Vector3 } from 'three'
-import { T, useLoader } from '@threlte/core'
+import { T, useLoader, forwardEventHandlers } from '@threlte/core'
 import textureUrl from '../assets/saturn/saturnmap.jpg'
 import ringTextureUrl from '../assets/saturn/saturnringcolor.jpg'
 import ringOpacityUrl from '../assets/saturn/saturnringpattern.gif'
 import { useSuspense } from '@threlte/extras'
+
+const component = forwardEventHandlers()
 
 export let planetRadius = 1
 export let position = [0, 0, 0]
@@ -36,6 +38,7 @@ const textures = suspend(useLoader(TextureLoader).load({
     rotation={[0, 0, -Math.PI / 2]}
     scale={[planetRadius, planetRadius, planetRadius]}
     receiveShadow
+    bind:this={$component}
   >
     <T.IcosahedronGeometry args={[1.00004, 64]} />
     <T.MeshStandardMaterial

@@ -1,11 +1,13 @@
 <script>
 import { Color, DoubleSide, RingGeometry, TextureLoader, Vector3 } from 'three'
-import { T, useLoader } from '@threlte/core'
+import { T, useLoader, forwardEventHandlers } from '@threlte/core'
 import textureUrl from '../assets/uranus/uranusmap.jpg'
 import ringTextureUrl from '../assets/uranus/uranusringcolor.jpg'
 import ringOpacityUrl from '../assets/uranus/uranusringtrans.gif'
 import { useSuspense } from '@threlte/extras'
 import { altitude, atmosphereThickness } from '../store/environment'
+
+const component = forwardEventHandlers()
 
 export let planetRadius = 1
 export let position = [0, 0, 0]
@@ -41,6 +43,7 @@ $: colorFade = new Color(0x000000).lerp(new Color(0xffffff), Math.min(1, $altitu
     scale={[planetRadius, planetRadius, planetRadius]}
     receiveShadow
     renderOrder={1}
+    bind:this={$component}
   >
     <T.IcosahedronGeometry args={[0.9999, 64]} />
     <T.MeshStandardMaterial

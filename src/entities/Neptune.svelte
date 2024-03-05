@@ -1,8 +1,10 @@
 <script>
 import { TextureLoader } from 'three'
-import { T, useLoader } from '@threlte/core'
+import { T, useLoader, forwardEventHandlers } from '@threlte/core'
 import textureUrl from '../assets/neptune/neptunemap.jpg'
 import { useSuspense } from '@threlte/extras'
+
+const component = forwardEventHandlers()
 
 export let planetRadius = 1
 export let position = [0, 0, 0]
@@ -24,6 +26,7 @@ const textures = suspend(useLoader(TextureLoader).load({
     scale={[planetRadius, planetRadius, planetRadius]}
     receiveShadow
     renderOrder={1}
+    bind:this={$component}
   >
     <T.IcosahedronGeometry args={[0.9999, 64]} />
     <T.MeshStandardMaterial

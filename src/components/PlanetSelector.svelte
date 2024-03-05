@@ -1,20 +1,40 @@
 <script>
   import { Canvas } from '@threlte/core'
-  import { onMount } from 'svelte'
+  import { onMount, createEventDispatcher } from 'svelte'
   import PlanetSelectorScene from './PlanetSelectorScene.svelte'
   import interact from 'interactjs'
-  import { Tween, animationFrames } from 'intween'
-    import { planet } from '../store/environment';
+  import { Observable, Tween, animationFrames } from 'intween'
 
-  export let onChange = () => {}
+  const frames = (duration = 1000) => {
+    return new Observable((observer) => {
+      const sub = animationFrames().subscribe({
+        next: (time) => {
+          observer.next(time)
+          if (time >= duration) {
+            sub.unsubscribe()
+            observer.next(duration)
+            observer.complete()
+          }
+        },
+        error: (error) => {
+          observer.error(error)
+        },
+        complete: () => {
+          observer.complete()
+        }
+      })
+    })
+  }
+
+  const dispatch = createEventDispatcher()
 
   const planetNames = [
-    'Earth',
-    'Mars',
-    'Jupiter',
-    'Saturn',
-    'Uranus',
-    'Neptune'
+    'earth',
+    'mars',
+    'jupiter',
+    'saturn',
+    'uranus',
+    'neptune'
   ]
   const MIN_FLICK_VEL = 0.8
   let element
@@ -46,7 +66,7 @@
     const tween = Tween.create({ pos })
       .by(time, { pos: target }, 'quadOut')
 
-    sub = animationFrames()
+    sub = frames(time)
       .pipe(tween)
       .subscribe((state) => {
         pos = state.pos
@@ -54,12 +74,31 @@
 
     clearTimeout(timer)
     timer = setTimeout(() => {
-      sub?.unsubscribe()
-      onChange({
+      dispatch('change', {
         index: planetIndex,
         name: planetNames[planetIndex]
       })
-    }, time + 250)
+    }, time + 500)
+  }
+
+  const moveToPlanet = (name, done) => {
+    const i = planetNames.indexOf(name)
+    let target = dangle * scale * (nplanets - i)
+    pos = (pos + 2 * Math.PI * scale) % (2 * Math.PI * scale)
+    if (pos - target > Math.PI * scale) {
+      target += 2 * Math.PI * scale
+    } else if (target - pos >= Math.PI * scale) {
+      target -= 2 * Math.PI * scale
+    }
+    const time = 500
+    const tween = Tween.create({ pos })
+      .by(time, { pos: target }, 'quadOut')
+
+    sub = frames(time)
+      .pipe(tween)
+      .subscribe((state) => {
+        pos = state.pos
+      }, null, done)
   }
 
   onMount(() => {
@@ -82,11 +121,21 @@
     }
   })
 
+  const handlePlanetClicked = (e) => {
+    const { planet } = e.detail
+    moveToPlanet(planet, () => {
+      dispatch('change', {
+        index: planetNames.indexOf(planet),
+        name: planet
+      })
+    })
+  }
+
 </script>
 
 <div class="planet-selector" bind:this={element}>
   <Canvas>
-    <PlanetSelectorScene pos={pos / scale} />
+    <PlanetSelectorScene pos={pos / scale} on:planetClicked={handlePlanetClicked} />
   </Canvas>
 </div>
 

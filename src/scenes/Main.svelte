@@ -13,7 +13,8 @@
   import Space from './Space.svelte'
   import * as PlanetConfigs from '../configs'
 
-  const onPlanetSelected = ({ index, name }) => {
+  const onPlanetSelected = ({ detail }) => {
+    const { name } = detail
     const v = name.toLowerCase()
     const moons = Object.values(PlanetConfigs[v].moons)
     load(PlanetConfigs[v])
@@ -35,7 +36,7 @@
 
 <Levetate>
   <div class="controls">
-    <PlanetSelector onChange={onPlanetSelected} />
+    <PlanetSelector on:change={onPlanetSelected} />
   </div>
 </Levetate>
 
