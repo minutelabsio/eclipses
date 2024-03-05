@@ -6,6 +6,8 @@
   import { Observable, Tween, animationFrames } from 'intween'
   import { frames } from '../lib/animation'
 
+  export let selected = 'earth'
+
   const dispatch = createEventDispatcher()
 
   const planetNames = [
@@ -28,6 +30,31 @@
   let sub = null
   let timer = null
   let dragging = false
+  let selectorOpen = true
+
+  const changePlanet = (indexOrName) => {
+    let index
+    if (typeof indexOrName === 'number') {
+      index = indexOrName
+    } else {
+      index = planetNames.indexOf(indexOrName)
+    }
+    const name = planetNames[index]
+    if (name === selected) return
+    selected = name
+    dispatch('change', {
+      index,
+      name
+    })
+  }
+
+  const selectPlanet = () => {
+    setTimeout(() => {
+      dispatch('select', {
+        name: selected
+      })
+    }, 500)
+  }
 
   const flick = v => {
     let ds = v * v / (2 * a)
@@ -55,10 +82,7 @@
 
     clearTimeout(timer)
     timer = setTimeout(() => {
-      dispatch('change', {
-        index: planetIndex,
-        name: planetNames[planetIndex]
-      })
+      changePlanet(planetIndex)
     }, time + 500)
   }
 
@@ -111,19 +135,30 @@
     clearTimeout(timer)
     sub?.unsubscribe()
     const { planet } = e.detail
-    moveToPlanet(planet, () => {
-      dispatch('change', {
-        index: planetNames.indexOf(planet),
-        name: planet
+
+    if (planet === selected){
+      if (selectorOpen) {
+        selectorOpen = false
+        selectPlanet()
+      } else {
+        selectorOpen = true
+      }
+    } else {
+      moveToPlanet(planet, () => {
+        changePlanet(planet)
       })
-    })
+    }
   }
 
 </script>
 
 <div class="planet-selector" bind:this={element}>
   <Canvas>
-    <PlanetSelectorScene pos={pos / scale} on:planetClicked={handlePlanetClicked} />
+    <PlanetSelectorScene
+      pos={pos / scale}
+      showAll={selectorOpen}
+      on:planetClicked={handlePlanetClicked}
+    />
   </Canvas>
 </div>
 

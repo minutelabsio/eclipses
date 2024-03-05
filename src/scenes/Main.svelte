@@ -36,7 +36,7 @@
 
 <Levetate>
   <div class="controls">
-    <PlanetSelector on:change={onPlanetSelected} />
+    <PlanetSelector on:select={onPlanetSelected} />
   </div>
 </Levetate>
 
