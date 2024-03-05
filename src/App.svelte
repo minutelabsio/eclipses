@@ -18,6 +18,10 @@
     { name: '404', redirectTo: '/' }
   ]
 
+  const routerOptions = {
+    prefix: import.meta.env.BASE_URL.substring(1)
+  }
+
   const renderOptions = {
     powerPreference: 'high-performance',
     antialias: false,
@@ -44,7 +48,7 @@
       <Levetate slot="fallback">
         <div class="loading">loading...</div>
       </Levetate>
-      <Router {routes} />
+      <Router {routes} options={routerOptions} />
     </Suspense>
   </Canvas>
 
