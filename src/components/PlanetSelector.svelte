@@ -60,7 +60,7 @@
     let i = Math.round(x / dangle / scale)
     const target = dangle * scale * i
 
-    planetIndex = (nplanets - i) % nplanets
+    planetIndex = (nplanets - i % nplanets) % nplanets
 
     const time = Math.sqrt(2 * Math.abs(target - pos) / a)
     const tween = Tween.create({ pos })

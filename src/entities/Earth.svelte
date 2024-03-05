@@ -3,8 +3,8 @@ import { useSuspense } from '@threlte/extras'
 import { TextureLoader } from 'three'
 import { T, useLoader, forwardEventHandlers } from '@threlte/core'
 import earthTextureUrl from '../assets/earth/Earth.png'
-import earthNormalUrl from '../assets/earth/normal/hires/EarthNormal.png'
-import earthSpecularUrl from '../assets/earth/spec/hires/EarthSpec.png'
+import earthNormalUrl from '../assets/earth/normal/lores/EarthNormal.png'
+import earthSpecularUrl from '../assets/earth/spec/lores/EarthSpec.png'
 
 export let planetRadius = 1
 export let position = [0, 0, 0]
