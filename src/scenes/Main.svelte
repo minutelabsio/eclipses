@@ -30,6 +30,7 @@
   transform: translateX(-50%)
   z-index: 100
   background: rgba(0, 0, 0, 0.5)
+  touch-action: none
 </style>
 
 <Levetate>
