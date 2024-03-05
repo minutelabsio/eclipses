@@ -16,7 +16,7 @@
     'uranus',
     'neptune'
   ]
-  const MIN_FLICK_VEL = 0.8
+  const MIN_FLICK_VEL = 0.4
   let element
   let pos = 0
   let scale = 500
@@ -27,6 +27,7 @@
 
   let sub = null
   let timer = null
+  let dragging = false
 
   const flick = v => {
     let ds = v * v / (2 * a)
@@ -85,6 +86,7 @@
     const draggable = interact(element).draggable({
       listeners: {
         start(e){
+          dragging = true
           sub?.unsubscribe()
           clearTimeout(timer)
         },
@@ -93,6 +95,9 @@
         },
         end(e){
           flick(e.velocity.x / 1000)
+          setTimeout(() => {
+            dragging = false
+          }, 100)
         }
       }
     })
@@ -102,6 +107,7 @@
   })
 
   const handlePlanetClicked = (e) => {
+    if (dragging) return
     clearTimeout(timer)
     sub?.unsubscribe()
     const { planet } = e.detail

@@ -11,6 +11,7 @@
   import Neptune from '../entities/Neptune.svelte'
 
   export let pos = 0
+  export let spotlight = true
 
   interactivity()
 
@@ -55,6 +56,7 @@
 />
 <T.AmbientLight intensity={0.2} />
 <T.DirectionalLight intensity={0.5} position={[0, 1, 5]} />
+<T.SpotLight visible={spotlight} intensity={20 * (Math.sin(time / 250) + 0.8)} position={[0, 2, 5]} distance={6} />
 <T.Group
   rotation={[tilt, 0, 0]}
 >
