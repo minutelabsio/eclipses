@@ -63,6 +63,9 @@
     if (Math.abs(v) > MIN_FLICK_VEL) {
       ds = Math.max(ds, dangle * scale)
     }
+    if (!selectorOpen) {
+      ds = Math.min(ds, dangle * scale)
+    }
     // get the closest planet to end position
     const x = pos + ds * Math.sign(v)
     let i = Math.round(x / dangle / scale)
@@ -81,9 +84,16 @@
       })
 
     clearTimeout(timer)
-    timer = setTimeout(() => {
+    if (selectorOpen) {
+      timer = setTimeout(() => {
+        changePlanet(planetIndex)
+      }, time + 500)
+    } else {
       changePlanet(planetIndex)
-    }, time + 500)
+      timer = setTimeout(() => {
+        selectPlanet()
+      }, time)
+    }
   }
 
   const moveToPlanet = (name, done) => {
@@ -115,7 +125,9 @@
           clearTimeout(timer)
         },
         move(e){
-          pos += e.dx
+          if (selectorOpen) {
+            pos += e.dx
+          }
         },
         end(e){
           flick(e.velocity.x / 1000)

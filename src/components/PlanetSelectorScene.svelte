@@ -53,7 +53,7 @@
       if (showAll) {
         return { scale: 1 }
       } else {
-        return { scale: 1e-10 }
+        return { scale: 1e-2 }
       }
     }),
     smoothen({ duration: '0.5s', easing: 'quadOut' })
