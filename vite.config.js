@@ -16,6 +16,6 @@ export default defineConfig({
   },
   assetsInclude: ['**/*.tif', '**/*.dds'],
   base: process.env.NODE_ENV === 'production'
-    ? `/${pkg.name}/`
-    : '/'
+    ? `/${pkg.name}`
+    : ''
 })
