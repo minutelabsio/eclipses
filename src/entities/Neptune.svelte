@@ -3,9 +3,11 @@ import { TextureLoader } from 'three'
 import { T, useLoader, forwardEventHandlers } from '@threlte/core'
 import textureUrl from '../assets/neptune/neptunemap.jpg'
 import { useSuspense } from '@threlte/extras'
+import config from '../configs/neptune'
 
 const component = forwardEventHandlers()
 
+export let time = 0
 export let planetRadius = 1
 export let position = [0, 0, 0]
 export let rotation = [2.5, 0, -Math.PI / 2]
@@ -18,11 +20,13 @@ const textures = suspend(useLoader(TextureLoader).load({
 </script>
 
 {#if $textures}
-<T.Group>
+<T.Group
+  visible={visible}
+  position={position}
+  rotation={rotation}
+>
   <T.Mesh
-    visible={visible}
-    position={position}
-    rotation={rotation}
+    rotation.y={2 * Math.PI * time / config.dayLength}
     scale={[planetRadius, planetRadius, planetRadius]}
     receiveShadow
     renderOrder={1}

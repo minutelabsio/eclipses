@@ -4,27 +4,7 @@
   import PlanetSelectorScene from './PlanetSelectorScene.svelte'
   import interact from 'interactjs'
   import { Observable, Tween, animationFrames } from 'intween'
-
-  const frames = (duration = 1000) => {
-    return new Observable((observer) => {
-      const sub = animationFrames().subscribe({
-        next: (time) => {
-          observer.next(time)
-          if (time >= duration) {
-            sub.unsubscribe()
-            observer.next(duration)
-            observer.complete()
-          }
-        },
-        error: (error) => {
-          observer.error(error)
-        },
-        complete: () => {
-          observer.complete()
-        }
-      })
-    })
-  }
+  import { frames } from '../lib/animation'
 
   const dispatch = createEventDispatcher()
 
@@ -122,6 +102,8 @@
   })
 
   const handlePlanetClicked = (e) => {
+    clearTimeout(timer)
+    sub?.unsubscribe()
     const { planet } = e.detail
     moveToPlanet(planet, () => {
       dispatch('change', {

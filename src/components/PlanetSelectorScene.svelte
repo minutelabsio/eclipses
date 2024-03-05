@@ -1,4 +1,5 @@
 <script>
+  import * as PlanetConfigs from '../configs'
   import { createEventDispatcher } from 'svelte'
   import { T, useFrame } from '@threlte/core'
   import { interactivity } from '@threlte/extras'
@@ -39,8 +40,10 @@
 
   $: scales = getScales(pos)
 
-  useFrame(() => {
+  let time = 0
+  useFrame((ctx, dt) => {
     rotation[1] = pos
+    time += 1e3 * dt
   })
 </script>
 
@@ -62,6 +65,7 @@
     <T.Group rotation.y={planetAngles[0]}>
       <T.Group position={[0, 0, dollyRadius]} scale.x={scales[0]} scale.y={scales[0]} scale.z={scales[0]}>
         <Earth
+          time={time}
           rotation={[0, Math.PI / 2, 0]}
           on:click={planetClicked('earth')}
         />
@@ -70,6 +74,7 @@
     <T.Group rotation.y={planetAngles[1]}>
       <T.Group position={[0, 0, dollyRadius]} scale.x={scales[1]} scale.y={scales[1]} scale.z={scales[1]}>
         <Mars
+          time={time}
           rotation={[0, Math.PI / 2, 0]}
           on:click={planetClicked('mars')}
         />
@@ -78,6 +83,7 @@
     <T.Group rotation.y={planetAngles[2]}>
       <T.Group position={[0, 0, dollyRadius]} scale.x={scales[2]} scale.y={scales[2]} scale.z={scales[2]}>
         <Jupiter
+          time={time}
           rotation={[0, Math.PI / 2, 0]}
           on:click={planetClicked('jupiter')}
         />
@@ -86,6 +92,7 @@
     <T.Group rotation.y={planetAngles[3]}>
       <T.Group position={[0, 0, dollyRadius]} scale.x={scales[3]} scale.y={scales[3]} scale.z={scales[3]}>
         <Saturn
+          time={time}
           rotation={[Math.PI / 2, Math.PI / 2, 0]}
           on:click={planetClicked('saturn')}
         />
@@ -94,6 +101,7 @@
     <T.Group rotation.y={planetAngles[4]}>
       <T.Group position={[0, 0, dollyRadius]} scale.x={scales[4]} scale.y={scales[4]} scale.z={scales[4]}>
         <Uranus
+          time={time}
           rotation={[-0.5, Math.PI / 2, 0]}
           on:click={planetClicked('uranus')}
         />
@@ -102,6 +110,7 @@
     <T.Group rotation.y={planetAngles[5]}>
       <T.Group position={[0, 0, dollyRadius]} scale.x={scales[5]} scale.y={scales[5]} scale.z={scales[5]}>
         <Neptune
+          time={time}
           rotation={[0, Math.PI / 2, 0]}
           on:click={planetClicked('neptune')}
         />

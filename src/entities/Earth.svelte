@@ -5,7 +5,9 @@ import { T, useLoader, forwardEventHandlers } from '@threlte/core'
 import earthTextureUrl from '../assets/earth/Earth.png'
 import earthNormalUrl from '../assets/earth/normal/lores/EarthNormal.png'
 import earthSpecularUrl from '../assets/earth/spec/lores/EarthSpec.png'
+import config from '../configs/earth'
 
+export let time = 0
 export let planetRadius = 1
 export let position = [0, 0, 0]
 export let rotation = [Math.PI / 2, 0, -Math.PI / 2]
@@ -30,6 +32,7 @@ const textures = suspend(useLoader(TextureLoader).load({
   >
     <T.Mesh
       scale={[planetRadius, planetRadius, planetRadius]}
+      rotation.y={2 * Math.PI * time / config.dayLength}
       receiveShadow
       renderOrder={1}
       bind:this={$component}

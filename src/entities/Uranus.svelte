@@ -6,9 +6,11 @@ import ringTextureUrl from '../assets/uranus/uranusringcolor.jpg'
 import ringOpacityUrl from '../assets/uranus/uranusringtrans.gif'
 import { useSuspense } from '@threlte/extras'
 import { altitude, atmosphereThickness } from '../store/environment'
+import config from '../configs/uranus'
 
 const component = forwardEventHandlers()
 
+export let time = 0
 export let planetRadius = 1
 export let position = [0, 0, 0]
 export let rotation = [0, -0.05, .2]
@@ -39,7 +41,8 @@ $: colorFade = new Color(0x000000).lerp(new Color(0xffffff), Math.min(1, $altitu
 <T.Group position={position} visible={visible} rotation={rotation}>
   <T.Mesh
     visible={visible}
-    rotation={[0, 0, -Math.PI / 2]}
+    rotation.z={-Math.PI / 2}
+    rotation.x={2 * Math.PI * time / config.dayLength}
     scale={[planetRadius, planetRadius, planetRadius]}
     receiveShadow
     renderOrder={1}

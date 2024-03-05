@@ -5,9 +5,11 @@ import textureUrl from '../assets/saturn/saturnmap.jpg'
 import ringTextureUrl from '../assets/saturn/saturnringcolor.jpg'
 import ringOpacityUrl from '../assets/saturn/saturnringpattern.gif'
 import { useSuspense } from '@threlte/extras'
+import config from '../configs/saturn'
 
 const component = forwardEventHandlers()
 
+export let time = 0
 export let planetRadius = 1
 export let position = [0, 0, 0]
 export let rotation = [0, 0, .1]
@@ -35,7 +37,8 @@ const textures = suspend(useLoader(TextureLoader).load({
 {#if $textures}
 <T.Group position={position} visible={visible} rotation={rotation}>
   <T.Mesh
-    rotation={[0, 0, -Math.PI / 2]}
+    rotation.x={2 * Math.PI * time / config.dayLength}
+    rotation.z={-Math.PI / 2}
     scale={[planetRadius, planetRadius, planetRadius]}
     receiveShadow
     bind:this={$component}
