@@ -26,6 +26,7 @@
   }
 
   const planetAngles = Array.from({ length: 6 }, (_, i) => i * Math.PI / 3)
+  let planetTilts = []
   const tilt = 0.5
   const rotation = [0, 0, 0]
   const dollyRadius = 3
@@ -47,14 +48,31 @@
   stateChange.pipe(
     map(({ showAll }) => {
       if (showAll) {
-        return { scale: 1, showAll }
+        const planetTilts = [
+          0, // earth
+          0, // mars
+          0, // jupiter
+          Math.PI / 2, // saturn
+          -0.5, // uranus
+          0 // neptune
+        ]
+        return { scale: 1, showAll, planetTilts }
       } else {
-        return { scale: 1e-2, showAll }
+        const planetTilts = [
+          -1, // earth
+          -1, // mars
+          -1, // jupiter
+          0.5, // saturn
+          -0.5, // uranus
+          -1 // neptune
+        ]
+        return { scale: 1e-2, showAll, planetTilts }
       }
     }),
     smoothen({ duration: '0.5s', easing: 'quadOut' })
-  ).subscribe(({ scale }) => {
-    nonSelectedScale = scale
+  ).subscribe((state) => {
+    nonSelectedScale = state.scale
+    planetTilts = state.planetTilts
   })
 
   setTimeout(() => {
@@ -91,7 +109,7 @@
       <T.Group position.z={planetStates[0].r} scale.x={planetStates[0].scale} scale.y={planetStates[0].scale} scale.z={planetStates[0].scale}>
         <Earth
           time={time}
-          rotation={[0, Math.PI / 2, 0]}
+          rotation={[planetTilts[0], Math.PI / 2, 0]}
           on:click={planetClicked('earth')}
         />
       </T.Group>
@@ -100,7 +118,7 @@
       <T.Group position.z={planetStates[1].r} scale.x={planetStates[1].scale} scale.y={planetStates[1].scale} scale.z={planetStates[1].scale}>
         <Mars
           time={time}
-          rotation={[0, Math.PI / 2, 0]}
+          rotation={[planetTilts[1], Math.PI / 2, 0]}
           on:click={planetClicked('mars')}
         />
       </T.Group>
@@ -109,7 +127,7 @@
       <T.Group position.z={planetStates[2].r} scale.x={planetStates[2].scale} scale.y={planetStates[2].scale} scale.z={planetStates[2].scale}>
         <Jupiter
           time={time}
-          rotation={[0, Math.PI / 2, 0]}
+          rotation={[planetTilts[2], Math.PI / 2, 0]}
           on:click={planetClicked('jupiter')}
         />
       </T.Group>
@@ -118,7 +136,7 @@
       <T.Group position.z={planetStates[3].r} scale.x={planetStates[3].scale} scale.y={planetStates[3].scale} scale.z={planetStates[3].scale}>
         <Saturn
           time={time}
-          rotation={[Math.PI / 2, Math.PI / 2, 0]}
+          rotation={[planetTilts[3], Math.PI / 2, 0]}
           on:click={planetClicked('saturn')}
         />
       </T.Group>
@@ -127,7 +145,7 @@
       <T.Group position.z={planetStates[4].r} scale.x={planetStates[4].scale} scale.y={planetStates[4].scale} scale.z={planetStates[4].scale}>
         <Uranus
           time={time}
-          rotation={[-0.5, Math.PI / 2, 0]}
+          rotation={[planetTilts[4], Math.PI / 2, 0]}
           on:click={planetClicked('uranus')}
         />
       </T.Group>
@@ -136,7 +154,7 @@
       <T.Group position.z={planetStates[5].r} scale.x={planetStates[5].scale} scale.y={planetStates[5].scale} scale.z={planetStates[5].scale}>
         <Neptune
           time={time}
-          rotation={[0, Math.PI / 2, 0]}
+          rotation={[planetTilts[5], Math.PI / 2, 0]}
           on:click={planetClicked('neptune')}
         />
       </T.Group>
