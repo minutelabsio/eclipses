@@ -7,6 +7,7 @@
   import { frames } from '../lib/animation'
 
   export let selected = 'earth'
+  export let active = true
 
   const dispatch = createEventDispatcher()
 
@@ -30,7 +31,6 @@
   let sub = null
   let timer = null
   let dragging = false
-  let selectorOpen = true
 
   const changePlanet = (indexOrName) => {
     let index
@@ -63,7 +63,7 @@
     if (Math.abs(v) > MIN_FLICK_VEL) {
       ds = Math.max(ds, dangle * scale)
     }
-    if (!selectorOpen) {
+    if (!active) {
       ds = Math.min(ds, dangle * scale)
     }
     // get the closest planet to end position
@@ -84,7 +84,7 @@
       })
 
     clearTimeout(timer)
-    if (selectorOpen) {
+    if (active) {
       timer = setTimeout(() => {
         changePlanet(planetIndex)
       }, time + 500)
@@ -117,7 +117,7 @@
   }
 
   onMount(() => {
-    const draggable = interact(element).draggable({
+    const draggable = interact(element).styleCursor(false).draggable({
       listeners: {
         start(e){
           dragging = true
@@ -125,7 +125,7 @@
           clearTimeout(timer)
         },
         move(e){
-          if (selectorOpen) {
+          if (active) {
             pos += e.dx
           }
         },
@@ -149,11 +149,11 @@
     const { planet } = e.detail
 
     if (planet === selected){
-      if (selectorOpen) {
-        selectorOpen = false
+      if (active) {
+        active = false
         selectPlanet()
       } else {
-        selectorOpen = true
+        active = true
       }
     } else {
       moveToPlanet(planet, () => {
@@ -168,7 +168,7 @@
   <Canvas>
     <PlanetSelectorScene
       pos={pos / scale}
-      showAll={selectorOpen}
+      showAll={active}
       on:planetClicked={handlePlanetClicked}
     />
   </Canvas>

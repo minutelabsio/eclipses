@@ -1,5 +1,5 @@
 <script>
-  import { createEventDispatcher } from 'svelte'
+  import { createEventDispatcher, onMount } from 'svelte'
   import { T, useFrame } from '@threlte/core'
   import { interactivity } from '@threlte/extras'
   import Jupiter from '../entities/Jupiter.svelte'
@@ -26,7 +26,7 @@
   }
 
   const planetAngles = Array.from({ length: 6 }, (_, i) => i * Math.PI / 3)
-  const tilt = 0.4
+  const tilt = 0.5
   const rotation = [0, 0, 0]
   const dollyRadius = 3
   let nonSelectedScale = 1
@@ -41,25 +41,28 @@
       const scale = 1 / (1 + distance / x)
       return { scale, r: x * dollyRadius + 0.01 }
     })
-    console.log(states)
     return states
   }
-
-  $: planetStates = getPlanetStates(pos, nonSelectedScale)
-  $: stateChange.next({ showAll })
 
   stateChange.pipe(
     map(({ showAll }) => {
       if (showAll) {
-        return { scale: 1 }
+        return { scale: 1, showAll }
       } else {
-        return { scale: 1e-2 }
+        return { scale: 1e-2, showAll }
       }
     }),
     smoothen({ duration: '0.5s', easing: 'quadOut' })
   ).subscribe(({ scale }) => {
     nonSelectedScale = scale
   })
+
+  setTimeout(() => {
+    stateChange.next({ showAll })
+  }, 10)
+
+  $: planetStates = getPlanetStates(pos, nonSelectedScale)
+  $: stateChange.next({ showAll })
 
   let time = 0
   useFrame((ctx, dt) => {
@@ -70,7 +73,7 @@
 
 <T.PerspectiveCamera
   makeDefault={true}
-  position={[0, 0, 8]}
+  position={[0, 0.2, 5]}
   lookAt={[0, 0, 0]}
   fov={35}
 />
