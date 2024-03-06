@@ -130,11 +130,11 @@
 
 <Levetate>
   <!-- svelte-ignore a11y-no-static-element-interactions -->
-  <div class="controls" class:selector={selectorActive} bind:this={element} on:dblclick={openPlanetSelector} >
+  <div class="controls no-highlight" class:selector={selectorActive} bind:this={element} on:dblclick={openPlanetSelector} >
     <PlanetSelector on:select={onPlanetSelected} bind:active={selectorActive} />
 
     {#if !selectorActive}
-      <div transition:fade={{ duration: 100 }} class="eclipse-slider">
+      <div transition:fade={{ duration: 100 }} class="eclipse-slider no-highlight">
         <EclipseSlider bind:progress={$eclipseProgress} on:swipe={onSwipe} on:start={seekStart} on:end={seekEnd}/>
         <button class="play-pause" on:dblclick|capture|stopPropagation on:click={togglePlay}>
           <Icon icon={ playing ? 'mdi:pause' : 'mdi:play'} />
