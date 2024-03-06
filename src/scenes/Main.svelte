@@ -67,6 +67,7 @@
 
   const openPlanetSelector = () => {
     selectorActive = true
+    player.pause()
   }
 
   const onPlanetSelected = ({ detail }) => {
@@ -79,7 +80,7 @@
 
   const onSwipe = ({ detail }) => {
     if (detail.direction === 'up') {
-      selectorActive = true
+      openPlanetSelector()
     }
   }
 
@@ -135,10 +136,11 @@
 
     {#if !selectorActive}
       <div transition:fade={{ duration: 100 }} class="eclipse-slider no-highlight">
-        <EclipseSlider bind:progress={$eclipseProgress} on:swipe={onSwipe} on:start={seekStart} on:end={seekEnd}/>
-        <button class="play-pause" on:dblclick|capture|stopPropagation on:click={togglePlay}>
-          <Icon icon={ playing ? 'mdi:pause' : 'mdi:play'} />
-        </button>
+        <EclipseSlider bind:progress={$eclipseProgress} on:swipe={onSwipe} on:start={seekStart} on:end={seekEnd}>
+          <button class="play-pause" on:dblclick|capture|stopPropagation on:click={togglePlay}>
+            <Icon icon={ playing ? 'mdi:pause' : 'mdi:play'} />
+          </button>
+        </EclipseSlider>
       </div>
     {/if}
   </div>

@@ -35,12 +35,12 @@
           setTimeout(() => {
             dragging = false
             dispatch('end')
+            if (event.speed > 1000) {
+              let direction = event.velocity.x > 0 ? 'right' : 'left'
+              direction = Math.abs(event.velocity.x) > Math.abs(event.velocity.y) ? direction : event.velocity.y > 0 ? 'down' : 'up'
+              dispatch('swipe', { direction })
+            }
           }, 100)
-          if (event.speed > 1000) {
-            let direction = event.velocity.x > 0 ? 'right' : 'left'
-            direction = Math.abs(event.velocity.x) > Math.abs(event.velocity.y) ? direction : event.velocity.y > 0 ? 'down' : 'up'
-            dispatch('swipe', { direction })
-          }
         },
       },
     })
@@ -54,23 +54,25 @@
 
 </script>
 
-<!-- svelte-ignore a11y-click-events-have-key-events -->
-<svg bind:this={element} on:click={checkClick} viewBox="-10 -10 120 120" role="slider" aria-valuenow={progress} tabindex="0">
-  <!-- a semicircle -->
-  <!-- svelte-ignore a11y-no-static-element-interactions -->
-  <g on:click|capture|stopPropagation={setSlider} on:pointerdown|capture={setSlider}>
-    <path class="path" d="M 0 50 A 50 50 0 0 1 100 50" />
-    <path d="M 0 50 A 50 50 0 0 1 100 50" stroke="transparent" stroke-width="10" fill="none" />
-    <!-- moon -->
-    <circle
-      class="moon"
-      transform={`rotate(${progress * 180} 50 50)`}
-      cx="0" cy="50" dx="50" r="5"
-    />
-  </g>
-  <!-- a circle -->
-  <!-- <circle cx="50" cy="50" r="10" fill="white" /> -->
-</svg>
+<div bind:this={element} on:click={checkClick}>
+  <svg viewBox="-10 -10 120 120">
+    <!-- a semicircle -->
+    <!-- svelte-ignore a11y-no-static-element-interactions -->
+    <g on:click|capture|stopPropagation={setSlider} on:pointerdown|capture={setSlider}>
+      <path class="path" d="M 0 50 A 50 50 0 0 1 100 50" />
+      <path d="M 0 50 A 50 50 0 0 1 100 50" stroke="transparent" stroke-width="10" fill="none" />
+      <!-- moon -->
+      <circle
+        class="moon"
+        transform={`rotate(${progress * 180} 50 50)`}
+        cx="0" cy="50" dx="50" r="5"
+      />
+    </g>
+    <!-- a circle -->
+    <!-- <circle cx="50" cy="50" r="10" fill="white" /> -->
+  </svg>
+  <slot/>
+</div>
 
 <style lang="sass">
   svg
