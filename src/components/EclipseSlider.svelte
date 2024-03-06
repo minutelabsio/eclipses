@@ -10,11 +10,13 @@
 
   const setSlider = (e) => {
     if (dragging) { return }
+    dispatch('start')
     const x = e.offsetX
     const y = e.offsetY
     const width = element.clientWidth
     const angle = Math.atan2(width / 2 - y, width / 2 - x)
     progress = angle / Math.PI
+    dispatch('end')
   }
 
   onMount(() => {
@@ -22,6 +24,7 @@
       listeners: {
         start(event) {
           dragging = true
+          dispatch('start')
         },
         move(event) {
           event.preventDefault()
@@ -31,7 +34,13 @@
         end(event) {
           setTimeout(() => {
             dragging = false
+            dispatch('end')
           }, 100)
+          if (event.speed > 1000) {
+            let direction = event.velocity.x > 0 ? 'right' : 'left'
+            direction = Math.abs(event.velocity.x) > Math.abs(event.velocity.y) ? direction : event.velocity.y > 0 ? 'down' : 'up'
+            dispatch('swipe', { direction })
+          }
         },
       },
     })
