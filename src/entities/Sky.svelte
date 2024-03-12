@@ -3,6 +3,7 @@
   import createSky from '../shaders/sky/Sky'
   import { T } from '@threlte/core'
   import {
+    telescopeMode,
     altitude,
     planetRadius,
     atmosphereThickness,
@@ -55,11 +56,11 @@
   $: Sky.ozoneLayerHeight = $ozoneLayerHeight
   $: Sky.ozoneLayerWidth = $ozoneLayerWidth
   $: Sky.ozoneCoefficients = $ozoneCoefficients
-  $: Sky.exposure = $exposure
+  // $: Sky.exposure = $exposure
   $: Sky.iSteps = $iSteps
   $: Sky.jSteps = $jSteps
   $: Sky.cloudZ = $cloudZ
-  $: Sky.cloudThickness = $cloudThickness
+  $: Sky.cloudThickness = $telescopeMode ? 0 : $cloudThickness
   $: Sky.cloudSize = $cloudSize
   $: Sky.cloudMie = $cloudMie
   $: Sky.cloudThreshold = $cloudThreshold

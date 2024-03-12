@@ -15,7 +15,7 @@
     Selection,
     EdgeDetectionMode,
   } from 'postprocessing'
-  import { exposure, bloomIntensity } from '../store/environment'
+  import { exposure, bloomIntensity, telescopeMode, telescopeModeExposure } from '../store/environment'
   import { onMount } from 'svelte'
   import { getGPUTier } from 'detect-gpu'
   import { iSteps, jSteps } from '../store/environment'
@@ -116,7 +116,7 @@
   $: setupEffectComposer($camera)
   $: composer.setSize($size.width, $size.height)
   $: bloom.intensity = $bloomIntensity
-  $: renderer.toneMappingExposure = $exposure
+  $: renderer.toneMappingExposure = $telescopeMode ? $telescopeModeExposure : $exposure
 
   onMount(() => {
     let auto = autoRender.current

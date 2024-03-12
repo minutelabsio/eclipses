@@ -5,6 +5,8 @@
     eclipseProgress,
     load,
     planet,
+    sunPosition,
+    telescopeMode,
   } from '../store/environment'
   import {
     AU,
@@ -23,6 +25,7 @@
   let selectorActive = false
   const player = Player.create(10000)
   let playing = !player.paused
+  let cameraControls
 
   player.on('play', () => {
     if (player.progress === 100) {
@@ -79,6 +82,18 @@
   const onSwipe = ({ detail }) => {
     if (detail.direction === 'up') {
       openPlanetSelector()
+    }
+  }
+
+  const toggleTelecopeMode = () => {
+    $telescopeMode = !$telescopeMode
+    if (!cameraControls) return
+    if ($telescopeMode) {
+      cameraControls.saveState()
+      const [x, y, z] = $sunPosition
+      cameraControls.lookInDirectionOf(x, y, z, false)
+    } else {
+      cameraControls.reset()
     }
   }
 
@@ -157,6 +172,7 @@
   <div transition:fade={{ duration: 100 }} class="menu-container no-highlight">
     <Menu
       on:planet={openPlanetSelector}
+      on:telescope={toggleTelecopeMode}
     />
   </div>
   {/if}
@@ -169,4 +185,6 @@
   makeDefault
   near={1}
   far={1.2 * AU}
+  bind:controls={cameraControls}
+  telescope={$telescopeMode}
 />

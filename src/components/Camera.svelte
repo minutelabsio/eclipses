@@ -6,9 +6,11 @@ import {
   FOV,
   sunPosition,
   moonDistance,
+  sunAngularDiameter,
   altitude,
 } from '../store/environment'
 
+export let telescope = true
 const component = forwardEventHandlers()
 const { renderer, renderStage } = useThrelte()
 
@@ -27,6 +29,8 @@ extend({ CameraControls })
 export let controls
 
 $: controls?.moveTo(0, $altitude, -2, false)
+$: controlsEnabled = !telescope
+$: fov = telescope ? $sunAngularDiameter * 4 : $FOV
 
 useTask((dt) => {
   controls?.update(dt)
@@ -37,13 +41,14 @@ useTask((dt) => {
 
 <T.PerspectiveCamera
   position.z={2}
-  fov={$FOV}
+  fov={fov}
   bind:this={$component}
   let:ref
   {...$$restProps}
 >
   <T.CameraControls
     args={[ref, renderer.domElement]}
+    enabled={controlsEnabled}
     draggingSmoothTime={0.05}
     maxZoom={1}
     minZoom={1}

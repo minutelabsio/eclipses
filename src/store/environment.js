@@ -27,6 +27,9 @@ const sphereIntersection = (origin, ray, radius) => {
   return x0 < x1 ? [x0, x1] : [x1, x0]
 }
 
+export const telescopeMode = writable(false)
+export const telescopeModeExposure = writable(0.25)
+
 export const planet = writable('earth')
 export const FOV = writable(26.5)
 export const exposure = writable(1.0)
@@ -50,6 +53,10 @@ export const observerOrigin = derived(
 )
 export const sunDistance = writable(1 * AU)
 export const sunRadius = writable(109 * Re)
+export const sunAngularDiameter = derived(
+  [sunDistance, sunRadius],
+  ([$sunDistance, $sunRadius]) => Math.asin($sunRadius / $sunDistance) / DEG
+)
 export const sunPosition = derived(
   [sunDistance, elevationRad],
   ([$sunDistance, $elevationRad]) => skyPosition($sunDistance, $elevationRad, 0)
@@ -188,6 +195,8 @@ export const mountainsVisible = writable(true)
 export const earthVisible = writable(true)
 
 const state = {
+  telescopeMode,
+  telescopeModeExposure,
   planet,
   FOV,
   exposure,

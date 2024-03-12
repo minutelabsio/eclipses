@@ -386,7 +386,7 @@ float sunMoonIntensity(vec3 rayDir, vec3 sSun, float sunAngularRadius, vec3 sMoo
   // some texture on the sun
   vec2 sunxy = squash(rayDir, sSun) / sunAngularRadius;
   // sunspots (not that you'd really see them)
-  sun *= (1. - 0.8 * step(0.8, cnoise2(15. * sunxy)));
+  sun *= (1. - 0.2 * step(0.8, cnoise2(15. * sunxy)));
   // flairs
   // sun += smoothcircle(rayDir, sunAngularRadius * 0.9, sSun, 0.3) *
   //   smoothstep(0.3, 0.9, fbm(vec3(sunxy, 0.) * 20.)) *
