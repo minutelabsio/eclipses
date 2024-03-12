@@ -366,51 +366,38 @@ float luma(vec3 c){
 float coronaValue(vec3 rayDir, vec3 sSun, float sunAngularRadius){
   vec2 xy = squash(rayDir, sSun);
   xy.x *= -1.;
-  vec2 uv = clamp(.235 * xy / sunAngularRadius + vec2(0.497, 0.493), 0., 1.);
+  vec2 uv = .235 * xy / sunAngularRadius + vec2(0.497, 0.493);
+  // prevent streaking at edges of texture
   vec4 corona = texture2D(coronaTexture, uv);
+  // color correction
+  corona.rgb = pow(corona.rgb, vec3(2.2));
   float l = luma(corona.xyz);
-  return 1e-2 * l * smoothcircle(rayDir, sunAngularRadius * 2., sSun, 2.) ;
+  return 1e-2 * l * smoothcircle(rayDir, sunAngularRadius * 2., sSun, .5);
 }
 
 const float bloomFactor = 8e-6;
 float sunMoonIntensity(vec3 rayDir, vec3 sSun, float sunAngularRadius, vec3 sMoon, float moonAngularRadius){
-  // float mu = dot(rayDir, sSun);
-  // if(mu < 0.9995) {
-  //   return 0.0;
-  // }
+  if (distance(sSun, rayDir) > 0.02){
+    return 0.0;
+  }
 
   // simple circle sun
   float sun = smoothcircle(rayDir, sunAngularRadius, sSun, 0.01);
-  // float coronaArea = smoothcircle(rayDir, sunAngularRadius * 1.1, sSun, 1.9);
-  // float corona = coronaArea;
-  // // add noise to corona to give it whisps
-  // float d = length(rayDir - sSun);
-  // vec3 g = (rayDir - sSun) / pow(d, 1. - 3.1 * d * snoise3(9. * vec3(d)));
-  // corona *= smoothstep(0.4, 0.8 * (1. - 60.4 * d * snoise3(vec3(30. * (rayDir - sSun)))), fbm(10. * g));
-  // corona += .009 * (1. - 0.8 * fbm(200. * (rayDir - sSun))) * coronaArea / d;
-  // sun += 3e-3 * min(1., corona);
+  // some texture on the sun
+  vec2 sunxy = squash(rayDir, sSun) / sunAngularRadius;
+  // sunspots (not that you'd really see them)
+  sun *= (1. - 0.8 * step(0.8, cnoise2(15. * sunxy)));
+  // flairs
+  // sun += smoothcircle(rayDir, sunAngularRadius * 0.9, sSun, 0.3) *
+  //   smoothstep(0.3, 0.9, fbm(vec3(sunxy, 0.) * 20.)) *
+  //   clampMix(0., 1., sin(atan(sunxy.y, sunxy.x) * 10. * cnoise2(sunxy * 1.)));
   sun += coronaValue(rayDir, sSun, sunAngularRadius);
-  float moon = smoothcircle(rayDir, moonAngularRadius, sMoon, 0.01);
-  // moon covers sun
-  return pow(mix(sun, 0.0, moon), 1.);
+  // create little bumps on the edge of the moon
+  vec2 y = normalize(squash(rayDir, sMoon));
+  float r = moonAngularRadius * (1. - 0.002 * cnoise2(15. * y));
+  float moon = smoothcircle(rayDir, r, sMoon, 0.01);
+  return mix(sun, 0.0, moon);
   // return step(.9, sun - moon);
-
-  // screen space of ray and moon, sun is at origin
-  vec2 moonxy = squash(sMoon, sSun);
-  vec2 rayxy = squash(rayDir, sSun);
-
-  vec2 moonRay = rayxy - moonxy;
-  float x = 0.02 * smoothstep(0.0008, 0., length(moonxy));
-  vec2 seed = 1000. * moonRay + 15.;
-  // this adds little craters when the moon is near totality
-  float f = 1.0 - x * smoothstep(0., 1., cnoise2(seed));
-  float distFromSunEdge = circleEdge(rayxy, sunAngularRadius, moonxy, f * moonAngularRadius);
-  distFromSunEdge = max(0.0, distFromSunEdge);
-  // distFromSunEdge = distFromSunEdge * step(0.0009 * (cnoise2(4000. * vUv) - 0.5), distFromSunEdge);
-
-  // TODO: should also account for thickness of segment for more bloom
-  float bloom = min(1.0, bloomFactor / sqrt(distFromSunEdge));
-  return step(0.001, bloom) * bloom;
 }
 
 float nextStep(const float d, const float ds, const int i) {
