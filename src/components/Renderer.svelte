@@ -71,11 +71,11 @@
 
     bloom = new SelectiveBloomEffect(scene, camera, {
       intensity: $bloomIntensity,
-      luminanceThreshold: 3.5, //0.5,
+      luminanceThreshold: 2.5, //0.5,
       luminanceSmoothing: 0.7,
       blendFunction: BlendFunction.ADD,
       radius: .9, //.99,
-      levels: 8, //40,
+      levels: 10, //40,
       mipmapBlur: true
     })
     bloom.dithering = true
@@ -86,7 +86,7 @@
         camera,
         new SMAAEffect({
           preset: SMAAPreset.ULTRA,
-          edgeDetectionMode: EdgeDetectionMode.COLOR,
+          edgeDetectionMode: EdgeDetectionMode.LUMA,
           // blendFunction: BlendFunction.SCREEN
         }),
         bloom,
