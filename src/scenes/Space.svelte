@@ -198,6 +198,6 @@
     position={$sunPosition}
   >
     <T.IcosahedronGeometry args={[$sunRadius, 32]} />
-    <T.MeshBasicMaterial color="green" dithering fog={false} />
+    <T.MeshBasicMaterial color="green" fog={false} />
   </T.Mesh>
 </T.Group>
