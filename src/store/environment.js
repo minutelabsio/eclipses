@@ -7,6 +7,7 @@ import {
   DEG
 } from '../lib/units'
 import { skyPosition } from '../lib/sky-position'
+import * as PlanetConfigs from '../configs'
 
 const print = (val, ...args) => {
   console.log(val, ...args)
@@ -280,4 +281,11 @@ export function load(settings){
       state[key].set(settings[key])
     }
   }
+}
+
+export function selectPlanet(name = 'earth'){
+  const v = name.toLowerCase()
+  const moons = Object.values(PlanetConfigs[v].moons)
+  load(PlanetConfigs[v])
+  load(PlanetConfigs[v].moons[moons[0]])
 }

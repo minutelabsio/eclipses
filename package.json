@@ -44,6 +44,7 @@
     "sass": "^1.66.1",
     "stats.js": "^0.17.0",
     "svelte-router-spa": "^7.0.1",
+    "svelte-spa-router": "^4.0.1",
     "three": "^0.159.0",
     "three-good-godrays": "^0.4.4",
     "three-story-controls": "^1.0.6",

@@ -2,24 +2,28 @@
   import { Canvas } from '@threlte/core'
   import Main from './scenes/Main.svelte'
   import Fisheye from './scenes/Fisheye.svelte'
-  import { Router } from 'svelte-router-spa'
+  import Router from 'svelte-spa-router'
   import { onMount } from 'svelte'
   import { NoToneMapping } from 'three'
   import { Suspense, HTML, Billboard } from '@threlte/extras'
   import Visualizer from './scenes/Visualizer.svelte'
   import Levetate from './components/Levetate.svelte'
   import Debug from './scenes/Debug.svelte'
+  import { selectPlanet } from './store/environment'
 
-  const routes = [
-    { name: '/', component: Main },
-    { name: '/fisheye', component: Fisheye },
-    { name: '/debug', component: Debug },
-    { name: '/vis', component: Visualizer },
-    { name: '404', redirectTo: '/' }
-  ]
+  const routes = {
+    '/fisheye': Fisheye,
+    '/debug': Debug,
+    '/vis': Visualizer,
+    '/:planet': Main,
+    '*': Main,
+  }
 
-  const routerOptions = {
-    prefix: import.meta.env.BASE_URL.substring(1)
+  function routeLoaded(e){
+    const { params } = e.detail
+    if (!params) return
+    const planet = params.planet
+    selectPlanet(planet)
   }
 
   const renderOptions = {
@@ -48,7 +52,7 @@
       <Levetate slot="fallback">
         <div class="loading">loading...</div>
       </Levetate>
-      <Router {routes} options={routerOptions} />
+      <Router {routes} on:routeLoaded={routeLoaded} />
     </Suspense>
   </Canvas>
 

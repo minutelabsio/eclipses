@@ -12,11 +12,11 @@
   import Levetate from '../components/Levetate.svelte'
   import PlanetSelector from '../components/PlanetSelector.svelte'
   import Space from './Space.svelte'
-  import * as PlanetConfigs from '../configs'
   import EclipseSlider from '../components/EclipseSlider.svelte'
   import { fade } from 'svelte/transition'
   import Icon from '@iconify/svelte'
   import { Player } from 'intween'
+  import { push } from 'svelte-spa-router'
 
   let element
   let selectorActive = false
@@ -72,10 +72,7 @@
 
   const onPlanetSelected = ({ detail }) => {
     const { name } = detail
-    const v = name.toLowerCase()
-    const moons = Object.values(PlanetConfigs[v].moons)
-    load(PlanetConfigs[v])
-    load(PlanetConfigs[v].moons[moons[0]])
+    push(`/${name}`)
   }
 
   const onSwipe = ({ detail }) => {
