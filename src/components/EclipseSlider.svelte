@@ -5,8 +5,16 @@
   const dispatch = createEventDispatcher()
 
   export let progress = 0
+  let pos = 0
   let element
   let dragging = false
+  const range = [0.05, 0.95]
+
+  const remap = (value, from, to) => {
+    return (value - from[0]) / (from[1] - from[0]) * (to[1] - to[0]) + to[0]
+  }
+
+  $: pos = remap(progress, [0, 1], range)
 
   const setSlider = (e) => {
     if (dragging) { return }
@@ -14,7 +22,7 @@
     const x = e.offsetX
     const y = e.offsetY
     const width = element.clientWidth
-    const angle = Math.atan2(width / 2 - y, width / 2 - x)
+    let angle = Math.atan2(width / 2 - y, width / 2 - x)
     progress = angle / Math.PI
     dispatch('end')
   }
@@ -64,7 +72,7 @@
       <!-- moon -->
       <circle
         class="moon"
-        transform={`rotate(${progress * 180} 50 50)`}
+        transform={`rotate(${pos * 180} 50 50)`}
         cx="0" cy="50" dx="50" r="5"
       />
     </g>

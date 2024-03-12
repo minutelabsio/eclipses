@@ -31,6 +31,7 @@
   const rotation = [0, 0, 0]
   const dollyRadius = 3
   let nonSelectedScale = 1
+  let verticalOffset = 0
 
   const getPlanetStates = (pos, x) => {
     const theta = -(pos - 2 * Math.PI) % (2 * Math.PI)
@@ -56,7 +57,7 @@
           -0.5, // uranus
           0 // neptune
         ]
-        return { scale: 1, showAll, planetTilts }
+        return { scale: 1, showAll, planetTilts, y: 0 }
       } else {
         const planetTilts = [
           -1, // earth
@@ -66,13 +67,14 @@
           -0.5, // uranus
           -1 // neptune
         ]
-        return { scale: 1e-2, showAll, planetTilts }
+        return { scale: 1e-2, showAll, planetTilts, y: -0.8 }
       }
     }),
     smoothen({ duration: '0.5s', easing: 'quadOut' })
   ).subscribe((state) => {
     nonSelectedScale = state.scale
     planetTilts = state.planetTilts
+    verticalOffset = state.y
   })
 
   setTimeout(() => {
@@ -100,9 +102,10 @@
 <T.SpotLight visible={spotlight} intensity={20 * (Math.sin(time / 250) + 0.8)} position={[0, 2, 5]} distance={6} />
 <T.Group
   rotation={[tilt, 0, 0]}
+  position={[0, verticalOffset, 0]}
 >
   <T.Group
-    position={[0, 0, -2.5 * nonSelectedScale]}
+    position={[0, 0, -1.5 * nonSelectedScale]}
     rotation={rotation}
   >
     <T.Group rotation.y={planetAngles[0]}>

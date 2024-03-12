@@ -11,6 +11,7 @@
   } from '../lib/units'
   import Levetate from '../components/Levetate.svelte'
   import PlanetSelector from '../components/PlanetSelector.svelte'
+  import Menu from '../components/Menu.svelte'
   import Space from './Space.svelte'
   import EclipseSlider from '../components/EclipseSlider.svelte'
   import { fade } from 'svelte/transition'
@@ -83,36 +84,47 @@
 
 </script>
 <style lang="sass">
-.controls
+.menu-container
   position: fixed
   bottom: 0
   left: 50%
+  transform: translateX(-50%)
   width: 100%
+  height: 42px
   max-width: 660px
+  z-index: 101
+  backdrop-filter: blur(10px)
+.controls
+  position: fixed
+  bottom: 0px
+  left: 50%
+  width: 100%
+  max-width: 860px
   height: 280px
   transform: translateX(-50%)
   z-index: 100
   touch-action: none
   cursor: pointer
+  overflow: hidden
 
   .eclipse-slider
     position: absolute
-    top: 7%
+    bottom: -33%
     left: 50%
     transform: translateX(-50%)
     height: 280px
     width: 280px
     touch-action: none
     cursor: pointer
-    box-shadow: 0 0 50px 0 hsla(0, 0%, 50%, 0.5)
+    // box-shadow: 0 0 50px 0 hsla(0, 0%, 50%, 0.5)
     border-radius: 50%
 
   .play-pause
     position: absolute
-    top: 50%
+    top: 40%
     left: 50%
     transform: translate(-50%, -50%)
-    font-size: 80px
+    font-size: 60px
     line-height: 0
     background: none
     border: none
@@ -141,6 +153,13 @@
       </div>
     {/if}
   </div>
+  {#if !selectorActive}
+  <div transition:fade={{ duration: 100 }} class="menu-container no-highlight">
+    <Menu
+      on:planet={openPlanetSelector}
+    />
+  </div>
+  {/if}
 </Levetate>
 
 <Renderer/>
