@@ -10,7 +10,7 @@ varying float altitude;
 uniform bool fisheye;
 uniform float time;
 
-uniform sampler2D opticalDepthMap;
+uniform sampler2D coronaTexture;
 uniform float opticalDepthMapSize;
 uniform float sunRadius;
 uniform float moonRadius;
@@ -162,9 +162,14 @@ float umbra(vec3 ri, float rSun, vec3 pSun, float rMoon, vec3 pMoon) {
 }
 
 float smoothcircle(vec3 ray, float angularRadius, vec3 centerDir, float boundary){
-  float angle = acos(dot(centerDir, ray));
-  float b = boundary * angularRadius;
-  return 1.0 - smoothstep(angularRadius - b, angularRadius + b, angle);
+  // this way gives weird artifacts because the angle is so small it leads to floating point errors
+  // float angle = acos(dot(centerDir, ray));
+  // float b = boundary * angularRadius;
+  // return 1.0 - smoothstep(angularRadius - b, angularRadius + b, angle);
+  float y = length(ray - centerDir);
+  float r = sin(angularRadius);
+  float b = boundary * r;
+  return smoothstep(r + b, r - b, y);
 }
 
 float closestApproachDepth(vec3 start, vec3 ray, float planetRadius) {
@@ -354,15 +359,41 @@ float circleEdge(vec2 p, float r1, vec2 c2, float r2){
   return min(d1, d2);
 }
 
+float luma(vec3 c){
+  return dot(c, vec3(0.299, 0.587, 0.114));
+}
+
+float coronaValue(vec3 rayDir, vec3 sSun, float sunAngularRadius){
+  vec2 xy = squash(rayDir, sSun);
+  xy.x *= -1.;
+  vec2 uv = clamp(.235 * xy / sunAngularRadius + vec2(0.497, 0.493), 0., 1.);
+  vec4 corona = texture2D(coronaTexture, uv);
+  float l = luma(corona.xyz);
+  return 1e-2 * l * smoothcircle(rayDir, sunAngularRadius * 2., sSun, 2.) ;
+}
+
 const float bloomFactor = 8e-6;
 float sunMoonIntensity(vec3 rayDir, vec3 sSun, float sunAngularRadius, vec3 sMoon, float moonAngularRadius){
-  float mu = dot(rayDir, sSun);
-  if(mu < 0.9995) {
-    return 0.0;
-  }
+  // float mu = dot(rayDir, sSun);
+  // if(mu < 0.9995) {
+  //   return 0.0;
+  // }
 
   // simple circle sun
-  // return I0 * smoothcircle(rayDir, sunAngularRadius, sSun, 0.01);
+  float sun = smoothcircle(rayDir, sunAngularRadius, sSun, 0.01);
+  // float coronaArea = smoothcircle(rayDir, sunAngularRadius * 1.1, sSun, 1.9);
+  // float corona = coronaArea;
+  // // add noise to corona to give it whisps
+  // float d = length(rayDir - sSun);
+  // vec3 g = (rayDir - sSun) / pow(d, 1. - 3.1 * d * snoise3(9. * vec3(d)));
+  // corona *= smoothstep(0.4, 0.8 * (1. - 60.4 * d * snoise3(vec3(30. * (rayDir - sSun)))), fbm(10. * g));
+  // corona += .009 * (1. - 0.8 * fbm(200. * (rayDir - sSun))) * coronaArea / d;
+  // sun += 3e-3 * min(1., corona);
+  sun += coronaValue(rayDir, sSun, sunAngularRadius);
+  float moon = smoothcircle(rayDir, moonAngularRadius, sMoon, 0.01);
+  // moon covers sun
+  return pow(mix(sun, 0.0, moon), 1.);
+  // return step(.9, sun - moon);
 
   // screen space of ray and moon, sun is at origin
   vec2 moonxy = squash(sMoon, sSun);

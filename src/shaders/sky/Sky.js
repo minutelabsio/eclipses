@@ -1,7 +1,10 @@
-import { ShaderMaterial } from 'three'
+import { ShaderMaterial, TextureLoader } from 'three'
 import * as THREE from 'three'
 import vertexShader from './vertex.glsl'
 import fragmentShader from './fragment.glsl'
+import corona from '../../assets/corona.jpg'
+
+const coronaTexture = new TextureLoader().load(corona)
 
 export default () => {
   const shader = new ShaderMaterial({
@@ -79,6 +82,7 @@ export default () => {
   Object.keys(uniforms).forEach(defineUniform)
 
   shader.uniforms.time = { value: 0 }
+  shader.uniforms.coronaTexture = { value: coronaTexture }
   api.update = (dt) => {
     shader.uniforms.time.value += dt / 1000
     shader.uniforms.time.needsUpdate = true
