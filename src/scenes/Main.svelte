@@ -21,6 +21,11 @@
   import { Player } from 'intween'
   import { push } from 'svelte-spa-router'
 
+  export let selectedPlanet = 'earth'
+  export let params = {}
+
+  $: params.planet ? selectedPlanet = params.planet : selectedPlanet = 'earth'
+
   let element
   let selectorActive = false
   const player = Player.create(10000)
@@ -156,7 +161,7 @@
 <Levetate>
   <!-- svelte-ignore a11y-no-static-element-interactions -->
   <div class="controls no-highlight" class:selector={selectorActive} bind:this={element} on:dblclick={openPlanetSelector} >
-    <PlanetSelector on:select={onPlanetSelected} bind:active={selectorActive} />
+    <PlanetSelector on:select={onPlanetSelected} bind:active={selectorActive} bind:selected={selectedPlanet} />
 
     {#if !selectorActive}
       <div transition:fade={{ duration: 100 }} class="eclipse-slider no-highlight">

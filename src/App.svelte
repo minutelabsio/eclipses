@@ -2,7 +2,7 @@
   import { Canvas } from '@threlte/core'
   import Main from './scenes/Main.svelte'
   import Fisheye from './scenes/Fisheye.svelte'
-  import Router from 'svelte-spa-router'
+  import Router, { params } from 'svelte-spa-router'
   import { onMount } from 'svelte'
   import { NoToneMapping } from 'three'
   import { Suspense, HTML, Billboard } from '@threlte/extras'

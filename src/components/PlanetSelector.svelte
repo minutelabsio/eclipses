@@ -7,6 +7,7 @@
   import { frames } from '../lib/animation'
 
   export let selected = 'earth'
+  export let hovering = 'earth'
   export let active = true
 
   const dispatch = createEventDispatcher()
@@ -40,8 +41,8 @@
       index = planetNames.indexOf(indexOrName)
     }
     const name = planetNames[index]
-    if (name === selected) return
-    selected = name
+    if (name === hovering) return
+    hovering = name
     dispatch('change', {
       index,
       name
@@ -51,7 +52,7 @@
   const selectPlanet = () => {
     setTimeout(() => {
       dispatch('select', {
-        name: selected
+        name: hovering
       })
     }, 500)
   }
@@ -148,7 +149,7 @@
     sub?.unsubscribe()
     const { planet } = e.detail
 
-    if (planet === selected){
+    if (planet === hovering){
       if (active) {
         active = false
         selectPlanet()
@@ -161,6 +162,8 @@
       })
     }
   }
+
+  $: moveToPlanet(selected)
 
 </script>
 
