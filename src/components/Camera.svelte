@@ -10,7 +10,7 @@ import {
   altitude,
 } from '../store/environment'
 
-export let telescope = true
+export let telescope = false
 const component = forwardEventHandlers()
 const { renderer, renderStage } = useThrelte()
 
