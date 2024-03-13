@@ -99,7 +99,9 @@
 <T.FogExp2 attach="fog" bind:ref={fog} density={1.5e-5} layers={9}/>
 
 {#await Stars then Stars}
-<T is={Stars} renderOrder={0} visible={$starsVisible}/>
+<T.Group rotation={[-$elevation * DEG, 0, 0]}>
+  <T is={Stars} renderOrder={0} visible={$starsVisible} rotation={[0, -.52, -0.53]}/>
+</T.Group>
 {/await}
 
 {#if $planet === 'earth'}
