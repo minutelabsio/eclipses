@@ -1,4 +1,5 @@
 <script>
+  import * as THREE from 'three'
   import { useFrame } from '@threlte/core'
   import createSky from '../shaders/sky/Sky'
   import { T } from '@threlte/core'
@@ -74,6 +75,8 @@
   $: Sky.moonRadius = $moonRadius / METER
   $: Sky.fisheye = fisheye
   $: Sky.uAltitude = $altitude
+
+  $: Sky.shader.blendEquation = $altitude > $atmosphereThickness * 0.9 ? THREE.AddEquation : THREE.MaxEquation
 
 </script>
 

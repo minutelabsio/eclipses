@@ -12,10 +12,11 @@ export default () => {
     fragmentShader,
     // blending: THREE.AdditiveBlending,
     blending: THREE.CustomBlending,
-    blendEquation: THREE.AddEquation,
+    // blendEquation: THREE.AddEquation,
     blendSrc: THREE.OneFactor,
     blendDst: THREE.OneMinusSrcAlphaFactor,
-    // blendEquation: THREE.MaxEquation,
+    // this only works inside the atmosphere
+    blendEquation: THREE.MaxEquation,
     transparent: true,
     // dithering: true,
     side: THREE.DoubleSide,
