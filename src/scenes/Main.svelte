@@ -141,7 +141,7 @@
 
   .play-pause
     position: absolute
-    top: 40%
+    top: 37%
     left: 50%
     transform: translate(-50%, -50%)
     font-size: 60px

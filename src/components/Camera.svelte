@@ -10,6 +10,7 @@ import {
   altitude,
 } from '../store/environment'
 
+export let controls
 export let telescope = false
 const component = forwardEventHandlers()
 const { renderer, renderStage } = useThrelte()
@@ -26,7 +27,6 @@ CameraControls.prototype.lookInDirectionOf = function(x, y, z, anim) {
   return this.setPosition( position.x, position.y, position.z, anim );
 }
 extend({ CameraControls })
-export let controls
 
 $: controls?.moveTo(0, $altitude, -2, false)
 $: controlsEnabled = !telescope
