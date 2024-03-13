@@ -23,13 +23,16 @@
     sunPosition,
     sunRadius,
     moonRadius,
+    moonDistance,
     moonRightAscention,
+    moonAngularDiameter,
     moonPosition,
     starsVisible,
     mountainsVisible,
     earthVisible,
     elevation,
     fogHue,
+    overrideRA,
   } from '../store/environment'
   import {
     DEG,
@@ -63,20 +66,22 @@
   const expoOut = createExpotentialOut(10)
   const lightIn = 'quadInOut'
   const lightOut = 'quadInOut'
-  $: moonMove = new Tween({ theta: -0.8, corona: minCoronaOpacity, brightness: 1 })
-    .by('2s', { theta: 0 }, 'quadOut')
+  $: moonMove = new Tween({ theta: -$moonAngularDiameter, corona: minCoronaOpacity, brightness: 1 })
+    .by('2s', { theta: 0 }, 'linear')
     .by('2s', { brightness: 0.01 }, lightIn)
     .by('2s', { corona: maxCoronaOpacity }, expoIn)
-    .by('4s', { theta: 0.8 }, 'quadIn')
+    .by('4s', { theta: $moonAngularDiameter }, 'linear')
     .by('4s', { brightness: 1.0 }, lightOut)
     .by('4s', { corona: minCoronaOpacity }, expoOut)
-    .by('6s', { theta: 0 }, 'quadOut')
+    .by('6s', { theta: 0 }, 'linear')
     .by('6s', { brightness: 0.01 }, lightIn)
     .by('6s', { corona: maxCoronaOpacity }, expoIn)
-    .by('8s', { theta: -0.8 }, 'quadIn')
+    .by('8s', { theta: -$moonAngularDiameter }, 'linear')
     .by('8s', { brightness: 1.0 }, lightOut)
     .by('8s', { corona: minCoronaOpacity }, expoOut)
     .loop()
+
+  $: angleLimit = Math.asin($planetRadius / $moonDistance)
 
   let time = 0
   useFrame((ctx, dt) => {
@@ -88,8 +93,9 @@
     }
     // controls?.update(window.performance.now())
     const state = moonMove.at(time / 2)
-    moonRightAscention.set(state.theta * DEG)
     sunBrightness = state.brightness * sunsetBrightness
+    const RA = $overrideRA ? MathUtils.lerp(-angleLimit, angleLimit, $eclipseProgress) : state.theta * DEG
+    moonRightAscention.set(RA)
   })
 
   let fog

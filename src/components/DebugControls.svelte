@@ -113,6 +113,7 @@
 
     const eclipseSettings = appSettings.addFolder('Eclipse')
     eclipseSettings.add(state, 'doAnimation')
+    eclipseSettings.add(state, 'overrideRA')
     eclipseSettings.add(state, 'eclipseProgress', 0, 1, 0.01)
     eclipseSettings.add(state, 'totalityFactor', 0, 1, 0.01)
     eclipseSettings.add(state, 'elevation', -90, 90, 0.001)

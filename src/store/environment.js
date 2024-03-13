@@ -39,6 +39,7 @@ export const altitude = writable(10)
 export const fogHue = writable(200)
 export const eclipseProgress = writable(0)
 export const doAnimation = writable(false)
+export const overrideRA = writable(false)
 export const planetRadius = writable(Re)
 export const planetAxialTilt = writable(23.44 * DEG)
 export const atmosphereThickness = writable(7 * 8e3)
@@ -55,7 +56,7 @@ export const sunDistance = writable(1 * AU)
 export const sunRadius = writable(109 * Re)
 export const sunAngularDiameter = derived(
   [sunDistance, sunRadius],
-  ([$sunDistance, $sunRadius]) => Math.asin($sunRadius / $sunDistance) / DEG
+  ([$sunDistance, $sunRadius]) => 2 * Math.asin($sunRadius / $sunDistance) / DEG
 )
 export const sunPosition = derived(
   [sunDistance, elevationRad],
@@ -102,6 +103,10 @@ export const moonPosition = derived(
   ([$moonDistance, $elevationRad, $moonAxis, $moonRightAscention, $moonAngleCorrection]) =>
     skyPosition($moonDistance, $elevationRad + $moonAngleCorrection, 0, new Vector3())
       .applyAxisAngle($moonAxis, $moonRightAscention)
+)
+export const moonAngularDiameter = derived(
+  [moonDistance, moonRadius],
+  ([$moonDistance, $moonRadius]) => 2 * Math.asin($moonRadius / $moonDistance) / DEG
 )
 
 const getScatteringScale = (n, k) => {
@@ -206,6 +211,7 @@ const state = {
   fogHue,
   eclipseProgress,
   doAnimation,
+  overrideRA,
   elevation,
   planetRadius,
   planetAxialTilt,
