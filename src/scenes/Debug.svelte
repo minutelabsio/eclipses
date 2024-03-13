@@ -20,5 +20,5 @@
   makeDefault
   near={1}
   far={1.2 * AU}
-  bind:cameraControls={cameraControls}
+  bind:controls={cameraControls}
 />
