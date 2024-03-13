@@ -67,6 +67,7 @@ export function starData(){
     }
 
     const s = (star.mag * 26) / 255 + 0.18
+    // if (star.name.includes('UMi')) {
     sizes.push(s)
 
     colors.push(color.r, color.g, color.b, 1)
