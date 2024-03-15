@@ -5,6 +5,10 @@ const pfx = (str, prefix) => {
   return str
 }
 
+/**
+ * @param {number} a - Semi-major axis
+ * @param {number} e - Eccentricity
+ */
 export const apoapsis = (a, e) => a * (1 + e)
 export const periapsis = (a, e) => a * (1 - e)
 export const bothApsis = (a, e, prefix = '') => ({

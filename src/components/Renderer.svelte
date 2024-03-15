@@ -14,11 +14,16 @@
     ToneMappingMode,
     Selection,
     EdgeDetectionMode,
+    LUT3DEffect,
+    LookupTexture
   } from 'postprocessing'
   import { exposure, bloomIntensity, telescopeMode, telescopeModeExposure } from '../store/environment'
   import { onMount } from 'svelte'
   import { getGPUTier } from 'detect-gpu'
   import { iSteps, jSteps } from '../store/environment'
+
+  export let lutPre = null
+  export let lutPost = null
 
   const detectGpu = async () => {
     // detect the gpu tier and adjust settings
@@ -57,7 +62,7 @@
 
   let bloom = {}
 
-  const setupEffectComposer = async (camera) => {
+  const setupEffectComposer = async (camera, lutPre, lutPost) => {
     if (!camera) return
     composer.removeAllPasses()
     const renderpass = new RenderPass(scene, camera)
@@ -81,39 +86,48 @@
     bloom.dithering = true
     bloom.inverted = true
 
+    const lutPreEffect = lutPre && new LUT3DEffect(lutPre)
+    const lutPostEffect = lutPost && new LUT3DEffect(lutPost)
+
+    const effects = [
+      new SMAAEffect({
+        preset: SMAAPreset.ULTRA,
+        edgeDetectionMode: EdgeDetectionMode.LUMA,
+        // blendFunction: BlendFunction.SCREEN
+      }),
+      bloom,
+      // new SMAAEffect({
+      //   preset: SMAAPreset.LOW,
+      //   edgeDetectionMode: EdgeDetectionMode.LUMA,
+      //   // edgeDetectionMode: EdgeDetectionMode.DEPTH,
+      //   blendFunction: BlendFunction.SCREEN
+      // }),
+      lutPreEffect,
+      new ToneMappingEffect({
+        // blendFunction: BlendFunction.NORMAL,
+        // mode: ToneMappingMode.ACES_FILMIC,
+        // mode: ToneMappingMode.REINHARD2,
+        mode: ToneMappingMode.REINHARD2_ADAPTIVE,
+        // adaptive: true,
+        // resolution: 256,
+        // middleGrey: 0.6,
+        whitePoint: 10,
+        // middleGrey: 1,
+        minLuminance: 0.0006, //0.0000025,
+        adaptationRate: 2,
+      }),
+      lutPostEffect
+    ].filter(Boolean)
+
     composer.addPass(
       new EffectPass(
         camera,
-        new SMAAEffect({
-          preset: SMAAPreset.ULTRA,
-          edgeDetectionMode: EdgeDetectionMode.LUMA,
-          // blendFunction: BlendFunction.SCREEN
-        }),
-        bloom,
-        // new SMAAEffect({
-        //   preset: SMAAPreset.LOW,
-        //   edgeDetectionMode: EdgeDetectionMode.LUMA,
-        //   // edgeDetectionMode: EdgeDetectionMode.DEPTH,
-        //   blendFunction: BlendFunction.SCREEN
-        // }),
-        new ToneMappingEffect({
-          // blendFunction: BlendFunction.NORMAL,
-          // mode: ToneMappingMode.ACES_FILMIC,
-          // mode: ToneMappingMode.REINHARD2,
-          mode: ToneMappingMode.REINHARD2_ADAPTIVE,
-          // adaptive: true,
-          // resolution: 256,
-          // middleGrey: 0.6,
-          whitePoint: 10,
-          // middleGrey: 1,
-          minLuminance: 0.0006, //0.0000025,
-          adaptationRate: 2,
-        }),
+        ...effects
       )
     )
   }
   // We need to set up the passes according to the camera in use
-  $: setupEffectComposer($camera)
+  $: setupEffectComposer($camera, lutPre, lutPost)
   $: composer.setSize($size.width, $size.height)
   $: bloom.intensity = $bloomIntensity
   $: renderer.toneMappingExposure = $telescopeMode ? $telescopeModeExposure : $exposure
