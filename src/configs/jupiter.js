@@ -23,7 +23,7 @@ const moons = {
     ...bothApsis(671.1e3 * 1000 * METER, 0.009, 'moon')
   },
   ganymede: {
-    moonRadius: 1069200 * 1000 * METER,
+    moonRadius: 2631.2 * 1000 * METER,
     moonOrbitInclination: -2.214 * DEG,
     moonOrbitPeriod: 7.154553 * DAYS,
     ...bothApsis(1070.4e3 * 1000 * METER, 0.001, 'moon')
