@@ -7,6 +7,7 @@ varying float MoonAngularRadius;
 varying float MoonAngularRadiusCamera;
 varying float altitude;
 varying vec3 origin;
+varying float sunVisibleArea;
 
 uniform bool fisheye;
 uniform float uAltitude;
@@ -15,6 +16,8 @@ uniform vec3 moonPosition;
 uniform float sunRadius;
 uniform float moonRadius;
 uniform float planetRadius;
+
+#pragma glslify: umbra = require(./umbra)
 
 void main() {
   vec4 worldPosition = modelMatrix * vec4(position, 1.0);
@@ -34,4 +37,5 @@ void main() {
   SunAngularRadius = asin(sunRadius / distance(sunPosition, groundOrigin));
   MoonAngularRadius = asin(moonRadius / distance(moonPosition, groundOrigin));
   MoonAngularRadiusCamera = asin(moonRadius / distance(moonPosition, rayOrigin));
+  sunVisibleArea = umbra(rayOrigin, SunAngularRadius, sunPosition, MoonAngularRadiusCamera, moonPosition);
 }

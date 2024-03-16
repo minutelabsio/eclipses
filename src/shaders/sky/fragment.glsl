@@ -6,6 +6,7 @@ varying float SunAngularRadius;
 varying float MoonAngularRadius;
 varying float MoonAngularRadiusCamera;
 varying float altitude;
+varying float sunVisibleArea;
 
 uniform bool fisheye;
 uniform float time;
@@ -52,6 +53,7 @@ uniform float cloudAbsorption;
 #pragma glslify: snoise3 = require(glsl-noise/simplex/3d)
 #pragma glslify: cnoise2 = require(glsl-noise/classic/2d)
 #pragma glslify: cnoise3 = require(glsl-noise/classic/3d)
+#pragma glslify: umbra = require(./umbra)
 
 const float ONE_OVER_E = exp(-1.0);
 const float THREE_OVER_16_PI = 3.0 / (16.0 * PI);
@@ -133,33 +135,6 @@ bool intersectsInsideOnly(vec2 intersections) {
   return intersections.x <= intersections.y && intersections.y > 0.0 && intersections.x < 0.0;
 }
 
-float twoCircleIntersection(float r1, float r2, float d) {
-  if(d > (r1 + r2)) {
-    return 0.0;
-  } else if(d <= abs(r1 - r2)) {
-    float r = min(r1, r2);
-    return PI * r * r;
-  }
-  float d2 = d * d;
-  vec2 rs = vec2(r1, r2);
-  vec2 rs2 = rs * rs;
-  float r12mr22 = dot(rs2, vec2(1., -1.));
-  float twod = 2.0 * d;
-  float twod2 = 2.0 * d2;
-  float area = dot(rs2, acos(vec2(d2 + r12mr22, d2 - r12mr22) / (twod * rs)))
-    - 0.5 * sqrt(dot(vec4(-r12mr22, twod2, twod2, -d2), vec4(r12mr22, rs2, d2)));
-  return area;
-}
-
-// amount of the sun that is unobstructed by the moon
-float umbra(vec3 ri, float rSun, vec3 pSun, float rMoon, vec3 pMoon) {
-  vec3 sSun = normalize(pSun - ri);
-  vec3 sMoon = normalize(pMoon - ri);
-  float d = length(sSun - sMoon);
-  float area = twoCircleIntersection(rSun, rMoon, d);
-  float totalArea = PI * rSun * rSun;
-  return max(1e-6, 1.0 - area / totalArea);
-}
 
 float smoothcircle(vec3 ray, float angularRadius, vec3 centerDir, float boundary){
   // this way gives weird artifacts because the angle is so small it leads to floating point errors
@@ -364,6 +339,10 @@ float luma(vec3 c){
 }
 
 float coronaValue(vec3 rayDir, vec3 sSun, float sunAngularRadius){
+  float intensity = 1e-2 * remap(sunVisibleArea, 0., 0.01, 1., 0.);
+  if (intensity < 1e-5){
+    return 0.0;
+  }
   vec2 xy = squash(rayDir, sSun);
   xy.x *= -1.;
   vec2 uv = .235 * xy / sunAngularRadius + vec2(0.497, 0.493);
@@ -372,7 +351,7 @@ float coronaValue(vec3 rayDir, vec3 sSun, float sunAngularRadius){
   // color correction
   corona.rgb = pow(corona.rgb, vec3(2.2));
   float l = luma(corona.xyz);
-  return 1e-2 * l * smoothcircle(rayDir, sunAngularRadius * 2., sSun, .5);
+  return intensity * l * smoothcircle(rayDir, sunAngularRadius * 2., sSun, .5);
 }
 
 const float bloomFactor = 8e-6;
@@ -391,7 +370,8 @@ float sunMoonIntensity(vec3 rayDir, vec3 sSun, float sunAngularRadius, vec3 sMoo
   // sun += smoothcircle(rayDir, sunAngularRadius * 0.9, sSun, 0.3) *
   //   smoothstep(0.3, 0.9, fbm(vec3(sunxy, 0.) * 20.)) *
   //   clampMix(0., 1., sin(atan(sunxy.y, sunxy.x) * 10. * cnoise2(sunxy * 1.)));
-  sun += coronaValue(rayDir, sSun, sunAngularRadius);
+  float corona = coronaValue(rayDir, sSun, sunAngularRadius);
+  sun += corona;
   // create little bumps on the edge of the moon
   vec2 y = normalize(squash(rayDir, sMoon));
   float r = moonAngularRadius * (1. - 0.002 * cnoise2(15. * y));
