@@ -107,6 +107,7 @@
         // blendFunction: BlendFunction.NORMAL,
         // mode: ToneMappingMode.ACES_FILMIC,
         // mode: ToneMappingMode.REINHARD2,
+        // mode: ToneMappingMode.NEUTRAL,
         mode: ToneMappingMode.REINHARD2_ADAPTIVE,
         // adaptive: true,
         // resolution: 256,

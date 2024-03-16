@@ -33,6 +33,8 @@
     elevation,
     fogHue,
     overrideRA,
+    sunAngularDiameter,
+    moonOrbitDirection,
   } from '../store/environment'
   import {
     DEG,
@@ -66,17 +68,19 @@
   const expoOut = createExpotentialOut(10)
   const lightIn = 'quadInOut'
   const lightOut = 'quadInOut'
-  $: moonMove = new Tween({ theta: -$moonAngularDiameter, corona: minCoronaOpacity, brightness: 1 })
+  $: moveDegrees = $moonOrbitDirection * $moonAngularDiameter
+  $: minBrightness = Math.max(0, 1 - $moonAngularDiameter * $moonAngularDiameter / ($sunAngularDiameter * $sunAngularDiameter))
+  $: moonMove = new Tween({ theta: -moveDegrees, corona: minCoronaOpacity, brightness: 1 })
     .by('2s', { theta: 0 }, 'linear')
-    .by('2s', { brightness: 0.01 }, lightIn)
+    .by('2s', { brightness: minBrightness }, lightIn)
     .by('2s', { corona: maxCoronaOpacity }, expoIn)
-    .by('4s', { theta: $moonAngularDiameter }, 'linear')
+    .by('4s', { theta: moveDegrees }, 'linear')
     .by('4s', { brightness: 1.0 }, lightOut)
     .by('4s', { corona: minCoronaOpacity }, expoOut)
     .by('6s', { theta: 0 }, 'linear')
-    .by('6s', { brightness: 0.01 }, lightIn)
+    .by('6s', { brightness: minBrightness }, lightIn)
     .by('6s', { corona: maxCoronaOpacity }, expoIn)
-    .by('8s', { theta: -$moonAngularDiameter }, 'linear')
+    .by('8s', { theta: -moveDegrees }, 'linear')
     .by('8s', { brightness: 1.0 }, lightOut)
     .by('8s', { corona: minCoronaOpacity }, expoOut)
     .loop()
@@ -105,7 +109,7 @@
 <T.FogExp2 attach="fog" bind:ref={fog} density={1.5e-5} layers={9}/>
 
 {#await Stars then Stars}
-<T.Group rotation={[-$elevation * DEG, 0, 0]}>
+<T.Group rotation={[-$elevationRad, 0, 0]}>
   <T is={Stars} renderOrder={0} visible={$starsVisible} rotation={[0, -.52, -0.53]}/>
 </T.Group>
 {/await}
@@ -166,27 +170,9 @@
     intensity={1}
     position={$sunPosition}
   />
-  <!-- Corona -->
-  <T.Mesh
-    visible={false}
-    position={$sunPosition}
-    rotation.x={-$elevationRad}
-    rotation.y={Math.PI}
-    scale={[$sunRadius, $sunRadius, $sunRadius]}
-    renderOrder={2}
-  >
-    <T.PlaneGeometry args={[4.4, 4.32]} />
-    <T is={Corona}/>
-  </T.Mesh>
 
   <!-- Sky -->
   <Sky/>
-
-  <!-- <Saturn
-    position={skyPosition(4.217e8, 13 * DEG, 20 * DEG)}
-    rotation={[0, 0, 0]}
-    planetRadius={7.1492e7}
-  /> -->
 
   <!-- moon debug -->
   <T.Mesh

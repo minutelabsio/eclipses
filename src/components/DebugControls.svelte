@@ -9,7 +9,7 @@
     getDatGuiState,
     altitude,
     load,
-    elevation,
+    elevationMid,
   } from '../store/environment'
   import {
     DEG,
@@ -34,7 +34,7 @@
 
   let player = new Player(tween.duration).seek(12000).pause()
   player.pipe(tween).subscribe(state => {
-    elevation.set(state.elevation)
+    elevationMid.set(state.elevation)
   })
 
   const animateSunRise = () => {
@@ -116,7 +116,7 @@
     eclipseSettings.add(state, 'overrideRA')
     eclipseSettings.add(state, 'eclipseProgress', 0, 1, 0.01)
     eclipseSettings.add(state, 'totalityFactor', 0, 1, 0.01)
-    eclipseSettings.add(state, 'elevation', -90, 90, 0.001)
+    eclipseSettings.add(state, 'elevationMid', -90, 90, 0.001)
 
     const planetSettings = appSettings.addFolder('Planetary')
     planetSettings.add(state, 'sunIntensity', 0, 500, 1)

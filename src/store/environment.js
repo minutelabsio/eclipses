@@ -4,7 +4,8 @@ import {
   METER,
   Re,
   AU,
-  DEG
+  DEG,
+  HOURS
 } from '../lib/units'
 import { skyPosition } from '../lib/sky-position'
 import * as PlanetConfigs from '../configs'
@@ -31,6 +32,7 @@ export const telescopeMode = writable(false)
 export const telescopeModeExposure = writable(0.25)
 
 export const planet = writable('earth')
+export const dayLength = writable(24 * HOURS)
 export const FOV = writable(26.5)
 export const exposure = writable(1.0)
 export const bloomIntensity = writable(2.5)
@@ -43,21 +45,62 @@ export const overrideRA = writable(false)
 export const planetRadius = writable(Re)
 export const planetAxialTilt = writable(23.44 * DEG)
 export const atmosphereThickness = writable(7 * 8e3)
-export const elevation = writable(2)
-export const elevationRad = derived(
-  [elevation],
-  ([$elevation]) => $elevation * DEG
-)
 export const observerOrigin = derived(
   [planetRadius],
   ([$planetRadius]) => new Vector3(0, $planetRadius, 0)
 )
 export const sunDistance = writable(1 * AU)
 export const sunRadius = writable(109 * Re)
+export const elevationMid = writable(2)
+export const totalityFactor = writable(0.9)
+export const selectedMoon = writable('luna')
+export const moonRadius = writable(0.2727 * Re)
+export const moonPeriapsis = writable(356500 * 1000 * METER)
+export const moonApoapsis = writable(406700 * 1000 * METER)
+export const moonOrbitPeriod = writable(27.3217 * 24 * HOURS)
+export const moonOrbitDirection = derived(
+  [moonOrbitPeriod], ([$moonOrbitPeriod]) => $moonOrbitPeriod < 0 ? -1 : 1
+)
+export const moonOrbitInclination = writable(5.145 * DEG)
+export const moonRightAscention = writable(0)
+
 export const sunAngularDiameter = derived(
   [sunDistance, sunRadius],
   ([$sunDistance, $sunRadius]) => 2 * Math.asin($sunRadius / $sunDistance) / DEG
 )
+
+export const moonDistance = derived(
+  [moonPeriapsis, moonApoapsis, totalityFactor],
+  ([$moonPeriapsis, $moonApoapsis, $totalityFactor]) => MathUtils.lerp($moonPeriapsis, $moonApoapsis, 1 - $totalityFactor)
+)
+
+export const moonAngularDiameter = derived(
+  [moonDistance, moonRadius],
+  ([$moonDistance, $moonRadius]) => 2 * Math.asin($moonRadius / $moonDistance) / DEG
+)
+
+
+// eclipse progress moves moon from -angularDiameter to angularDiameter
+// so calculate how much the sun moves in the same time
+export const elevationAdjustment = derived(
+  [eclipseProgress, dayLength, moonAngularDiameter, moonOrbitPeriod, moonOrbitDirection],
+  ([$eclipseProgress, $dayLength, $moonAngularDiameter, $moonOrbitPeriod, $moonOrbitDirection]) => {
+    const moonSpeed = 360 / $moonOrbitPeriod
+    const time = $moonOrbitDirection * $moonAngularDiameter / moonSpeed
+    // return an angle in rad
+    return 2 * Math.PI * MathUtils.lerp(-time, time, $eclipseProgress) / $dayLength
+  }
+)
+
+export const elevation = derived(
+  [elevationMid, elevationAdjustment],
+  ([$elevationMid, $elevationAdjustment]) => $elevationMid + $elevationAdjustment
+)
+export const elevationRad = derived(
+  [elevation],
+  ([$elevation]) => $elevation * DEG
+)
+
 export const sunPosition = derived(
   [sunDistance, elevationRad],
   ([$sunDistance, $elevationRad]) => skyPosition($sunDistance, $elevationRad, 0)
@@ -67,24 +110,13 @@ export const sunDirection = derived(
   ([$sunPosition]) => new Vector3().fromArray($sunPosition).normalize()
 )
 
-export const totalityFactor = writable(0.9)
-export const selectedMoon = writable('luna')
-export const moonRadius = writable(0.2727 * Re)
-export const moonPeriapsis = writable(356500 * 1000 * METER)
-export const moonApoapsis = writable(406700 * 1000 * METER)
-export const moonOrbitInclination = writable(5.145 * DEG)
-export const moonRightAscention = writable(0)
-export const moonDistance = derived(
-  [moonPeriapsis, moonApoapsis, totalityFactor],
-  ([$moonPeriapsis, $moonApoapsis, $totalityFactor]) => MathUtils.lerp($moonPeriapsis, $moonApoapsis, 1 - $totalityFactor)
-)
 export const moonAxis = derived(
   [moonOrbitInclination, planetAxialTilt],
   ([$moonOrbitInclination, $planetAxialTilt]) => new Vector3(1, 0, 0).applyAxisAngle(new Vector3(0, 0, 1), $moonOrbitInclination + $planetAxialTilt)
 )
 export const moonAngleCorrection = derived(
-  [moonDistance, sunDirection, observerOrigin, elevationRad],
-  ([$moonDistance, $sunDirection, $observerOrigin, $elevationRad]) => {
+  [moonDistance, sunDirection, observerOrigin, elevationMid],
+  ([$moonDistance, $sunDirection, $observerOrigin, $elevationMid]) => {
     const int = sphereIntersection($observerOrigin, $sunDirection, $moonDistance)
     if (!int) {
       return 0
@@ -95,18 +127,14 @@ export const moonAngleCorrection = derived(
     const R = $observerOrigin.length()
     const R2 = $observerOrigin.lengthSq()
     const cosa = Math.min(1., (R2 + m2 - d * d) / (2 * R * m))
-    return 0.5 * Math.PI - Math.acos(cosa) - $elevationRad
+    return 0.5 * Math.PI - Math.acos(cosa) - $elevationMid * DEG
   }
 )
 export const moonPosition = derived(
-  [moonDistance, elevationRad, moonAxis, moonRightAscention, moonAngleCorrection],
-  ([$moonDistance, $elevationRad, $moonAxis, $moonRightAscention, $moonAngleCorrection]) =>
-    skyPosition($moonDistance, $elevationRad + $moonAngleCorrection, 0, new Vector3())
+  [moonDistance, elevationMid, moonAxis, moonRightAscention, moonAngleCorrection],
+  ([$moonDistance, $elevationMid, $moonAxis, $moonRightAscention, $moonAngleCorrection]) =>
+    skyPosition($moonDistance, $elevationMid * DEG + $moonAngleCorrection, 0, new Vector3())
       .applyAxisAngle($moonAxis, $moonRightAscention)
-)
-export const moonAngularDiameter = derived(
-  [moonDistance, moonRadius],
-  ([$moonDistance, $moonRadius]) => 2 * Math.asin($moonRadius / $moonDistance) / DEG
 )
 
 const getScatteringScale = (n, k) => {
@@ -200,6 +228,7 @@ export const mountainsVisible = writable(true)
 export const earthVisible = writable(true)
 
 const state = {
+  dayLength,
   telescopeMode,
   telescopeModeExposure,
   planet,
@@ -212,7 +241,7 @@ const state = {
   eclipseProgress,
   doAnimation,
   overrideRA,
-  elevation,
+  elevationMid,
   planetRadius,
   planetAxialTilt,
   atmosphereThickness,
@@ -226,6 +255,7 @@ const state = {
   totalityFactor,
 
   selectedMoon,
+  moonOrbitPeriod,
   moonRadius,
   moonPeriapsis,
   moonApoapsis,
