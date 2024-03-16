@@ -3,7 +3,6 @@
   import { Easing, Tween } from 'intween'
   import { T } from '@threlte/core'
   import { Vector3, MathUtils } from 'three'
-  import createCorona from '../shaders/corona/Corona'
   import createStars from '../shaders/stars/Stars'
   import Sky from '../entities/Sky.svelte'
   import MarsScene from '../entities/MarsScene.svelte'
@@ -34,15 +33,11 @@
     fogHue,
     overrideRA,
     sunAngularDiameter,
-    moonOrbitDirection,
+    moonTransitDegrees,
   } from '../store/environment'
   import {
     DEG,
   } from '../lib/units'
-
-  const Corona = createCorona({
-    opacity: 0.5
-  })
 
   let starsPoints
   const Stars = createStars().then(s => starsPoints = s)
@@ -53,36 +48,18 @@
       0, 1
     )
 
-  const createExpotentialIn = (a) => {
-    return (x) => Math.pow(2, a * x - a) * x
-  }
-
-  const createExpotentialOut = (a) => {
-    return (x) => 1 - Math.pow(2, -a * x) * (1 - x)
-  }
-
-  $: maxCoronaOpacity = $totalityFactor * 0.09
-  let minCoronaOpacity = 0.06
-
-  const expoIn = createExpotentialIn(10)
-  const expoOut = createExpotentialOut(10)
   const lightIn = 'quadInOut'
   const lightOut = 'quadInOut'
-  $: moveDegrees = $moonOrbitDirection * $moonAngularDiameter
   $: minBrightness = Math.max(0, 1 - $moonAngularDiameter * $moonAngularDiameter / ($sunAngularDiameter * $sunAngularDiameter))
-  $: moonMove = new Tween({ theta: -moveDegrees, corona: minCoronaOpacity, brightness: 1 })
+  $: moonMove = new Tween({ theta: -$moonTransitDegrees, brightness: 1 })
     .by('2s', { theta: 0 }, 'linear')
     .by('2s', { brightness: minBrightness }, lightIn)
-    .by('2s', { corona: maxCoronaOpacity }, expoIn)
-    .by('4s', { theta: moveDegrees }, 'linear')
+    .by('4s', { theta: $moonTransitDegrees }, 'linear')
     .by('4s', { brightness: 1.0 }, lightOut)
-    .by('4s', { corona: minCoronaOpacity }, expoOut)
     .by('6s', { theta: 0 }, 'linear')
     .by('6s', { brightness: minBrightness }, lightIn)
-    .by('6s', { corona: maxCoronaOpacity }, expoIn)
-    .by('8s', { theta: -moveDegrees }, 'linear')
+    .by('8s', { theta: -$moonTransitDegrees }, 'linear')
     .by('8s', { brightness: 1.0 }, lightOut)
-    .by('8s', { corona: minCoronaOpacity }, expoOut)
     .loop()
 
   $: angleLimit = Math.asin($planetRadius / $moonDistance)

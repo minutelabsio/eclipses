@@ -40,6 +40,7 @@ export const bloomIntensity = writable(2.5)
 export const altitude = writable(10)
 export const fogHue = writable(200)
 export const eclipseProgress = writable(0)
+export const progressRate = writable(0.8)
 export const doAnimation = writable(false)
 export const overrideRA = writable(false)
 export const planetRadius = writable(Re)
@@ -79,16 +80,25 @@ export const moonAngularDiameter = derived(
   ([$moonDistance, $moonRadius]) => 2 * Math.asin($moonRadius / $moonDistance) / DEG
 )
 
+export const moonTransitDegrees = derived(
+  [moonOrbitDirection, moonAngularDiameter, sunAngularDiameter],
+  ([$moonOrbitDirection, $moonAngularDiameter, $sunAngularDiameter]) =>
+    // approximate
+    0.5 * $moonOrbitDirection * ($moonAngularDiameter + $sunAngularDiameter)
+)
 
+export const transitTime = derived(
+  [moonAngularDiameter, moonOrbitPeriod, sunAngularDiameter, dayLength],
+  ([$moonAngularDiameter, $moonOrbitPeriod, $sunAngularDiameter, $dayLength]) => {
+    return Math.abs($moonOrbitPeriod * $moonAngularDiameter / 360 - $sunAngularDiameter * $dayLength / 360)
+  }
+)
 // eclipse progress moves moon from -angularDiameter to angularDiameter
 // so calculate how much the sun moves in the same time
 export const elevationAdjustment = derived(
-  [eclipseProgress, dayLength, moonAngularDiameter, moonOrbitPeriod, moonOrbitDirection],
-  ([$eclipseProgress, $dayLength, $moonAngularDiameter, $moonOrbitPeriod, $moonOrbitDirection]) => {
-    const moonSpeed = 360 / $moonOrbitPeriod
-    const time = $moonOrbitDirection * $moonAngularDiameter / moonSpeed
-    // return an angle in rad
-    return 2 * Math.PI * MathUtils.lerp(-time, time, $eclipseProgress) / $dayLength
+  [eclipseProgress, dayLength, transitTime],
+  ([$eclipseProgress, $dayLength, $transitTime]) => {
+    return 2 * Math.PI * MathUtils.lerp(-$transitTime, $transitTime, $eclipseProgress) / $dayLength
   }
 )
 
@@ -104,6 +114,10 @@ export const elevationRad = derived(
 export const sunPosition = derived(
   [sunDistance, elevationRad],
   ([$sunDistance, $elevationRad]) => skyPosition($sunDistance, $elevationRad, 0)
+)
+export const totalityPosition = derived(
+  [sunDistance, elevationMid],
+  ([$sunDistance, $elevationMid]) => skyPosition($sunDistance, $elevationMid * DEG, 0)
 )
 export const sunDirection = derived(
   [sunPosition],
@@ -239,6 +253,7 @@ const state = {
   altitude,
   fogHue,
   eclipseProgress,
+  progressRate,
   doAnimation,
   overrideRA,
   elevationMid,

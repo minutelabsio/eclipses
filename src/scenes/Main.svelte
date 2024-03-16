@@ -3,10 +3,10 @@
   import Camera from '../components/Camera.svelte'
   import {
     eclipseProgress,
-    load,
-    planet,
-    sunPosition,
     telescopeMode,
+    transitTime,
+    progressRate,
+    sunPosition,
   } from '../store/environment'
   import {
     AU,
@@ -18,8 +18,9 @@
   import EclipseSlider from '../components/EclipseSlider.svelte'
   import { fade } from 'svelte/transition'
   import Icon from '@iconify/svelte'
-  import { Player } from 'intween'
+  import { Player, Util } from 'intween'
   import { push } from 'svelte-spa-router'
+  import { quintIn } from 'svelte/easing'
 
   export let selectedPlanet = 'earth'
   export let params = {}
@@ -28,9 +29,13 @@
 
   let element
   let selectorActive = false
-  const player = Player.create(10000)
+  const player = Player.create(1)
   let playing = !player.paused
   let cameraControls
+
+  $: player.totalTime = $transitTime * 1000
+  // 0 will be realtime, 1 will be transitTime happens in 10 seconds
+  $: player.playbackRate = Util.lerp(1, $transitTime / 10, quintIn($progressRate))
 
   player.on('play', () => {
     if (player.progress === 100) {
@@ -90,6 +95,15 @@
     }
   }
 
+  let followSun = false
+
+  eclipseProgress.subscribe((v) => {
+    if (followSun){
+      const [x, y, z] = $sunPosition
+      cameraControls.lookInDirectionOf(x, y, z, false)
+    }
+  })
+
   const toggleTelecopeMode = () => {
     $telescopeMode = !$telescopeMode
     if (!cameraControls) return
@@ -97,7 +111,9 @@
       cameraControls.saveState()
       const [x, y, z] = $sunPosition
       cameraControls.lookInDirectionOf(x, y, z, false)
+      followSun = true
     } else {
+      followSun = false
       cameraControls.reset()
     }
   }
