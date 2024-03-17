@@ -9,6 +9,7 @@
   export let selected = 'earth'
   export let hovering = 'earth'
   export let active = true
+  export let changeWhenInactive = false
 
   const dispatch = createEventDispatcher()
 
@@ -121,6 +122,7 @@
     const draggable = interact(element).styleCursor(false).draggable({
       listeners: {
         start(e){
+          if (!active && !changeWhenInactive) return
           dragging = true
           sub?.unsubscribe()
           clearTimeout(timer)
@@ -131,6 +133,7 @@
           }
         },
         end(e){
+          if (!dragging) return
           flick(e.velocity.x / 1000)
           setTimeout(() => {
             dragging = false
@@ -167,7 +170,7 @@
 
 </script>
 
-<div class="planet-selector" bind:this={element}>
+<div class="planet-selector" bind:this={element} class:active={active}>
   <Canvas>
     <PlanetSelectorScene
       pos={pos / scale}
@@ -184,4 +187,6 @@
   display: flex
   flex-grow: 1
   flex: 1
+.active
+  cursor: pointer
 </style>

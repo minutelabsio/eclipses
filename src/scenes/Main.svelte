@@ -90,9 +90,9 @@
   }
 
   const onSwipe = ({ detail }) => {
-    if (detail.direction === 'up') {
-      openPlanetSelector()
-    }
+    // if (detail.direction === 'up') {
+    //   openPlanetSelector()
+    // }
   }
 
   let followSun = false
@@ -120,6 +120,10 @@
 
 </script>
 <style lang="sass">
+.no-interaction
+  touch-action: none
+  pointer-events: none
+  user-select: none
 .menu-container
   position: fixed
   bottom: 0
@@ -136,28 +140,31 @@
   left: 50%
   width: 100%
   max-width: 860px
-  height: 280px
   transform: translateX(-50%)
   z-index: 100
   touch-action: none
-  cursor: pointer
-  overflow: hidden
 
   .eclipse-slider
     position: absolute
     bottom: -33%
     left: 50%
     transform: translateX(-50%)
-    height: 280px
+    height: 190px
     width: 280px
     touch-action: none
     cursor: pointer
     // box-shadow: 0 0 50px 0 hsla(0, 0%, 50%, 0.5)
     border-radius: 50%
+  .planet-selector-container
+    position: absolute
+    bottom: 0
+    left: 0
+    width: 100%
+    height: 280px
 
   .play-pause
     position: absolute
-    top: 37%
+    top: 54%
     left: 50%
     transform: translate(-50%, -50%)
     font-size: 60px
@@ -177,7 +184,9 @@
 <Levetate>
   <!-- svelte-ignore a11y-no-static-element-interactions -->
   <div class="controls no-highlight" class:selector={selectorActive} bind:this={element} on:dblclick={openPlanetSelector} >
-    <PlanetSelector on:select={onPlanetSelected} bind:active={selectorActive} bind:selected={selectedPlanet} />
+    <div class="planet-selector-container" class:no-interaction={!selectorActive}>
+      <PlanetSelector on:select={onPlanetSelected} bind:active={selectorActive} bind:selected={selectedPlanet} />
+    </div>
 
     {#if !selectorActive}
       <div transition:fade={{ duration: 100 }} class="eclipse-slider no-highlight">
