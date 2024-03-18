@@ -97,31 +97,8 @@
     // }
   }
 
-  let followSun = false
-
-  const updateCameraPosition = () => {
-    if (!followSun) return
-    if (!cameraControls) return
-    const [x, y, z] = $sunPosition
-    cameraControls.lookInDirectionOf(x, y, z, true)
-  }
-
-  eclipseProgress.subscribe(updateCameraPosition)
-  elevationMid.subscribe(updateCameraPosition)
-
   const toggleTelecopeMode = async () => {
     $telescopeMode = !$telescopeMode
-    if (!cameraControls) return
-    if ($telescopeMode) {
-      await tick()
-      cameraControls.saveState()
-      const [x, y, z] = $sunPosition
-      cameraControls.lookInDirectionOf(x, y, z, false)
-      followSun = true
-    } else {
-      followSun = false
-      cameraControls.reset()
-    }
   }
 
 </script>
@@ -197,7 +174,7 @@
 
 <Levetate>
   <!-- svelte-ignore a11y-no-static-element-interactions -->
-  <div class="controls no-highlight" class:selector={selectorActive} bind:this={element} on:dblclick={openPlanetSelector} >
+  <div class="controls no-highlight" class:selector={selectorActive} bind:this={element}>
     <div class="planet-selector-container" class:no-interaction={!selectorActive}>
       <PlanetSelector on:select={onPlanetSelected} bind:active={selectorActive} bind:selected={selectedPlanet} />
     </div>

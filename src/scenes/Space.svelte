@@ -52,14 +52,14 @@
   const lightIn = 'quadInOut'
   const lightOut = 'quadInOut'
   $: minBrightness = Math.max(0, 1 - $moonAngularDiameter * $moonAngularDiameter / ($sunAngularDiameter * $sunAngularDiameter))
-  $: moonMove = new Tween({ theta: -$moonTransitDegrees, brightness: 1 })
+  $: moonMove = new Tween({ theta: -2 * $moonTransitDegrees, brightness: 1 })
     .by('2s', { theta: 0 }, 'linear')
     .by('2s', { brightness: minBrightness }, lightIn)
-    .by('4s', { theta: $moonTransitDegrees }, 'linear')
+    .by('4s', { theta: 2 * $moonTransitDegrees }, 'linear')
     .by('4s', { brightness: 1.0 }, lightOut)
     .by('6s', { theta: 0 }, 'linear')
     .by('6s', { brightness: minBrightness }, lightIn)
-    .by('8s', { theta: -$moonTransitDegrees }, 'linear')
+    .by('8s', { theta: -2 * $moonTransitDegrees }, 'linear')
     .by('8s', { brightness: 1.0 }, lightOut)
     .loop()
 

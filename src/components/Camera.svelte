@@ -5,7 +5,6 @@ import { T, extend, useStage, useTask, useThrelte, forwardEventHandlers } from '
 import {
   FOV,
   sunPosition,
-  moonDistance,
   planetRadius,
   sunAngularDiameter,
   altitude,
@@ -45,22 +44,51 @@ const setOrbit = (camera, orbitPlanet) => {
   }
 }
 
-const setTelescopeUp = (camera, telescope) => {
+let followSun = false
+let stateSaved = false
+
+const updateCameraPosition = ([x, y, z]) => {
+  if (!followSun) return
+  if (!controls) return
+  controls.lookInDirectionOf(x, y, z, false)
+}
+
+sunPosition.subscribe(updateCameraPosition)
+
+const toggleTelecopeMode = async (camera, telescope) => {
   if (!camera || !controls) return
-  if (telescope){
+  if (telescope) {
+    controls.saveState()
+    stateSaved = true
     camera.up.set(0, Math.SQRT1_2, -Math.SQRT1_2)
     controls.updateCameraUp()
+    controls.zoomTo(1, false)
+    const [x, y, z] = $sunPosition
+    controls.lookInDirectionOf(x, y, z, false)
+    followSun = true
   } else {
+    followSun = false
     camera.up.set(0, 1, 0)
     controls.updateCameraUp()
+    if (stateSaved){
+      controls.reset()
+      stateSaved = false
+    }
   }
+}
+
+let zoom = 1
+
+const onInteract = e => {
+  zoom = controls._zoom
 }
 
 $: orbitPlanet ? setOrbit(camera, orbitPlanet) : controls?.moveTo(0, $altitude, -2, false)
 $: controlsEnabled = !telescope
 $: fov = telescope ? $sunAngularDiameter * 4 : $FOV
 $: setOrbit(camera, orbitPlanet)
-$: setTelescopeUp(camera, telescope)
+$: toggleTelecopeMode(camera, telescope)
+
 
 useTask((dt) => {
   controls?.update(dt)
@@ -81,16 +109,19 @@ useTask((dt) => {
     args={[ref, renderer.domElement]}
     enabled={controlsEnabled}
     draggingSmoothTime={0.05}
-    maxZoom={1}
-    minZoom={1}
+    maxZoom={50}
+    minZoom={0.5}
     minDistance={2}
     maxDistance={2.1}
-    polarRotateSpeed={orbitPlanet ? 0.5 : -0.08}
-    azimuthRotateSpeed={orbitPlanet ? 0.5 : -0.08}
+    polarRotateSpeed={orbitPlanet ? 0.5 / zoom : -0.08 / zoom}
+    azimuthRotateSpeed={orbitPlanet ? 0.5 / zoom : -0.08 / zoom}
+    mouseButtons.wheel={CameraControls.ACTION.ZOOM}
+    touches.two={CameraControls.ACTION.TOUCH_ZOOM}
     bind:ref={controls}
     on:create={({ ref }) => {
       const [x, y, z] = $sunPosition
       ref.lookInDirectionOf(x, y, z, false)
+      ref.addEventListener('control', onInteract)
     }}
   />
 </T.PerspectiveCamera>
