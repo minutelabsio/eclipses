@@ -272,7 +272,7 @@
         </div>
       {/if}
     </div>
-    <div class:hidden={selectorActive} class="menu-container no-highlight">
+    <div class="menu-container no-highlight">
       <Menu
         bind:selected={selectedMenuItem}
         on:planet={openPlanetSelector}
