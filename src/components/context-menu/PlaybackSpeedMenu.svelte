@@ -19,7 +19,8 @@
     align-items: center
     justify-content: center
   .slider
-    margin: 0 10px
+    margin: 0 6px
   label
+    display: flex
     font-size: 32px
 </style>

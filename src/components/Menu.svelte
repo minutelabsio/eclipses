@@ -89,16 +89,15 @@
 
 <style lang="sass">
   .eclipse-menu
-    height: 100%
-    display: flex
-    flex-direction: column
+    background: linear-gradient(111.68deg, rgba(221, 221, 221, 0.15) 7.59%, rgba(221, 221, 221, 0.3) 102.04%)
+    backdrop-filter: blur(10px)
     .context-menu
-      flex: 1
-      height: 50%
+      height: 40px
       display: flex
       flex-direction: column
       justify-content: center
-      padding: 0 64px
+      padding: 0 1.5rem
+      letter-spacing: 1px
     ul, li
       display: flex
       list-style: none
@@ -106,26 +105,34 @@
       margin: 0
     ul
       display: flex
-      flex: 1
       justify-content: space-around
       align-items: center
       font-size: 20px
+      height: 70px
+      padding: 0 0.5rem
+      background: linear-gradient(111.68deg, rgba(221, 221, 221, 0.15) 7.59%, rgba(221, 221, 221, 0.3) 102.04%)
       li
         button
           line-height: 0
-          background: none
           border: none
           padding: 0
           margin: 0
           cursor: pointer
-          color: white
+          border-radius: 50%
+          background: hsla(0, 0%, 100%, 0)
+          width: 50px
+          height: 50px
+          color: hsla(0, 0%, 100%, .6)
           font-size: 1.5em
-          transition: transform 100ms
+          transition: transform 100ms, color 150ms
           transform-origin: 50% 50%
+          border: 1px solid hsla(0, 0%, 100%, 0)
           &:focus, &:hover
-            transform: scale(1.2)
+            color: hsla(0, 100%, 100%, 1)
           &:active
-            transform: scale(1)
+            color: hsla(0, 0%, 100%, .6)
           &.active
-            color: #3eedda
+            border: 1px solid hsla(0, 0%, 100%, 0.25)
+            background: hsla(0, 0%, 100%, 0.25)
+            color: hsla(0, 100%, 100%, 1)
 </style>

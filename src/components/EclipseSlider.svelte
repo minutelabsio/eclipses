@@ -55,6 +55,17 @@
     return () => int.unset()
   })
 
+  const checkKey = (e) => {
+    dispatch('start')
+    if (e.key === 'ArrowLeft') {
+      progress = Math.max(0, progress - 0.01)
+    }
+    if (e.key === 'ArrowRight') {
+      progress = Math.min(1, progress + 0.01)
+    }
+    dispatch('end')
+  }
+
   const checkClick = (e) => {
     if (dragging) { return }
     dispatch('click', e)
@@ -62,18 +73,24 @@
 
 </script>
 
-<div bind:this={element} on:click={checkClick}>
+<div bind:this={element} on:click={checkClick} on:keydown={checkKey} role="slider" aria-valuenow={progress} tabindex="0">
   <svg viewBox="-10 -10 120 120">
     <!-- a semicircle -->
     <!-- svelte-ignore a11y-no-static-element-interactions -->
     <g on:click|capture|stopPropagation={setSlider} on:pointerdown|capture={setSlider}>
       <path class="path" d="M 0 50 A 50 50 0 0 1 100 50" />
-      <path d="M 0 50 A 50 50 0 0 1 100 50" stroke="transparent" stroke-width="10" fill="none" />
+      <path class="path before" d="M 0 50 A 50 50 0 0 1 100 50" stroke-dasharray={`${6 + progress * Math.PI * 50 * (range[1] - range[0])} 314`}/>
+
+      <circle
+        class="shadow"
+        transform={`rotate(${pos * 180} 50 50)`}
+        cx="0" cy="50" dx="50" r="4"
+      />
       <!-- moon -->
       <circle
         class="moon"
         transform={`rotate(${pos * 180} 50 50)`}
-        cx="0" cy="50" dx="50" r="5"
+        cx="0" cy="50" dx="50" r="4"
       />
     </g>
     <!-- a circle -->
@@ -87,11 +104,17 @@
     outline: none
   // stroke inside the semicircle
   .path
-    stroke-width: 1px
+    stroke-width: 8px
     stroke-linecap: round
-    stroke: hsla(0, 0%, 100%, 0.5)
+    stroke: hsla(0, 0%, 30%, 0.5)
     fill: none
+  .before
+    stroke: hsla(166, 95%, 51%, 0.6)
   .moon
-    fill: hsla(0, 0%, 50%, 1)
+    fill: hsla(0, 0%, 100%, 1)
+    filter: drop-shadow(0px -1px 2px rgb(0 0 0 / 0.4))
+  .shadow
+    fill: hsla(0, 0%, 100%, 1)
+    filter: drop-shadow(15px 0px 0px rgb(0 0 0 / 0.4))
   //   transition: transform 0.25s ease
 </style>

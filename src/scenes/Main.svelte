@@ -6,8 +6,12 @@
     telescopeMode,
     transitTime,
     progressRate,
-    sunPosition,
-    elevationMid,
+    altitude,
+    planetRadius,
+    atmosphereThickness,
+    skyVisible,
+    earthVisible,
+    mountainsVisible,
   } from '../store/environment'
   import {
     AU,
@@ -19,13 +23,16 @@
   import EclipseSlider from '../components/EclipseSlider.svelte'
   import { fade } from 'svelte/transition'
   import Icon from '@iconify/svelte'
-  import { Player, Util } from 'intween'
+  import { Player, Util, Tween } from 'intween'
+  import { frames } from '../lib/animation'
   import { push } from 'svelte-spa-router'
   import { quintIn } from 'svelte/easing'
   import { tick } from 'svelte'
 
   export let selectedPlanet = 'earth'
   export let params = {}
+
+  const delay = dt => new Promise(resolve => setTimeout(resolve, dt))
 
   $: params.planet ? selectedPlanet = params.planet : selectedPlanet = 'earth'
 
@@ -34,6 +41,7 @@
   const player = Player.create(1)
   let playing = !player.paused
   let cameraControls
+  let hideUi = false
 
   $: player.totalTime = $transitTime * 1000
   // 0 will be realtime, 1 will be transitTime happens in 10 seconds
@@ -81,14 +89,44 @@
     }
   }
 
+  const toSpace = () => {
+    const tween = Tween.create({ alt: $altitude })
+      .by('1s', { alt: 100 * $planetRadius }, 'expIn')
+
+    frames(1000).pipe(tween)
+      .subscribe(({ alt }) => {
+        altitude.set(alt)
+      })
+  }
+
+  const toPlanet = async () => {
+    await tick()
+    await delay(500)
+    const tween = Tween.create({ alt: 100 * $planetRadius })
+      .by('1s', { alt: 10 }, 'expOut')
+
+    frames(1000).pipe(tween)
+      .subscribe(({ alt }) => {
+        altitude.set(alt)
+      })
+  }
+
   const openPlanetSelector = () => {
     selectorActive = true
     player.pause()
+    skyVisible.set(false)
+    earthVisible.set(false)
+    mountainsVisible.set(false)
+    // toSpace()
   }
 
   const onPlanetSelected = ({ detail }) => {
     const { name } = detail
     push(`/${name}`)
+    skyVisible.set(true)
+    earthVisible.set(true)
+    mountainsVisible.set(true)
+    // toPlanet()
   }
 
   const onSwipe = ({ detail }) => {
@@ -99,6 +137,10 @@
 
   const toggleTelecopeMode = async () => {
     $telescopeMode = !$telescopeMode
+  }
+
+  const toggleControls = () => {
+    hideUi = !hideUi
   }
 
 </script>
@@ -112,19 +154,24 @@
   pointer-events: none
   user-select: none
   touch-action: none
+
+.controls-container
+  transition: filter 300ms
+  &.hidden
+    opacity: 1
+    filter: opacity(0)
 .menu-container
   position: fixed
   bottom: 0
   left: 50%
   transform: translateX(-50%)
   width: 100%
-  height: 42px * 2
   max-width: 660px
   z-index: 101
-  backdrop-filter: blur(10px)
   display: flex
   flex-direction: column
   transition: opacity 100ms
+
 .controls
   position: fixed
   bottom: 0px
@@ -137,7 +184,7 @@
 
   .eclipse-slider
     position: absolute
-    bottom: 42px
+    bottom: 62px
     left: 50%
     transform: translateX(-50%)
     height: 190px
@@ -170,30 +217,64 @@
       transform: translate(-50%, -50%) scale(1.2)
     &:active
       transform: translate(-50%, -50%) scale(1)
+
+.hide-controls
+  position: fixed
+  top: 0.75rem
+  left: 1rem
+  font-size: 24px
+  button
+    line-height: 0
+    border: none
+    padding: 0
+    margin: 0
+    cursor: pointer
+    border-radius: 50%
+    background: hsla(0, 0%, 100%, 0)
+    width: 50px
+    height: 50px
+    color: hsla(0, 0%, 100%, .6)
+    font-size: 1.5em
+    transition: transform 100ms, color 150ms
+    transform-origin: 50% 50%
+
+    &:focus, &:hover
+      color: hsla(0, 100%, 100%, 1)
+    &:active
+      color: hsla(0, 0%, 100%, .6)
+    &.active
+      color: hsla(0, 100%, 100%, 1)
 </style>
 
 <Levetate>
-  <!-- svelte-ignore a11y-no-static-element-interactions -->
-  <div class="controls no-highlight" class:selector={selectorActive} bind:this={element}>
-    <div class="planet-selector-container" class:no-interaction={!selectorActive}>
-      <PlanetSelector on:select={onPlanetSelected} bind:active={selectorActive} bind:selected={selectedPlanet} />
-    </div>
-
-    {#if !selectorActive}
-      <div transition:fade={{ duration: 100 }} class="eclipse-slider no-highlight">
-        <EclipseSlider bind:progress={$eclipseProgress} on:swipe={onSwipe} on:start={seekStart} on:end={seekEnd}>
-          <button class="play-pause" on:dblclick|capture|stopPropagation on:click={togglePlay}>
-            <Icon icon={ playing ? 'mdi:pause' : 'mdi:play'} />
-          </button>
-        </EclipseSlider>
-      </div>
-    {/if}
+  <div class="hide-controls">
+    <button on:click={toggleControls} class:active={hideUi}>
+      <Icon icon="mdi:eye" />
+    </button>
   </div>
-  <div class:hidden={selectorActive} class="menu-container no-highlight">
-    <Menu
-      on:planet={openPlanetSelector}
-      on:telescope={toggleTelecopeMode}
-    />
+  <div class="controls-container no-highlight" class:hidden={hideUi} >
+    <!-- svelte-ignore a11y-no-static-element-interactions -->
+    <div class="controls no-highlight" class:selector={selectorActive} bind:this={element}>
+      <div class="planet-selector-container" class:no-interaction={!selectorActive}>
+        <PlanetSelector on:select={onPlanetSelected} bind:active={selectorActive} bind:selected={selectedPlanet} />
+      </div>
+
+      {#if !selectorActive}
+        <div transition:fade={{ duration: 100 }} class="eclipse-slider no-highlight">
+          <EclipseSlider bind:progress={$eclipseProgress} on:swipe={onSwipe} on:start={seekStart} on:end={seekEnd}>
+            <button class="play-pause" on:dblclick|capture|stopPropagation on:click={togglePlay}>
+              <Icon icon={ playing ? 'mdi:pause' : 'mdi:play'} />
+            </button>
+          </EclipseSlider>
+        </div>
+      {/if}
+    </div>
+    <div class:hidden={selectorActive} class="menu-container no-highlight">
+      <Menu
+        on:planet={openPlanetSelector}
+        on:telescope={toggleTelecopeMode}
+      />
+    </div>
   </div>
 </Levetate>
 

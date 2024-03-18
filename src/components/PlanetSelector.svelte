@@ -175,6 +175,7 @@
     <PlanetSelectorScene
       pos={pos / scale}
       showAll={active}
+      spotlight={active}
       on:planetClicked={handlePlanetClicked}
     />
   </Canvas>
