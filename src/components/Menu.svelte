@@ -11,19 +11,19 @@
       title: 'Planet View',
     },
     {
+      icon: 'mdi:sun-angle',
+      name: 'sun',
+      title: 'Time of day',
+    },
+    {
       icon: 'mdi:telescope',
       name: 'telescope',
       title: 'Telescope View',
     },
     {
-      icon: 'mdi:gear',
-      name: 'settings',
-      title: 'Settings',
-    },
-    {
-      icon: 'mdi:volume-off',
-      name: 'mute',
-      title: 'Mute',
+      icon: 'mdi:speedometer',
+      name: 'animation-speed',
+      title: 'Animation Speed',
     },
     {
       icon: 'mdi:information',
@@ -31,9 +31,9 @@
       title: 'Info',
     },
     {
-      icon: 'mdi:eye',
-      name: 'hideui',
-      title: 'Hide UI',
+      icon: 'mdi:gear',
+      name: 'settings',
+      title: 'Settings',
     },
   ]
 
