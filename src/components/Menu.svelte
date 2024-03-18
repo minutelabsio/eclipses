@@ -38,11 +38,13 @@
       icon: 'mdi:information',
       name: 'info',
       title: 'Info',
+      expanded: true,
     },
     {
       icon: 'mdi:gear',
       name: 'settings',
       title: 'Settings',
+      expanded: true,
     },
   ])
   const activeItem = derived(
@@ -50,9 +52,26 @@
     $menuItems => $menuItems.filter(isTab).find(item => item.active)
   )
 
+  export const selected = derived(
+    activeItem,
+    $activeItem => $activeItem?.name
+  )
+
   const buttonClicked = (name) => {
     const itemClicked = $menuItems.find(item => item.name === name)
     if (isTab(itemClicked)) {
+      if (itemClicked.active && itemClicked.expanded) {
+        // select time of day
+        menuItems.update(items => {
+          items.filter(isTab).forEach(item => {
+            item.active = item.name === 'sun'
+          })
+          return items
+        })
+        dispatch('select', 'sun')
+        dispatch('timeOfDay')
+        return
+      }
       menuItems.update(items => {
         items.filter(isTab).forEach(item => {
           item.active = item.name === name
@@ -70,8 +89,8 @@
 </script>
 
 <nav class="eclipse-menu">
-  <div class="context-menu">
-    {#if $activeItem.component}
+  <div class="context-menu" class:expanded={$activeItem?.expanded}>
+    {#if $activeItem?.component}
     <svelte:component this={$activeItem.component}/>
     {/if}
   </div>
@@ -89,15 +108,22 @@
 
 <style lang="sass">
   .eclipse-menu
-    background: linear-gradient(111.68deg, rgba(221, 221, 221, 0.15) 7.59%, rgba(221, 221, 221, 0.3) 102.04%)
-    backdrop-filter: blur(10px)
     .context-menu
       height: 40px
       display: flex
       flex-direction: column
       justify-content: center
       padding: 0 1.5rem
+      margin: 0 6px
       letter-spacing: 1px
+      background: linear-gradient(-5deg, rgba(221, 221, 221, 0.15) 7.59%, rgba(221, 221, 221, 0.3) 102.04%)
+      backdrop-filter: blur(10px)
+      border-radius: 10px 10px 0 0
+      transition: height 300ms
+      &.expanded
+        height: 280px
+      &.collapsed
+        height: 0
     ul, li
       display: flex
       list-style: none
@@ -110,7 +136,8 @@
       font-size: 20px
       height: 70px
       padding: 0 0.5rem
-      background: linear-gradient(111.68deg, rgba(221, 221, 221, 0.15) 7.59%, rgba(221, 221, 221, 0.3) 102.04%)
+      background: linear-gradient(10deg, rgba(221, 221, 221, 0.15) 7.59%, rgba(221, 221, 221, 0.5) 102.04%)
+      backdrop-filter: blur(10px)
       li
         button
           line-height: 0

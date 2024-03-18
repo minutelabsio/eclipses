@@ -143,6 +143,9 @@
     hideUi = !hideUi
   }
 
+  let selectedMenuItem
+  $: hideEclipseControls = $selectedMenuItem === 'info' || $selectedMenuItem === 'settings'
+
 </script>
 <style lang="sass">
 .no-interaction
@@ -254,7 +257,7 @@
   </div>
   <div class="controls-container no-highlight" class:hidden={hideUi} >
     <!-- svelte-ignore a11y-no-static-element-interactions -->
-    <div class="controls no-highlight" class:selector={selectorActive} bind:this={element}>
+    <div class="controls no-highlight" class:selector={selectorActive} class:hidden={hideEclipseControls} bind:this={element}>
       <div class="planet-selector-container" class:no-interaction={!selectorActive}>
         <PlanetSelector on:select={onPlanetSelected} bind:active={selectorActive} bind:selected={selectedPlanet} />
       </div>
@@ -271,6 +274,7 @@
     </div>
     <div class:hidden={selectorActive} class="menu-container no-highlight">
       <Menu
+        bind:selected={selectedMenuItem}
         on:planet={openPlanetSelector}
         on:telescope={toggleTelecopeMode}
       />
