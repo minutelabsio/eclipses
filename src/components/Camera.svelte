@@ -45,10 +45,22 @@ const setOrbit = (camera, orbitPlanet) => {
   }
 }
 
+const setTelescopeUp = (camera, telescope) => {
+  if (!camera || !controls) return
+  if (telescope){
+    camera.up.set(0, Math.SQRT1_2, -Math.SQRT1_2)
+    controls.updateCameraUp()
+  } else {
+    camera.up.set(0, 1, 0)
+    controls.updateCameraUp()
+  }
+}
+
 $: orbitPlanet ? setOrbit(camera, orbitPlanet) : controls?.moveTo(0, $altitude, -2, false)
 $: controlsEnabled = !telescope
 $: fov = telescope ? $sunAngularDiameter * 4 : $FOV
 $: setOrbit(camera, orbitPlanet)
+$: setTelescopeUp(camera, telescope)
 
 useTask((dt) => {
   controls?.update(dt)

@@ -7,6 +7,7 @@
     transitTime,
     progressRate,
     sunPosition,
+    elevationMid,
   } from '../store/environment'
   import {
     AU,
@@ -21,6 +22,7 @@
   import { Player, Util } from 'intween'
   import { push } from 'svelte-spa-router'
   import { quintIn } from 'svelte/easing'
+  import { tick } from 'svelte'
 
   export let selectedPlanet = 'earth'
   export let params = {}
@@ -97,17 +99,21 @@
 
   let followSun = false
 
-  eclipseProgress.subscribe((v) => {
-    if (followSun){
-      const [x, y, z] = $sunPosition
-      cameraControls.lookInDirectionOf(x, y, z, false)
-    }
-  })
+  const updateCameraPosition = () => {
+    if (!followSun) return
+    if (!cameraControls) return
+    const [x, y, z] = $sunPosition
+    cameraControls.lookInDirectionOf(x, y, z, true)
+  }
 
-  const toggleTelecopeMode = () => {
+  eclipseProgress.subscribe(updateCameraPosition)
+  elevationMid.subscribe(updateCameraPosition)
+
+  const toggleTelecopeMode = async () => {
     $telescopeMode = !$telescopeMode
     if (!cameraControls) return
     if ($telescopeMode) {
+      await tick()
       cameraControls.saveState()
       const [x, y, z] = $sunPosition
       cameraControls.lookInDirectionOf(x, y, z, false)
@@ -124,16 +130,24 @@
   touch-action: none
   pointer-events: none
   user-select: none
+.hidden
+  opacity: 0
+  pointer-events: none
+  user-select: none
+  touch-action: none
 .menu-container
   position: fixed
   bottom: 0
   left: 50%
   transform: translateX(-50%)
   width: 100%
-  height: 42px
+  height: 42px * 2
   max-width: 660px
   z-index: 101
   backdrop-filter: blur(10px)
+  display: flex
+  flex-direction: column
+  transition: opacity 100ms
 .controls
   position: fixed
   bottom: 0px
@@ -146,7 +160,7 @@
 
   .eclipse-slider
     position: absolute
-    bottom: -33%
+    bottom: 42px
     left: 50%
     transform: translateX(-50%)
     height: 190px
@@ -198,14 +212,12 @@
       </div>
     {/if}
   </div>
-  {#if !selectorActive}
-  <div transition:fade={{ duration: 100 }} class="menu-container no-highlight">
+  <div class:hidden={selectorActive} class="menu-container no-highlight">
     <Menu
       on:planet={openPlanetSelector}
       on:telescope={toggleTelecopeMode}
     />
   </div>
-  {/if}
 </Levetate>
 
 <Renderer/>

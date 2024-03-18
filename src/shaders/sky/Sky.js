@@ -16,7 +16,7 @@ export default () => {
     blendSrc: THREE.OneFactor,
     blendDst: THREE.OneMinusSrcAlphaFactor,
     // this only works inside the atmosphere
-    blendEquation: THREE.MaxEquation,
+    blendEquation: THREE.AddEquation,
     transparent: true,
     // dithering: true,
     side: THREE.DoubleSide,

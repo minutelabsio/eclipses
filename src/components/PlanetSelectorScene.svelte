@@ -57,17 +57,17 @@
           -0.5, // uranus
           0 // neptune
         ]
-        return { scale: 1, showAll, planetTilts, y: 0 }
+        return { scale: 1, showAll, planetTilts, y: 0.3 }
       } else {
         const planetTilts = [
           -1, // earth
           -1, // mars
           -1, // jupiter
-          0.5, // saturn
+          0.7, // saturn
           -0.5, // uranus
           -1 // neptune
         ]
-        return { scale: 1e-2, showAll, planetTilts, y: -0.8 }
+        return { scale: 1e-2, showAll, planetTilts, y: -0.3 }
       }
     }),
     smoothen({ duration: '0.5s', easing: 'quadOut' })

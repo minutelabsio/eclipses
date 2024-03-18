@@ -1,3 +1,4 @@
+@use 'input-range-scss' with ($track-color: white, $thumb-color: white)
 
 * > *
   box-sizing: border-box
@@ -30,3 +31,19 @@ html, body
   overflow: hidden
   clip: rect(0, 0, 0, 0)
   border: 0
+
+input[type="range"]::-webkit-slider-thumb
+  cursor: pointer
+input[type="range"]::-moz-range-thumb
+  cursor: pointer
+input[type="range"]::-ms-thumb
+  cursor: pointer
+input[type="range"]::-webkit-slider-runnable-track
+  cursor: pointer
+input[type="range"]::-moz-range-track
+  cursor: pointer
+input[type="range"]::-ms-track
+  cursor: pointer
+
+label
+  font-family: 'latin-modern-mono', monospace

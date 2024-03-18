@@ -76,7 +76,7 @@
   $: Sky.fisheye = fisheye
   $: Sky.uAltitude = $altitude
 
-  $: Sky.shader.blendEquation = $altitude > $atmosphereThickness * 0.9 ? THREE.AddEquation : THREE.MaxEquation
+  // $: Sky.shader.blendEquation = $altitude > $atmosphereThickness * 0.9 ? THREE.AddEquation : THREE.MaxEquation
 
 </script>
 
