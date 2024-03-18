@@ -11,6 +11,7 @@
   import { filedrop } from 'filedrop-svelte'
   import { LUT3dlLoader } from 'three/addons/loaders/LUT3dlLoader.js'
   import { LUTImageLoader } from 'three/addons/loaders/LUTImageLoader.js'
+  import { orbitPlanet } from '../store/environment'
 
   let cameraControls
   let useLutPre = true
@@ -23,14 +24,12 @@
   const lutImageLoader = new LUTImageLoader()
 
   const handleDrop = (which) => (e) => {
-    console.log(e)
     const file = e.detail.files.accepted[0]
     if (which === 'pre') {
       lutPreFilename = file.name
     } else {
       lutPostFilename = file.name
     }
-    console.log(which, file.name)
     const dataUrl = URL.createObjectURL(file)
     const loader = file.name.endsWith('.3dl') ? lutLoader : lutImageLoader
     loader.load(dataUrl, ({ texture3D }) => {
@@ -81,6 +80,7 @@
   makeDefault
   near={1}
   far={1.2 * AU}
+  orbitPlanet={$orbitPlanet}
   bind:controls={cameraControls}
 />
 

@@ -30,6 +30,7 @@ const sphereIntersection = (origin, ray, radius) => {
 
 export const telescopeMode = writable(false)
 export const telescopeModeExposure = writable(0.25)
+export const orbitPlanet = writable(false)
 
 export const planet = writable('earth')
 export const dayLength = writable(24 * HOURS)
@@ -245,6 +246,8 @@ const state = {
   dayLength,
   telescopeMode,
   telescopeModeExposure,
+  orbitPlanet,
+
   planet,
   FOV,
   exposure,

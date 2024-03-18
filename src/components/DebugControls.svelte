@@ -107,6 +107,7 @@
     perspectiveSettings.add(eclipseState, 'altitude', 0.01, 1, 0.001).onChange(v => {
       setAltitude(v, $planetRadius)
     })
+    perspectiveSettings.add(state, 'orbitPlanet')
     perspectiveSettings.add(eclipseState, 'lookAtSun')
     perspectiveSettings.add(eclipseState, 'lookAtPlanet')
     perspectiveSettings.add(eclipseState, 'animateSunRise')

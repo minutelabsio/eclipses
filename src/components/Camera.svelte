@@ -6,12 +6,16 @@ import {
   FOV,
   sunPosition,
   moonDistance,
+  planetRadius,
   sunAngularDiameter,
   altitude,
 } from '../store/environment'
 
 export let controls
 export let telescope = false
+export let orbitPlanet = false
+let camera
+
 const component = forwardEventHandlers()
 const { renderer, renderStage } = useThrelte()
 
@@ -28,9 +32,23 @@ CameraControls.prototype.lookInDirectionOf = function(x, y, z, anim) {
 }
 extend({ CameraControls })
 
-$: controls?.moveTo(0, $altitude, -2, false)
+const setOrbit = (camera, orbitPlanet) => {
+  if (!camera || !controls) return
+  if (orbitPlanet){
+    camera.up.set(1, 0, 0)
+    controls.updateCameraUp()
+    controls?.setLookAt(0, $altitude, -2, 0, -$planetRadius, 0)
+  } else {
+    camera.up.set(0, 1, 0)
+    controls.updateCameraUp()
+    controls?.setLookAt(0, $altitude, -2, 0, $altitude, 0)
+  }
+}
+
+$: orbitPlanet ? setOrbit(camera, orbitPlanet) : controls?.moveTo(0, $altitude, -2, false)
 $: controlsEnabled = !telescope
 $: fov = telescope ? $sunAngularDiameter * 4 : $FOV
+$: setOrbit(camera, orbitPlanet)
 
 useTask((dt) => {
   controls?.update(dt)
@@ -43,6 +61,7 @@ useTask((dt) => {
   position.z={2}
   fov={fov}
   bind:this={$component}
+  bind:ref={camera}
   let:ref
   {...$$restProps}
 >
@@ -54,8 +73,8 @@ useTask((dt) => {
     minZoom={1}
     minDistance={2}
     maxDistance={2.1}
-    polarRotateSpeed={-0.08}
-    azimuthRotateSpeed={-0.08}
+    polarRotateSpeed={orbitPlanet ? 0.5 : -0.08}
+    azimuthRotateSpeed={orbitPlanet ? 0.5 : -0.08}
     bind:ref={controls}
     on:create={({ ref }) => {
       const [x, y, z] = $sunPosition
