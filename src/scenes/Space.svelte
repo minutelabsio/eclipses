@@ -34,6 +34,7 @@
     overrideRA,
     sunAngularDiameter,
     moonTransitDegrees,
+    moonAngleCorrection,
   } from '../store/environment'
   import {
     DEG,
@@ -75,7 +76,9 @@
     // controls?.update(window.performance.now())
     const state = moonMove.at(time / 2)
     sunBrightness = state.brightness * sunsetBrightness
-    const RA = $overrideRA ? MathUtils.lerp(-angleLimit, angleLimit, $eclipseProgress) : state.theta * DEG
+    const RA = $overrideRA ?
+      MathUtils.lerp(-angleLimit, angleLimit, $eclipseProgress) + $moonAngleCorrection :
+      state.theta * DEG
     moonRightAscention.set(RA)
   })
 
