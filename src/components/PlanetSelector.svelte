@@ -21,7 +21,7 @@
     'uranus',
     'neptune'
   ]
-  const MIN_FLICK_VEL = 0.4
+  const MIN_FLICK_VEL = 0.6
   let element
   let pos = 0
   let scale = 500
@@ -89,7 +89,7 @@
     if (active) {
       timer = setTimeout(() => {
         changePlanet(planetIndex)
-      }, time + 500)
+      }, time + 100)
     } else {
       changePlanet(planetIndex)
       timer = setTimeout(() => {
@@ -166,7 +166,16 @@
     }
   }
 
+  const onToggle = (active) => {
+    if (!active) {
+      selectPlanet()
+      return
+    }
+    hovering = selected
+  }
+
   $: moveToPlanet(selected)
+  $: onToggle(active)
 
 </script>
 
