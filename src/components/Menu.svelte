@@ -60,21 +60,21 @@
   const buttonClicked = (name) => {
     const itemClicked = $menuItems.find(item => item.name === name)
     if (isTab(itemClicked)) {
-      if (itemClicked.active && itemClicked.expanded) {
-        // select time of day
-        menuItems.update(items => {
-          items.filter(isTab).forEach(item => {
-            item.active = item.name === 'sun'
-          })
-          return items
-        })
-        dispatch('select', 'sun')
-        dispatch('timeOfDay')
-        return
-      }
+      // if (itemClicked.active && itemClicked.expanded) {
+      //   // select time of day
+      //   menuItems.update(items => {
+      //     items.filter(isTab).forEach(item => {
+      //       item.active = item.name === 'sun'
+      //     })
+      //     return items
+      //   })
+      //   dispatch('select', 'sun')
+      //   dispatch('timeOfDay')
+      //   return
+      // }
       menuItems.update(items => {
         items.filter(isTab).forEach(item => {
-          item.active = item.name === name
+          item.active = item.name === name && !item.active
         })
         return items
       })
@@ -89,7 +89,7 @@
 </script>
 
 <nav class="eclipse-menu">
-  <div class="context-menu" class:expanded={$activeItem?.expanded}>
+  <div class="context-menu" class:expanded={$activeItem?.expanded} class:collapsed={!$activeItem}>
     {#if $activeItem?.component}
     <svelte:component this={$activeItem.component}/>
     {/if}
