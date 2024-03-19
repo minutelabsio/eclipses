@@ -346,9 +346,15 @@ export function load(settings){
   }
 }
 
-export function selectPlanet(name = 'earth'){
+export function selectPlanet(name = 'earth', moon = 'luna'){
   const v = name.toLowerCase()
-  const moons = Object.values(PlanetConfigs[v].moons)
-  load(PlanetConfigs[v])
-  load(PlanetConfigs[v].moons[moons[0]])
+  const planetCfg = PlanetConfigs[v] || PlanetConfigs.earth
+  const moons = Object.keys(planetCfg.moons)
+  moon = moon?.toLowerCase()
+  if (!moons.includes(moon)){
+    moon = moons[0]
+  }
+  load(planetCfg)
+  load(planetCfg.moons[moon])
+  selectedMoon.set(moon)
 }

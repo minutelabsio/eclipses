@@ -8,10 +8,12 @@
     progressRate,
     altitude,
     planetRadius,
-    atmosphereThickness,
+    sunPosition,
     skyVisible,
     earthVisible,
     mountainsVisible,
+    selectedMoon,
+    selectPlanet,
   } from '../store/environment'
   import {
     AU,
@@ -28,9 +30,15 @@
   import { push } from 'svelte-spa-router'
   import { quintIn } from 'svelte/easing'
   import { tick } from 'svelte'
+  import { interactivity } from '@threlte/extras'
+  import { T } from '@threlte/core'
+  import MoonSelector from '../components/MoonSelector.svelte'
 
   export let selectedPlanet = 'earth'
   export let params = {}
+
+  let hoveringPlanet = selectedPlanet
+  let hoveringMoon = 'luna'
 
   const delay = dt => new Promise(resolve => setTimeout(resolve, dt))
 
@@ -111,24 +119,6 @@
       })
   }
 
-  const openPlanetSelector = () => {
-    selectorActive = true
-    player.pause()
-    skyVisible.set(false)
-    earthVisible.set(false)
-    mountainsVisible.set(false)
-    // toSpace()
-  }
-
-  const onPlanetSelected = ({ detail }) => {
-    const { name } = detail
-    push(`/${name}`)
-    skyVisible.set(true)
-    earthVisible.set(true)
-    mountainsVisible.set(true)
-    // toPlanet()
-  }
-
   const onSwipe = ({ detail }) => {
     // if (detail.direction === 'up') {
     //   openPlanetSelector()
@@ -143,9 +133,40 @@
     hideUi = !hideUi
   }
 
+  const lookAtSun = () => {
+    const [x, y, z] = $sunPosition
+    cameraControls.lookInDirectionOf(x, y, z, true)
+  }
+
+  const openPlanetSelector = () => {
+    hoveringMoon = $selectedMoon
+    selectorActive = true
+    player.pause()
+    skyVisible.set(false)
+    earthVisible.set(false)
+    mountainsVisible.set(false)
+    // toSpace()
+    $telescopeMode = false
+  }
+
+  const onPlanetSelected = ({ detail }) => {
+    const { name } = detail
+    push(`/${name}/${hoveringMoon}`)
+    skyVisible.set(true)
+    earthVisible.set(true)
+    mountainsVisible.set(true)
+    // toPlanet()
+  }
+
   let selectedMenuItem
   $: hideEclipseControls = $selectedMenuItem === 'info' || $selectedMenuItem === 'settings'
 
+  interactivity({
+    filter: (hits, state) => {
+      // Only return the first hit
+      return hits.slice(0, 1)
+    }
+  })
 </script>
 <style lang="sass">
 .no-interaction
@@ -202,6 +223,14 @@
     left: 0
     width: 100%
     height: 280px
+  .moon-selector-container
+    position: absolute
+    bottom: 0
+    left: 50%
+    transform: translateX(-50%)
+    max-width: 660px
+    transition: opacity 100ms
+    width: 100%
 
   .play-pause
     position: absolute
@@ -259,7 +288,11 @@
     <!-- svelte-ignore a11y-no-static-element-interactions -->
     <div class="controls no-highlight" class:selector={selectorActive} class:hidden={hideEclipseControls} bind:this={element}>
       <div class="planet-selector-container" class:no-interaction={!selectorActive}>
-        <PlanetSelector on:select={onPlanetSelected} bind:active={selectorActive} bind:selected={selectedPlanet} />
+        <PlanetSelector on:select={onPlanetSelected} bind:active={selectorActive} bind:selected={selectedPlanet} bind:hovering={hoveringPlanet} />
+      </div>
+
+      <div class="moon-selector-container" class:hidden={!selectorActive}>
+        <MoonSelector planet={hoveringPlanet} bind:hoveringMoon={hoveringMoon} />
       </div>
 
       {#if !selectorActive}
@@ -283,7 +316,10 @@
 </Levetate>
 
 <Renderer/>
-<Space/>
+
+<T.Group on:dblclick={lookAtSun} on:click={() => selectorActive = false}>
+  <Space/>
+</T.Group>
 
 <Camera
   makeDefault

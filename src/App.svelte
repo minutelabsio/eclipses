@@ -2,7 +2,8 @@
   import { Canvas } from '@threlte/core'
   import Main from './scenes/Main.svelte'
   import Fisheye from './scenes/Fisheye.svelte'
-  import Router, { params } from 'svelte-spa-router'
+  import Router, { params, replace } from 'svelte-spa-router'
+  import {wrap} from 'svelte-spa-router/wrap'
   import { onMount } from 'svelte'
   import { NoToneMapping } from 'three'
   import { Suspense, HTML, Billboard } from '@threlte/extras'
@@ -10,20 +11,37 @@
   import Levetate from './components/Levetate.svelte'
   import Debug from './scenes/Debug.svelte'
   import { selectPlanet } from './store/environment'
+  import * as PlanetConfigs from './configs'
 
   const routes = {
     '/fisheye': Fisheye,
     '/debug': Debug,
     '/vis': Visualizer,
-    '/:planet': Main,
+    '/:planet/:moon?': wrap({
+      component: Main,
+      conditions: [
+        (detail) => {
+          const { planet } = detail.params
+          if (!planet || !PlanetConfigs[planet]) {
+            return false
+          }
+          return true
+        }
+      ]
+    }),
     '*': Main,
+  }
+
+  const defaultToEarth = () => {
+    replace('/earth')
   }
 
   function routeLoaded(e){
     const { params } = e.detail
     if (!params) return
     const planet = params.planet
-    selectPlanet(planet)
+    const moon = params.moon
+    selectPlanet(planet, moon)
   }
 
   const renderOptions = {
@@ -52,7 +70,7 @@
       <Levetate slot="fallback">
         <div class="loading">loading...</div>
       </Levetate>
-      <Router {routes} on:routeLoaded={routeLoaded} />
+      <Router {routes} on:routeLoaded={routeLoaded} on:conditionsFailed={defaultToEarth}/>
     </Suspense>
   </Canvas>
 
