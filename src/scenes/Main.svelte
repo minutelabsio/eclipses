@@ -206,6 +206,25 @@
   z-index: 100
   touch-action: none
 
+  .planet-moon-title
+    font-family: "Plus Jakarta Sans", sans-serif
+    position: absolute
+    bottom: 400px
+    left: 50%
+    transform: translateX(-50%)
+    color: hsla(0, 0%, 100%, .5)
+    transition: opacity 1000ms ease-out
+    text-align: center
+    &.hidden
+      transition: opacity 5000ms ease-in
+    h2, h3
+      margin: 0
+    h2
+      font-size: 2.5rem
+      margin-bottom: 1rem
+    h3
+      font-size: 1.5rem
+
   .eclipse-slider
     position: absolute
     bottom: 62px
@@ -287,6 +306,11 @@
   <div class="controls-container no-highlight" class:hidden={hideUi} >
     <!-- svelte-ignore a11y-no-static-element-interactions -->
     <div class="controls no-highlight" class:selector={selectorActive} class:hidden={hideEclipseControls} bind:this={element}>
+      <aside class="planet-moon-title no-interaction" class:hidden={!selectorActive}>
+        <h2>{hoveringPlanet || ''}</h2>
+        <h3>{hoveringMoon || ''}</h3>
+      </aside>
+
       <div class="planet-selector-container" class:no-interaction={!selectorActive}>
         <PlanetSelector on:select={onPlanetSelected} bind:active={selectorActive} bind:selected={selectedPlanet} bind:hovering={hoveringPlanet} />
       </div>
