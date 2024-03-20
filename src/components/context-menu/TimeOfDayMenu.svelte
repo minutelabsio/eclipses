@@ -3,9 +3,9 @@
 </script>
 
 <div class="time-of-day-menu">
-  <label for="elevation">AM</label>
+  <label for="elevation">dawn</label>
   <input class="slider" name="elevation" type="range" min="-10" max="90" step="0.1" bind:value={$elevationMid} />
-  <label for="elevation">PM</label>
+  <label for="elevation">noon</label>
 </div>
 
 <style lang="sass">
