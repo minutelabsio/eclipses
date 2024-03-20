@@ -106,7 +106,7 @@
 <Camera
   makeDefault
   near={1}
-  far={1.2 * AU}
+  far={31 * AU}
   orbitPlanet={$orbitPlanet}
   bind:controls={cameraControls}
 />
