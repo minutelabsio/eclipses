@@ -12,6 +12,7 @@ uniform bool fisheye;
 uniform float time;
 
 uniform sampler2D coronaTexture;
+uniform sampler2D moonTexture;
 uniform float opticalDepthMapSize;
 uniform float sunRadius;
 uniform float moonRadius;
@@ -350,8 +351,26 @@ float coronaValue(vec3 rayDir, vec3 sSun, float sunAngularRadius){
   vec4 corona = texture2D(coronaTexture, uv);
   // color correction
   corona.rgb = pow(corona.rgb, vec3(2.2));
-  float l = luma(corona.xyz);
+  float l = luma(corona.rgb);
   return intensity * l * smoothcircle(rayDir, sunAngularRadius * 2., sSun, .5);
+}
+
+float moonValue(vec3 rayDir, vec3 sMoon, float moonAngularRadius){
+  if (textureSize(moonTexture, 0).x == 1){
+    // create little bumps on the edge of the moon
+    vec2 y = normalize(squash(rayDir, sMoon));
+    float r = moonAngularRadius * (1. - 0.002 * cnoise2(15. * y));
+    return smoothcircle(rayDir, r, sMoon, 0.01);
+  }
+  vec2 xy = squash(rayDir, sMoon);
+  // xy is the vector from the center of the moon to the point on the moon
+  // uv should be calculated so that the height of the texture is the angular diameter of the moon
+  vec2 uv = 0.5 * xy / moonAngularRadius + vec2(0.5, 0.5);
+  if (uv.x <= 0. || uv.x >= 1. || uv.y <= 0.0 || uv.y >= 1.){
+    return 0.0;
+  }
+  vec4 moon = texture2D(moonTexture, uv);
+  return moon.a;
 }
 
 const float bloomFactor = 8e-6;
@@ -372,10 +391,8 @@ float sunMoonIntensity(vec3 rayDir, vec3 sSun, float sunAngularRadius, vec3 sMoo
   //   clampMix(0., 1., sin(atan(sunxy.y, sunxy.x) * 10. * cnoise2(sunxy * 1.)));
   float corona = coronaValue(rayDir, sSun, sunAngularRadius);
   sun += corona;
-  // create little bumps on the edge of the moon
-  vec2 y = normalize(squash(rayDir, sMoon));
-  float r = moonAngularRadius * (1. - 0.002 * cnoise2(15. * y));
-  float moon = smoothcircle(rayDir, r, sMoon, 0.01);
+
+  float moon = moonValue(rayDir, sMoon, moonAngularRadius);
   return mix(sun, 0.0, moon);
   // return step(.9, sun - moon);
 }

@@ -1,6 +1,6 @@
 <script>
-  import * as THREE from 'three'
-  import { useFrame } from '@threlte/core'
+  import { TextureLoader } from 'three'
+  import { useFrame, useLoader } from '@threlte/core'
   import createSky from '../shaders/sky/Sky'
   import { T } from '@threlte/core'
   import {
@@ -33,11 +33,14 @@
     cloudAbsorption,
     windSpeed,
     skyVisible,
+    selectedMoon,
   } from '../store/environment'
   import {
     METER,
     AU,
   } from '../lib/units'
+  import Thalassa from '../assets/moon-stencils/Thalassa.png'
+  import { useSuspense } from '@threlte/extras'
 
   export let fisheye = false
 
@@ -47,6 +50,24 @@
     Sky.update(dt)
   })
 
+  const suspend = useSuspense()
+
+  let textures
+  suspend(useLoader(TextureLoader).load({
+    thalassa: Thalassa,
+  })).then((result) => {
+    textures = result
+  })
+
+  const getTexture = (textures, moon) => {
+    if (!textures) return null
+    if (moon in textures) {
+      return textures[moon]
+    }
+    return null
+  }
+
+  $: Sky.moonTexture = getTexture(textures, $selectedMoon)
   $: Sky.sunIntensity = $sunIntensity
   $: Sky.rayleighCoefficients = $rayleighCoefficient
   $: Sky.rayleighScaleHeight = $rayleighScaleHeight

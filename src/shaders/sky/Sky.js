@@ -62,6 +62,7 @@ export default () => {
     cloudAbsorption: 0.2,
     windSpeed: 8,
     fisheye: false,
+    moonTexture: new THREE.DataTexture(new Uint8Array([]), 1, 1, THREE.RGBAFormat),
   }
 
   const api = { shader }
