@@ -18,6 +18,8 @@
   import { Player, Tween } from 'intween'
 
   export let cameraControls = null
+  export let moonDebug = false
+  export let sunDebug = false
 
   const lookAtSun = () => {
     const [x, y, z] = $sunPosition
@@ -55,6 +57,11 @@
     lookAtSun: lookAtSun,
     lookAtPlanet: lookAtPlanet,
     animateSunRise: animateSunRise,
+
+    get moonDebug() { return moonDebug },
+    set moonDebug(v) { moonDebug = v },
+    get sunDebug() { return sunDebug },
+    set sunDebug(v) { sunDebug = v },
   }
 
   const apparentSize = (r, d) => {
@@ -180,6 +187,8 @@
     visibilitySettings.add(state, 'starsVisible')
     visibilitySettings.add(state, 'mountainsVisible')
     visibilitySettings.add(state, 'earthVisible')
+    visibilitySettings.add(eclipseState, 'moonDebug')
+    visibilitySettings.add(eclipseState, 'sunDebug')
 
     moonRadiusCtrl.onChange(r => {
       if (eclipseState.lockApparentSize){

@@ -154,24 +154,4 @@
   <!-- Sky -->
   <Sky/>
 
-  <!-- moon debug -->
-  <T.Mesh
-    visible={false}
-    position={$moonPosition.toArray()}
-    rotation={[180 * DEG, 0, 0]}
-  >
-    <!-- <T.SphereGeometry args={[moonRadius, 32, 32]} /> -->
-    <T.IcosahedronGeometry args={[$moonRadius, 32]} />
-    <!-- <T.CircleGeometry args={[moonRadius, 32]} /> -->
-    <T.MeshBasicMaterial color="red" dithering fog={false} />
-  </T.Mesh>
-
-  <!-- Sun Debug -->
-  <T.Mesh
-    visible={false}
-    position={$sunPosition}
-  >
-    <T.IcosahedronGeometry args={[$sunRadius, 32]} />
-    <T.MeshBasicMaterial color="green" fog={false} />
-  </T.Mesh>
 </T.Group>

@@ -1,9 +1,12 @@
 <script>
   import Renderer from '../components/Renderer.svelte'
   import Camera from '../components/Camera.svelte'
+  import { T } from '@threlte/core'
   import {
     AU,
+    DEG,
   } from '../lib/units'
+  import { orbitPlanet, moonPosition, sunPosition, moonRadius, sunRadius, planetRadius } from '../store/environment'
   import Space from './Space.svelte'
   import DebugControls from '../components/DebugControls.svelte'
   import Stats from '../components/Stats.svelte'
@@ -11,9 +14,10 @@
   import { filedrop } from 'filedrop-svelte'
   import { LUT3dlLoader } from 'three/addons/loaders/LUT3dlLoader.js'
   import { LUTImageLoader } from 'three/addons/loaders/LUTImageLoader.js'
-  import { orbitPlanet } from '../store/environment'
 
   let cameraControls
+  let moonDebug = false
+  let sunDebug = false
   let useLutPre = true
   let useLutPost = true
   let lutPreFilename = 'none'
@@ -52,10 +56,33 @@
 
 </script>
 
-<DebugControls cameraControls={cameraControls}/>
+<DebugControls cameraControls={cameraControls} bind:moonDebug={moonDebug} bind:sunDebug={sunDebug}/>
 <Renderer lutPre={useLutPre && lutPre} lutPost={useLutPost && lutPost}/>
 <Stats />
 <Space/>
+
+<T.Group position.y={-$planetRadius}>
+    <!-- moon debug -->
+    <T.Mesh
+      visible={moonDebug}
+      position={$moonPosition.toArray()}
+      rotation={[180 * DEG, 0, 0]}
+    >
+      <!-- <T.SphereGeometry args={[moonRadius, 32, 32]} /> -->
+      <T.IcosahedronGeometry args={[$moonRadius, 32]} />
+      <!-- <T.CircleGeometry args={[moonRadius, 32]} /> -->
+      <T.MeshBasicMaterial color="#555" dithering fog={false} />
+    </T.Mesh>
+
+    <!-- Sun Debug -->
+    <T.Mesh
+      visible={sunDebug}
+      position={$sunPosition}
+    >
+      <T.IcosahedronGeometry args={[$sunRadius, 32]} />
+      <T.MeshBasicMaterial color="white" fog={false} />
+    </T.Mesh>
+</T.Group>
 
 <Levetate>
 <div class="lut-upload">
