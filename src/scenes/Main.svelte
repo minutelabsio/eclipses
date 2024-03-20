@@ -214,7 +214,9 @@
   transform: translateX(-50%)
   z-index: 100
   touch-action: none
-
+  &.hidden
+    opacity: 1
+    filter: opacity(0)
   .planet-moon-title
     font-family: "Plus Jakarta Sans", sans-serif
     position: absolute
