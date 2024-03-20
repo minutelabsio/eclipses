@@ -9,6 +9,7 @@ import {
 } from '../lib/units'
 import { skyPosition } from '../lib/sky-position'
 import * as PlanetConfigs from '../configs'
+import { solarVisibility } from '../lib/occlusion'
 
 const print = (val, ...args) => {
   console.log(val, ...args)
@@ -150,6 +151,15 @@ export const moonPosition = derived(
   ([$moonDistance, $elevationMid, $moonAxis, $moonRightAscention, $moonAngleCorrection]) =>
     skyPosition($moonDistance, $elevationMid * DEG + $moonAngleCorrection, 0, new Vector3())
       .applyAxisAngle($moonAxis, $moonRightAscention)
+)
+
+export const sunVisibility = derived(
+  [planetRadius, sunDirection, moonPosition, sunAngularDiameter, moonAngularDiameter],
+  ([$planetRadius, $sunDirection, $moonPosition, $sunAngularDiameter, $moonAngularDiameter]) => {
+    const p = $moonPosition.clone()
+    p.y -= $planetRadius
+    return solarVisibility($sunAngularDiameter * DEG, $sunDirection, $moonAngularDiameter * DEG, p)
+  }
 )
 
 const getScatteringScale = (n, k) => {

@@ -35,6 +35,7 @@
     sunAngularDiameter,
     moonTransitDegrees,
     moonAngleCorrection,
+    sunVisibility,
   } from '../store/environment'
   import {
     DEG,
@@ -43,24 +44,16 @@
   let starsPoints
   const Stars = createStars().then(s => starsPoints = s)
 
-  let sunBrightness = 1
-  $: sunsetBrightness = MathUtils.clamp(
+  $: sunBrightness = MathUtils.clamp(
       MathUtils.inverseLerp(-6, 3, $elevation),
-      0, 1
+      0, $sunVisibility
     )
 
-  const lightIn = 'quadInOut'
-  const lightOut = 'quadInOut'
-  $: minBrightness = Math.max(0, 1 - $moonAngularDiameter * $moonAngularDiameter / ($sunAngularDiameter * $sunAngularDiameter))
-  $: moonMove = new Tween({ theta: -2 * $moonTransitDegrees, brightness: 1 })
+  $: moonMove = new Tween({ theta: -2 * $moonTransitDegrees })
     .by('2s', { theta: 0 }, 'linear')
-    .by('2s', { brightness: minBrightness }, lightIn)
     .by('4s', { theta: 2 * $moonTransitDegrees }, 'linear')
-    .by('4s', { brightness: 1.0 }, lightOut)
     .by('6s', { theta: 0 }, 'linear')
-    .by('6s', { brightness: minBrightness }, lightIn)
     .by('8s', { theta: -2 * $moonTransitDegrees }, 'linear')
-    .by('8s', { brightness: 1.0 }, lightOut)
     .loop()
 
   $: angleLimit = Math.asin($planetRadius / $moonDistance)
@@ -75,7 +68,6 @@
     }
     // controls?.update(window.performance.now())
     const state = moonMove.at(time / 2)
-    sunBrightness = state.brightness * sunsetBrightness
     const RA = $overrideRA ?
       MathUtils.lerp(-angleLimit, angleLimit, $eclipseProgress) + $moonAngleCorrection :
       state.theta * DEG
