@@ -8,7 +8,7 @@
 
   export let selected = 'earth'
   export let hovering = 'earth'
-  export let active = true
+  export let active = false
   export let changeWhenInactive = false
 
   const dispatch = createEventDispatcher()

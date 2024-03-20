@@ -42,7 +42,16 @@
 
   const delay = dt => new Promise(resolve => setTimeout(resolve, dt))
 
-  $: params.planet ? selectedPlanet = params.planet : selectedPlanet = 'earth'
+  const updateFromParams = (params) => {
+    const { planet, moon } = params
+    hoveringPlanet = planet || 'earth'
+    selectedPlanet = planet || 'earth'
+    console.log(moon)
+    hoveringMoon = moon || 'luna'
+    selectedMoon.set(moon || 'luna')
+  }
+
+  $: updateFromParams(params)
 
   let element
   let selectorActive = false

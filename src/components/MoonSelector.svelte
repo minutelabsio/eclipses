@@ -50,7 +50,7 @@
   let dx = 0
 
   $: moons = getMoonsFor(planet)
-  $: hoveringMoon = moons[0].name
+  $: hoveringMoon = moons.find(m => m.name === hoveringMoon) ? hoveringMoon : moons[0].name
   $: menuItems = getMenuItems(moons, hoveringMoon)
   $: selectedIndex = menuItems.findIndex(item => item.active)
   $: position = carouselPosition(selectedIndex, menuItems) + dx
