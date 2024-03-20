@@ -370,7 +370,7 @@ float moonValue(vec3 rayDir, vec3 sMoon, float moonAngularRadius){
     return 0.0;
   }
   vec4 moon = texture2D(moonTexture, uv);
-  return moon.a;
+  return moon.r;
 }
 
 const float bloomFactor = 8e-6;

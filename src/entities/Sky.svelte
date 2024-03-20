@@ -39,7 +39,7 @@
     METER,
     AU,
   } from '../lib/units'
-  import Thalassa from '../assets/moon-stencils/Thalassa.png'
+  import Thalassa from '../assets/moon-stencils/Thalassa.webp'
   import { useSuspense } from '@threlte/extras'
 
   export let fisheye = false
