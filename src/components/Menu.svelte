@@ -4,6 +4,7 @@
   import Icon from '@iconify/svelte'
   import TimeOfDayMenu from './context-menu/TimeOfDayMenu.svelte'
   import PlaybackSpeedMenu from './context-menu/PlaybackSpeedMenu.svelte'
+  import { telescopeMode } from '../store/environment'
 
   export let dispatch = createEventDispatcher()
 
@@ -47,6 +48,14 @@
       expanded: true,
     },
   ])
+
+  telescopeMode.subscribe(value => {
+    menuItems.update(items => {
+      items.find(item => item.name === 'telescope').active = value
+      return items
+    })
+  })
+
   const activeItem = derived(
     menuItems,
     $menuItems => $menuItems.filter(isTab).find(item => item.active)
