@@ -578,7 +578,9 @@ vec4 scattering(
   vec3 color = (1. - cloudAbsorptionAmount) * (scatter + sunDiskColor) + cloud;
   float opacity = dot(primaryDepth.xy, vec2(0.2 * length(rayleighCoefficients), length(mieCoefficients))) + cloudAbsorptionAmount;
   // this is a fudge to help hide stars in the daytime when lots of light is scattered
-  opacity += mix(0., 1., 300. * length(color));
+  opacity += clampMix(0., 1., 300. * length(color));
+  // the stars twinkle :)
+  opacity += clampMix(0., 1.0, primaryDepth.x / 1000.) * fbm(rayDir * 100. + 500. * time);
   return vec4(I0 * clamp(color, 0.0, 1.0), clamp(opacity, 0.0, 1.0));
 }
 
