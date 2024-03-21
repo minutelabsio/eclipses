@@ -340,19 +340,22 @@ float luma(vec3 c){
 }
 
 float coronaValue(vec3 rayDir, vec3 sSun, float sunAngularRadius){
-  float intensity = 1e-2 * remap(sunVisibleArea, 0., 0.01, 1., 0.);
+  float intensity = 5e-2 * remap(sunVisibleArea, 0., 0.01, 1., 0.);
   if (intensity < 1e-5){
     return 0.0;
   }
   vec2 xy = squash(rayDir, sSun);
   xy.x *= -1.;
-  vec2 uv = .235 * xy / sunAngularRadius + vec2(0.497, 0.493);
+  vec2 uv = .56 * xy / sunAngularRadius / vec2(3.17, 2.556) + vec2(0.4956, 0.492);
+  if(uv.x <= 0. || uv.x >= 1. || uv.y <= 0.0 || uv.y >= 1.) {
+    return 0.0;
+  }
   // prevent streaking at edges of texture
   vec4 corona = texture2D(coronaTexture, uv);
   // color correction
   corona.rgb = pow(corona.rgb, vec3(2.2));
   float l = luma(corona.rgb);
-  return intensity * l * smoothcircle(rayDir, sunAngularRadius * 2., sSun, .5);
+  return intensity * l;
 }
 
 float moonValue(vec3 rayDir, vec3 sMoon, float moonAngularRadius){
@@ -574,6 +577,8 @@ vec4 scattering(
   // opacity of the atmosphere
   vec3 color = (1. - cloudAbsorptionAmount) * (scatter + sunDiskColor) + cloud;
   float opacity = dot(primaryDepth.xy, vec2(0.2 * length(rayleighCoefficients), length(mieCoefficients))) + cloudAbsorptionAmount;
+  // this is a fudge to help hide stars in the daytime when lots of light is scattered
+  opacity += mix(0., 1., 300. * length(color));
   return vec4(I0 * clamp(color, 0.0, 1.0), clamp(opacity, 0.0, 1.0));
 }
 
