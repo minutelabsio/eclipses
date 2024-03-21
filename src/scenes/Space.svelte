@@ -45,7 +45,7 @@
   const Stars = createStars().then(s => starsPoints = s)
 
   $: sunBrightness = MathUtils.clamp(
-      MathUtils.inverseLerp(-6, 3, $elevation),
+      MathUtils.inverseLerp(-3, 10, $elevation),
       0, $sunVisibility
     )
 

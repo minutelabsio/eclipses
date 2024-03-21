@@ -545,11 +545,11 @@ vec4 scattering(
       float cloudPhase = miePhase(mu, cloudMie);
       vec3 cloudPoint = rayOrigin + cloudInt.y * rayDir;
       vec2 planetInt = raySphereIntersection(cloudPoint, sSun, planetRadius);
-      float cloudMinBrightness = mix(1e-5, 0., remap(planetInt.y - abs(planetInt.x), 0., 0.03 * planetRadius, 0., 1.));
       vec3 cloudLayer = cloudSize * 900. * cloudPoint / atmosphereRadius;
       cloudAmount = cloudThickness * smoothstep(0., 1.0, fbm(cloudLayer + windSpeed * time) - cloudThreshold);
       // float cloudAmount = 2. * getPhases(rayDir, sSun, 0.5 + 0.4 * fbm(cloudLayer * 20.)).y;
-      cloudAbsorptionAmount = clamp(cloudAbsorption * cloudAmount, 0., 1.);
+      cloudAbsorptionAmount = clamp(cloudAbsorption * cloudAmount, 0., .02);
+      float cloudMinBrightness = mix(1e-5, 0., remap(planetInt.y - abs(planetInt.x), 0., 0.03 * planetRadius, 0., 1.));
       // cloud = 1e-6 * I0 * cloudAmount * cloudPhase * rayleighT;
       cloud = clamp(0.1 * cloudAmount * max(10. * (mieCoefficients) * (cloudPhase + (1. - cloudAbsorptionAmount) * rphase), cloudMinBrightness) * (rayleighT + mieT), 0., 1.);
     }
@@ -575,7 +575,7 @@ vec4 scattering(
   vec3 scatter = rayleighT * rphase * rayleighCoefficients + mieT * mphase * mieCoefficients;
   // scatter = clamp(scatter, vec3(0.0), vec3(I0)) / sqrt(fsteps);
   // opacity of the atmosphere
-  vec3 color = (1. - cloudAbsorptionAmount) * (scatter + sunDiskColor) + cloud;
+  vec3 color = (1. - cloudAbsorptionAmount) * (scatter + sunDiskColor) + cloud - 0.2 * cloudAbsorptionAmount;
   float opacity = dot(primaryDepth.xy, vec2(0.2 * length(rayleighCoefficients), length(mieCoefficients))) + cloudAbsorptionAmount;
   // this is a fudge to help hide stars in the daytime when lots of light is scattered
   opacity += clampMix(0., 1., 300. * length(color));
