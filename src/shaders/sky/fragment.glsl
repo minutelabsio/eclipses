@@ -342,7 +342,7 @@ float luma(vec3 c){
 float coronaValue(vec3 rayDir, vec3 sSun, float sunAngularRadius){
   float intensity = 5e-2 * remap(sunVisibleArea, 0., 0.01, 1., 0.);
   if (intensity < 1e-5){
-    return 0.0;
+    // return 0.0;
   }
   vec2 xy = squash(rayDir, sSun);
   xy.x *= -1.;
@@ -506,7 +506,8 @@ vec4 scattering(
     // I tried doing this and it created lines in the atmosphere
     // vec2 intPlanet2 = raySphereIntersection(pos, sSun, planetRadius);
 
-    float u = umbra(pos, rApparentSun, sunPosition, rApparentMoon, moonPosition);
+    // has minimum brightness for corona
+    float u = max(1e-2, umbra(pos, rApparentSun, sunPosition, rApparentMoon, moonPosition));
     avgUmbra += u;
     // u = intersectsOutside(intPlanet2) ? 0.0 : u;
 
@@ -553,10 +554,10 @@ vec4 scattering(
       vec3 cloudLayer = cloudSize * 900. * cloudPoint / atmosphereRadius;
       cloudAmount = cloudThickness * smoothstep(0., 1.0, fbm(cloudLayer + windSpeed * time) - cloudThreshold);
       // float cloudAmount = 2. * getPhases(rayDir, sSun, 0.5 + 0.4 * fbm(cloudLayer * 20.)).y;
-      cloudAbsorptionAmount = clamp(cloudAbsorption * cloudAmount, 0., .02);
-      float cloudMinBrightness = mix(1e-5, 0., remap(planetInt.y - abs(planetInt.x), 0., 0.03 * planetRadius, 0., 1.));
+      cloudAbsorptionAmount = clamp(10. * cloudAbsorption * cloudAmount, 0., 1.);
+      float brightness = remap(planetInt.y - abs(planetInt.x), 0., 0.08 * planetRadius, 1., 0.);
       // cloud = 1e-6 * I0 * cloudAmount * cloudPhase * rayleighT;
-      cloud = clamp(0.1 * cloudAmount * max(10. * (mieCoefficients) * (cloudPhase + (1. - cloudAbsorptionAmount) * rphase), cloudMinBrightness) * (rayleighT + mieT), 0., 1.);
+      cloud =  clamp(0.1 * cloudAmount * mieCoefficients * (brightness * (1. - cloudAbsorption) * (cloudPhase + 1.) * (rayleighT + mieT)), 0., 1.);
     }
   }
 
@@ -580,17 +581,19 @@ vec4 scattering(
   vec3 scatter = rayleighT * rphase * rayleighCoefficients + mieT * mphase * mieCoefficients;
   // scatter = clamp(scatter, vec3(0.0), vec3(I0)) / sqrt(fsteps);
   // opacity of the atmosphere
-  vec3 color = (1. - cloudAbsorptionAmount) * (scatter + sunDiskColor) + cloud - 0.2 * cloudAbsorptionAmount;
+  vec3 color = (scatter + sunDiskColor);
   float opacity = dot(primaryDepth.xy, vec2(0.2 * length(rayleighCoefficients), length(mieCoefficients))) + cloudAbsorptionAmount;
   if(!planet_intersected) {
     // this is a fudge to help hide stars in the daytime when lots of light is scattered
-    opacity += clampMix(0., 1., 300. * length(color));
+    opacity += clampMix(0., 1., 300. * length(color) + cloudAbsorptionAmount);
     // the stars twinkle :)
     opacity += clampMix(0., 1.0, primaryDepth.x / 1000.) * fbm(rayDir * 100. + 500. * time);
   } else {
     // if looking at the planet from orbit, this ensures a dark shadow
     opacity = mix(1., opacity, avgUmbra);
   }
+  // add the clouds
+  color = color * (1. - cloudAbsorptionAmount) + cloud;
   return vec4(I0 * clamp(color, 0.0, 1.0), clamp(opacity, 0.0, 1.0));
 }
 
