@@ -24,7 +24,7 @@ float umbra(vec3 ri, float rSun, vec3 pSun, float rMoon, vec3 pMoon) {
   float d = length(sSun - sMoon);
   float area = twoCircleIntersection(rSun, rMoon, d);
   float totalArea = PI * rSun * rSun;
-  return max(1e-6, 1.0 - area / totalArea);
+  return max(1e-2, 1.0 - area / totalArea);
 }
 
 #pragma glslify: export(umbra)

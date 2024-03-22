@@ -346,7 +346,10 @@ float coronaValue(vec3 rayDir, vec3 sSun, float sunAngularRadius){
   }
   vec2 xy = squash(rayDir, sSun);
   xy.x *= -1.;
-  vec2 uv = .56 * xy / sunAngularRadius / vec2(3.17, 2.556) + vec2(0.4956, 0.492);
+  // eclipse2017 corona
+  // vec2 uv = .56 * xy / sunAngularRadius / vec2(3.17, 2.556) + vec2(0.4956, 0.492);
+  // simulated corona
+  vec2 uv = .6 * xy / sunAngularRadius / 15. + vec2(0.5, 0.5);
   if(uv.x <= 0. || uv.x >= 1. || uv.y <= 0.0 || uv.y >= 1.) {
     return 0.0;
   }
@@ -378,7 +381,7 @@ float moonValue(vec3 rayDir, vec3 sMoon, float moonAngularRadius){
 
 const float bloomFactor = 8e-6;
 float sunMoonIntensity(vec3 rayDir, vec3 sSun, float sunAngularRadius, vec3 sMoon, float moonAngularRadius){
-  if (distance(sSun, rayDir) > 0.02){
+  if (distance(sSun, rayDir) > 0.07){
     return 0.0;
   }
 
@@ -489,7 +492,7 @@ vec4 scattering(
   float factor = planet_intersected ? 0. : 8.;
   float sampleDistributionExponent = 1. + factor * clamp(1. - observerHeight / atmosphereThickness, 0., 1.);
   float prevRayT = 0.0;
-
+  float avgUmbra = 0.0;
   for (int i = 0; i < steps.x; i++){
     float t = d * pow(float(i) / fsteps, sampleDistributionExponent);
     ds = t - prevRayT;
@@ -504,6 +507,7 @@ vec4 scattering(
     // vec2 intPlanet2 = raySphereIntersection(pos, sSun, planetRadius);
 
     float u = umbra(pos, rApparentSun, sunPosition, rApparentMoon, moonPosition);
+    avgUmbra += u;
     // u = intersectsOutside(intPlanet2) ? 0.0 : u;
 
     vec2 intAtmosOut = raySphereIntersection(pos, sSun, atmosphereRadius);
@@ -521,6 +525,7 @@ vec4 scattering(
     mieT += scatter * odStep.y;
   }
 
+  avgUmbra /= float(steps.x);
 
   // phases
   float mu = dot(rayDir, sSun);
@@ -577,10 +582,15 @@ vec4 scattering(
   // opacity of the atmosphere
   vec3 color = (1. - cloudAbsorptionAmount) * (scatter + sunDiskColor) + cloud - 0.2 * cloudAbsorptionAmount;
   float opacity = dot(primaryDepth.xy, vec2(0.2 * length(rayleighCoefficients), length(mieCoefficients))) + cloudAbsorptionAmount;
-  // this is a fudge to help hide stars in the daytime when lots of light is scattered
-  opacity += clampMix(0., 1., 300. * length(color));
-  // the stars twinkle :)
-  opacity += clampMix(0., 1.0, primaryDepth.x / 1000.) * fbm(rayDir * 100. + 500. * time);
+  if(!planet_intersected) {
+    // this is a fudge to help hide stars in the daytime when lots of light is scattered
+    opacity += clampMix(0., 1., 300. * length(color));
+    // the stars twinkle :)
+    opacity += clampMix(0., 1.0, primaryDepth.x / 1000.) * fbm(rayDir * 100. + 500. * time);
+  } else {
+    // if looking at the planet from orbit, this ensures a dark shadow
+    opacity = mix(1., opacity, avgUmbra);
+  }
   return vec4(I0 * clamp(color, 0.0, 1.0), clamp(opacity, 0.0, 1.0));
 }
 

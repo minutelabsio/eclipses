@@ -2,7 +2,8 @@ import { ShaderMaterial, TextureLoader } from 'three'
 import * as THREE from 'three'
 import vertexShader from './vertex.glsl'
 import fragmentShader from './fragment.glsl'
-import corona from '../../assets/eclipse2017nasa.webp'
+// import corona from '../../assets/eclipse2017nasa.webp'
+import corona from '../../assets/simulated-corona.webp'
 
 const coronaTexture = new TextureLoader().load(corona)
 
