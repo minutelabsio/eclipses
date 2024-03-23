@@ -48,6 +48,7 @@ export default () => {
     mieWavelengthResponse: new THREE.Vector3(0.2),
     mieScaleHeight: 500,
     mieDirectional: -0.758,
+    mieBaseline: 0.,
     ozoneLayerHeight: 25e3,
     ozoneLayerWidth: 30e3,
     ozoneCoefficients: new THREE.Vector3(1.4e-6, 1.2e-6, 0.085e-6),

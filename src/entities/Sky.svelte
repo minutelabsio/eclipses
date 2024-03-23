@@ -19,6 +19,7 @@
     mieWavelengthResponse,
     mieScaleHeight,
     mieDirectional,
+    mieBaseline,
     ozoneLayerHeight,
     ozoneLayerWidth,
     ozoneCoefficients,
@@ -75,6 +76,7 @@
   $: Sky.mieWavelengthResponse = $mieWavelengthResponse
   $: Sky.mieScaleHeight = $mieScaleHeight
   $: Sky.mieDirectional = $mieDirectional
+  $: Sky.mieBaseline = $mieBaseline
   $: Sky.ozoneLayerHeight = $ozoneLayerHeight
   $: Sky.ozoneLayerWidth = $ozoneLayerWidth
   $: Sky.ozoneCoefficients = $ozoneCoefficients

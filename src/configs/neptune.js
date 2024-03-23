@@ -91,6 +91,7 @@ export default {
   mieAmount: 0.0,
   mieDirectional: 0,
   mieScaleHeight: 0,
+  mieBaseline: 0,
 
   ozoneRed: 0,
   ozoneGreen: 0,

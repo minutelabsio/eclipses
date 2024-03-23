@@ -214,6 +214,7 @@ export const mieWavelengthResponse = derived(
 )
 export const mieScaleHeight = writable(1.2e3)
 export const mieDirectional = writable(0.758)
+export const mieBaseline = writable(0)
 export const rayleighCoefficient = derived(
   [airIndexRefraction, airDensityFactor, overrideRayleigh, rayleighRed, rayleighGreen, rayleighBlue],
   ([$n, $air, $overrideRayleigh, $rayleighRed, $rayleighGreen, $rayleighBlue]) => {
@@ -309,6 +310,7 @@ const state = {
   mieWavelengthGreen,
   mieWavelengthBlue,
   mieDirectional,
+  mieBaseline,
 
   ozoneLayerHeight,
   ozoneLayerWidth,

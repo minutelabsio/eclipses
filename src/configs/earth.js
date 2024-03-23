@@ -48,6 +48,7 @@ export default {
   mieWavelengthRed: 0.8,
   mieWavelengthGreen: 0.8,
   mieWavelengthBlue: 0.8,
+  mieBaseline: 0,
   ozoneRed: 3.5,
   ozoneGreen: 1.7,
   ozoneBlue: 0.085,

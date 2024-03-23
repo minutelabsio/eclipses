@@ -72,6 +72,7 @@ export default {
   mieAmount: 2e-5,
   mieDirectional: 1e-5,
   mieScaleHeight: 11000,
+  mieBaseline: 0,
 
   ozoneLayerHeight: 27e3 * METER,
   ozoneLayerWidth: 27e3 * METER,

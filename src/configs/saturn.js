@@ -107,6 +107,7 @@ export default {
   mieAmount: 5.6e-5,
   mieDirectional: 0.05,
   mieScaleHeight: 9000,
+  mieBaseline: 0,
 
   ozoneRed: 0,
   ozoneGreen: 0,

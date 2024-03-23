@@ -156,11 +156,12 @@
     mieSettings.add(state, 'mieGreen', 0, 40, 0.1)
     mieSettings.add(state, 'mieBlue', 0, 40, 0.1)
     mieSettings.add(state, 'mieScaleHeight', 0, 50000, 10)
-    mieSettings.add(state, 'mieAmount', 0, 1e-4, 1e-10)
+    mieSettings.add(state, 'mieAmount', 0, 1e-5, 1e-8)
     mieSettings.add(state, 'mieWavelengthRed', 0, 1, 1e-2)
     mieSettings.add(state, 'mieWavelengthGreen', 0, 1, 1e-2)
     mieSettings.add(state, 'mieWavelengthBlue', 0, 1, 1e-2)
     mieSettings.add(state, 'mieDirectional', -.999, .999, 0.000001)
+    mieSettings.add(state, 'mieBaseline', 0, 0.5, 0.01)
 
     const ozoneSettings = atmosSettings.addFolder('Ozone')
     ozoneSettings.add(state, 'ozoneLayerHeight', 0, 100000, 10)

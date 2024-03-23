@@ -31,6 +31,7 @@ uniform vec3 mieCoefficients;
 uniform vec3 mieWavelengthResponse;
 uniform float mieScaleHeight;
 uniform float mieDirectional;
+uniform float mieBaseline;
 
 uniform float ozoneLayerHeight;
 uniform float ozoneLayerWidth;
@@ -578,7 +579,7 @@ vec4 scattering(
   }
 
   // final scattering
-  vec3 scatter = rayleighT * rphase * rayleighCoefficients + mieT * mphase * mieCoefficients;
+  vec3 scatter = rayleighT * rphase * rayleighCoefficients + mieT * (mieBaseline + mphase) * mieCoefficients;
   // scatter = clamp(scatter, vec3(0.0), vec3(I0)) / sqrt(fsteps);
   // opacity of the atmosphere
   vec3 color = (scatter + sunDiskColor);
