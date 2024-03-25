@@ -52,7 +52,7 @@ const atmosphereThickness = 9 * 27.7e3 * METER
 export default {
   fogHue: 0,
   sunDistance: 19.22 * AU, // between 20.09 and 18.28
-  sunIntensity: 2,
+  sunIntensity: 3,
 
   planetRadius,
   planetAxialTilt,
@@ -66,32 +66,37 @@ export default {
   airSurfacePressure: 1000 * mBar,
   airSurfaceTemperature: 76,
 
-  mieAmount: 1.7e-5,
-  mieDirectional: 0.36,
-  mieScaleHeight: 13800,
+  // For uranus this is not mie scattering, or ozone.
+  // This is meant to mimick the methane in the atmosphere
+  // that creates clouds and absorbs red light
+  mieAmount: 2.2e-6,
+  mieDirectional: 0,
+  mieScaleHeight: 7000,
 
-  mieRed: 0.2,
-  mieGreen: 0.8,
-  mieBlue: 2.4,
+  mieRed: 0.79,
+  mieGreen: 4.03,
+  mieBlue: 6.47,
 
-  mieWavelengthRed: 0.3,
-  mieWavelengthGreen: 0.15,
-  mieWavelengthBlue: 0.13,
+  mieWavelengthRed: 0.1,
+  mieWavelengthGreen: 0.1,
+  mieWavelengthBlue: 0.1,
   mieBaseline: 0,
 
-  ozoneRed: 0,
-  ozoneGreen: 0,
-  ozoneBlue: 0,
+  ozoneRed: 7.8,
+  ozoneGreen: 2.4,
+  ozoneBlue: 2.1,
+  ozoneLayerHeight: 0,
+  ozoneLayerWidth: 39000,
+
+  windSpeed: 100,
+  cloudZ: 0.2,
+  cloudThickness: 3.1,
+  cloudSize: 0.2,
+  cloudMie: 0.1,
+  cloudThreshold: 0.49,
+  cloudAbsorption: 0.49,
 
   // moon
   ...moons.miranda,
   moons,
-
-  windSpeed: 100,
-  cloudZ: 0.2,
-  cloudThickness: 4.2,
-  cloudSize: 0.1,
-  cloudMie: 0.35,
-  cloudThreshold: 0.49,
-  cloudAbsorption: 0.49,
 }

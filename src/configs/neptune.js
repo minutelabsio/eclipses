@@ -88,24 +88,36 @@ export default {
   airSurfacePressure: 1000 * mBar,
   airSurfaceTemperature: 72,
 
-  mieAmount: 0.0,
+  // apparently the latest news is neptune is roughly the color of uranus
+  // so... i guess use the same parameters but put less methane in the atmosphere...
+  mieAmount: 1.2e-6,
   mieDirectional: 0,
-  mieScaleHeight: 0,
+  mieScaleHeight: 7000,
+
+  mieRed: 0.79,
+  mieGreen: 4.03,
+  mieBlue: 6.47,
+
+  mieWavelengthRed: 0.1,
+  mieWavelengthGreen: 0.1,
+  mieWavelengthBlue: 0.1,
   mieBaseline: 0,
 
-  ozoneRed: 0,
-  ozoneGreen: 0,
-  ozoneBlue: 0,
+  ozoneRed: 7.8,
+  ozoneGreen: 2.4,
+  ozoneBlue: 2.1,
+  ozoneLayerHeight: 0,
+  ozoneLayerWidth: 30000,
+
+  windSpeed: 100,
+  cloudZ: 0.2,
+  cloudThickness: 10,
+  cloudSize: 0.2,
+  cloudMie: 0,
+  cloudThreshold: 0.35,
+  cloudAbsorption: 0.03,
 
   // moon
   ...moons.niaid,
   moons,
-
-  windSpeed: 100,
-  cloudZ: 0.5,
-  cloudThickness: 0.8,
-  cloudSize: 0.1,
-  cloudMie: 0.35,
-  cloudThreshold: 0,
-  cloudAbsorption: 0.8,
 }
