@@ -1,31 +1,9 @@
 import * as THREE from 'three'
 // TODO: change assert => with when linting supports it
 import { starData } from './starData' assert { type: 'macro' };
-
-function vertexShader() {
-  return `
-    attribute float size;
-    attribute vec4 color;
-    varying vec4 vColor;
-    void main() {
-      vColor = color * size * 0.62;
-      vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
-      // gl_PointSize = 6e9 * size * ( 250.0 / -mvPosition.z );
-      gl_PointSize = size * 1.8;
-      gl_Position = projectionMatrix * mvPosition;
-    }
-  `
-}
-
-function fragmentShader() {
-  return `
-    varying vec4 vColor;
-    uniform float exposure;
-    void main() {
-      gl_FragColor = vColor; //1.0 - exp(-exposure * vec4( vColor ));
-    }
-  `
-}
+import { vertexShader, fragmentShader } from './shaders.js'
+import { rayleighScaleHeight, altitude } from '../../store/environment'
+import { derived } from 'svelte/store';
 
 export default async function createStars(){
   const {
@@ -40,11 +18,27 @@ export default async function createStars(){
   starsGeometry.setAttribute('size', new THREE.Float32BufferAttribute(sizes, 1))
 
   const starsMaterial = new THREE.ShaderMaterial({
-    vertexShader: vertexShader(),
-    fragmentShader: fragmentShader()
+    vertexShader: vertexShader,
+    fragmentShader: fragmentShader,
   })
 
   starsMaterial.uniforms.exposure = { value: 1.0 }
+  starsMaterial.uniforms.time = { value: 0 }
+  starsMaterial.uniforms.depth = { value: 0 }
+  const z = derived([altitude, rayleighScaleHeight], ([$altitude, $rayleighScaleHeight]) => {
+    return $altitude / $rayleighScaleHeight
+  })
+  z.subscribe(value => {
+    starsMaterial.uniforms.depth.value = Math.exp(-value)
+    starsMaterial.uniforms.depth.needsUpdate = true
+  })
+
+  function tick(time){
+    requestAnimationFrame(tick)
+    starsMaterial.uniforms.time.value = time
+    starsMaterial.uniforms.time.needsUpdate = true
+  }
+  tick(0)
 
   return new THREE.Points(starsGeometry, starsMaterial)
 }

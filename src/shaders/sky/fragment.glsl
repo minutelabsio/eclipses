@@ -599,7 +599,8 @@ vec4 scattering(
     // this is a fudge to help hide stars in the daytime when lots of light is scattered
     opacity += clampMix(0., 1., 100. * length(color) + cloudAbsorptionAmount);
     // the stars twinkle :)
-    opacity += clampMix(0., 1.0, primaryDepth.x / 1000.) * fbm(rayDir * 100. + 500. * time);
+    // moved twinkle to stars shader
+    // opacity += clampMix(0., 1.0, primaryDepth.x / 1000.) * fbm(rayDir * 100. + 500. * time);
   } else {
     // if looking at the planet from orbit, this ensures a dark shadow
     opacity = mix(1., opacity, avgUmbra);
