@@ -456,6 +456,13 @@ vec4 scattering(
     return vec4(I0 * vec3(sunDisk), step(0.01, length(sunDisk)));
   }
 
+  // if(altitude < 0.1 * atmosphereThickness) {
+  //   vec2 intPlanet = raySphereIntersection(rayOrigin, rayDir, planetRadius);
+  //   vec3 intPt = rayOrigin + intPlanet.x * rayDir;
+    // mieCoefficients *= fbm(normalize(intPt) * 400. + 500. * time);
+    // path.y *= fbm(rayDir * 4. + 300. * time);
+  // }
+
   float rApparentSun = tan(SunAngularRadius);
   float rApparentMoon = tan(moonAngularRadius);
 
@@ -549,34 +556,38 @@ vec4 scattering(
     float cloudHeight = cloudZ * atmosphereThickness;
     vec2 cloudInt = raySphereIntersection(rayOrigin, rayDir, planetRadius + cloudHeight);
     if (intersectsInsideOnly(cloudInt)){
-      float cloudPhase = miePhase(mu, cloudMie);
+      float cloudNorm = miePhase(1., cloudMie);
+      float cloudPhase = 4. * miePhase(mu, cloudMie) / cloudNorm;
+      float cloudRefl = 4. * miePhase(mu, -0.1);
       vec3 cloudPoint = rayOrigin + cloudInt.y * rayDir;
       vec2 planetInt = raySphereIntersection(cloudPoint, sSun, planetRadius);
       vec3 cloudLayer = cloudSize * 900. * cloudPoint / atmosphereRadius;
       cloudAmount = cloudThickness * smoothstep(0., 1.0, fbm(cloudLayer + windSpeed * time) - cloudThreshold);
       // float cloudAmount = 2. * getPhases(rayDir, sSun, 0.5 + 0.4 * fbm(cloudLayer * 20.)).y;
-      cloudAbsorptionAmount = clamp(10. * cloudAbsorption * cloudAmount, 0., 1.);
+      cloudAbsorptionAmount = clamp(cloudAbsorption * cloudAmount, 0., 1.);
       float brightness = remap(planetInt.y - abs(planetInt.x), 0., 0.08 * planetRadius, 1., 0.);
-      // cloud = 1e-6 * I0 * cloudAmount * cloudPhase * rayleighT;
-      cloud =  clamp(0.1 * cloudAmount * mieCoefficients * (brightness * (1. - cloudAbsorption) * (cloudPhase + 1.) * (rayleighT + mieT)), 0., 1.);
+      cloud =  clamp(0.1 * cloudAmount * mieCoefficients * (brightness * (1. - cloudAbsorption) * (cloudPhase + cloudRefl) * (rayleighT + mieT)), 0., 1.);
     }
   }
 
   // clouds below for gas giants
-  if (planetRadius > 5e6 && planet_intersected){
-    float cloudPhase = miePhase(mu, cloudMie);
-    vec3 cloudPoint = rayOrigin + path.y * rayDir;
-    cloudPoint += 20. * cnoise3(cloudPoint / planetRadius);
-    vec2 planetInt = raySphereIntersection(cloudPoint, sSun, planetRadius - 1.);
-    float cloudMinBrightness = mix(1e-5, 0., remap(planetInt.y - abs(planetInt.x), 0., 0.03 * planetRadius, 0., 1.));
-    vec3 cloudLayer = cloudSize * 4000. * cloudPoint / atmosphereRadius;
-    cloudAmount = cloudThickness * smoothstep(0., 1.0, fbm(cloudLayer + windSpeed * time + 10.) - cloudThreshold);
-    // fade as we get higher
-    float k = remap(length(rayOrigin) - planetRadius, 0., atmosphereThickness, 0., 1.);
-    cloudAmount = mix(cloudAmount, 0., k);
-    cloudAbsorptionAmount = clamp(cloudAbsorption * cloudAmount, 0., 1.);
-    cloud = clamp(0.1 * cloudAmount * max(10. * (mieCoefficients) * (cloudPhase + (1. - cloudAbsorptionAmount) * rphase), cloudMinBrightness) * (rayleighT + mieT), 0., 1.);
-  }
+  // if (planetRadius > 5e6 && planet_intersected){
+  //   float cloudNorm = miePhase(1., cloudMie);
+  //   float cloudPhase = 4. * miePhase(mu, cloudMie);
+  //   float cloudRefl = 4. * miePhase(mu, -0.1);
+  //   vec3 cloudPoint = rayOrigin + path.y * rayDir;
+  //   // cloudPoint += 20. * cnoise3(cloudPoint / planetRadius);
+  //   vec2 planetInt = raySphereIntersection(cloudPoint, sSun, planetRadius - 1.);
+  //   float cloudMinBrightness = mix(1e-5, 0., remap(planetInt.y - abs(planetInt.x), 0., 0.03 * planetRadius, 0., 1.));
+  //   vec3 cloudLayer = cloudSize * 4000. * cloudPoint / atmosphereRadius;
+  //   cloudAmount = cloudThickness * smoothstep(0., 1.0, fbm(cloudLayer + windSpeed * time + 10.) - cloudThreshold);
+  //   // fade as we get higher
+  //   float k = remap(length(rayOrigin) - planetRadius, 0., atmosphereThickness, 0., 1.);
+  //   cloudAmount = mix(cloudAmount, 0., k);
+  //   cloudAbsorptionAmount = clamp(cloudAbsorption * cloudAmount, 0., 1.);
+  //   float brightness = remap(planetInt.y - abs(planetInt.x), 0., 0.08 * planetRadius, 1., 0.);
+  //   cloud += clamp(0.1 * cloudAmount * mieCoefficients * (brightness * (1. - cloudAbsorption) * (cloudPhase + cloudRefl) * (rayleighT + mieT)), 0., 1.);
+  // }
 
   // final scattering
   vec3 scatter = rayleighT * rphase * rayleighCoefficients + mieT * (mieBaseline + mphase) * mieCoefficients;
@@ -586,7 +597,7 @@ vec4 scattering(
   float opacity = dot(primaryDepth.xy, vec2(0.2 * length(rayleighCoefficients), length(mieCoefficients))) + cloudAbsorptionAmount;
   if(!planet_intersected) {
     // this is a fudge to help hide stars in the daytime when lots of light is scattered
-    opacity += clampMix(0., 1., 300. * length(color) + cloudAbsorptionAmount);
+    opacity += clampMix(0., 1., 100. * length(color) + cloudAbsorptionAmount);
     // the stars twinkle :)
     opacity += clampMix(0., 1.0, primaryDepth.x / 1000.) * fbm(rayDir * 100. + 500. * time);
   } else {
@@ -594,7 +605,7 @@ vec4 scattering(
     opacity = mix(1., opacity, avgUmbra);
   }
   // add the clouds
-  color = color * (1. - cloudAbsorptionAmount) + cloud;
+  color = color * (1. - cloudAbsorptionAmount)  + cloud;
   return vec4(I0 * clamp(color, 0.0, 1.0), clamp(opacity, 0.0, 1.0));
 }
 

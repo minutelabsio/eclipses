@@ -152,9 +152,9 @@
     rayleighSettings.add(state, 'rayleighScaleHeight', 0, 100000, 10)
 
     const mieSettings = atmosSettings.addFolder('Mie')
-    mieSettings.add(state, 'mieRed', 0, 40, 0.1)
-    mieSettings.add(state, 'mieGreen', 0, 40, 0.1)
-    mieSettings.add(state, 'mieBlue', 0, 40, 0.1)
+    mieSettings.add(state, 'mieRed', 0, 40, 0.01)
+    mieSettings.add(state, 'mieGreen', 0, 40, 0.01)
+    mieSettings.add(state, 'mieBlue', 0, 40, 0.01)
     mieSettings.add(state, 'mieScaleHeight', 0, 50000, 10)
     mieSettings.add(state, 'mieAmount', 0, 1e-5, 1e-8)
     mieSettings.add(state, 'mieWavelengthRed', 0, 1, 1e-2)

@@ -61,21 +61,22 @@ export default {
   airSurfacePressure: 1000 * mBar,
   airSurfaceTemperature: 165,
 
-  mieRed: 0.8,
-  mieGreen: 5.9,
-  mieBlue: 32.5,
+  // this is a best guess for ammonia clouds
+  mieRed: 5.12,
+  mieGreen: 8.9,
+  mieBlue: 11.1,
 
-  mieWavelengthRed: 0.8,
-  mieWavelengthGreen: 0.85,
-  mieWavelengthBlue: 0.9,
+  mieWavelengthRed: 0.38,
+  mieWavelengthGreen: 0.43,
+  mieWavelengthBlue: 0.46,
 
-  mieAmount: 2e-5,
-  mieDirectional: 1e-5,
+  mieAmount: 5e-6,
+  mieDirectional: .41,
   mieScaleHeight: 11000,
   mieBaseline: 0,
 
   ozoneLayerHeight: 27e3 * METER,
-  ozoneLayerWidth: 27e3 * METER,
+  ozoneLayerWidth: 0,
   ozoneRed: 4.3,
   ozoneGreen: 14.6,
   ozoneBlue: 40,
@@ -84,11 +85,11 @@ export default {
   ...moons.amalthea,
   moons,
 
-  windSpeed: 100,
   cloudZ: 100e3 * METER / atmosphereThickness,
-  cloudThickness: 0.4,
+  cloudThickness: 0.7,
   cloudSize: 0.1,
-  cloudMie: 0.2,
-  cloudThreshold: 0.2,
-  cloudAbsorption: 0.05,
+  cloudMie: 0.4,
+  cloudThreshold: 0.36,
+  cloudAbsorption: 0.35,
+  windSpeed: 100,
 }

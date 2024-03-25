@@ -52,9 +52,11 @@ export default {
   // mieRed: 37.8,
   // mieGreen: 26.1,
   // mieBlue: 18.1,
-  mieRed: 17.8,
+
+  // this is due to FE3O2 in the atmosphere that dominates scattering
+  mieRed: 14.86,
   mieGreen: 11.6,
-  mieBlue: 7.3,
+  mieBlue: 10.26,
 
   mieWavelengthRed: 0.78,
   mieWavelengthGreen: .89,
@@ -62,7 +64,7 @@ export default {
 
   mieAmount: 6.7e-7,
   mieScaleHeight: 8770,
-  mieDirectional: 0.81,
+  mieDirectional: 0.71,
   mieBaseline: 0.29,
 
   ozoneRed: 10,
@@ -73,7 +75,7 @@ export default {
 
   windSpeed: 10,
   cloudZ: 0.01,
-  cloudThickness: 2,
+  cloudThickness: 0.5,
   cloudSize: 3.6,
   cloudMie: 0.31,
   cloudThreshold: 0.34,
