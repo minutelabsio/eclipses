@@ -79,7 +79,7 @@
   })
 
   eclipseProgress.subscribe((v) => {
-    if (player.paused){
+    if (player.paused) {
       player.progress = v * 100
     }
   })

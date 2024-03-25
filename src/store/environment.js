@@ -54,7 +54,7 @@ export const observerOrigin = derived(
 )
 export const sunDistance = writable(1 * AU)
 export const sunRadius = writable(109 * Re)
-export const elevationMid = writable(2)
+export const elevationMid = writable(9)
 export const totalityFactor = writable(0.9)
 export const selectedMoon = writable('luna')
 export const moonRadius = writable(0.2727 * Re)
@@ -82,11 +82,29 @@ export const moonAngularDiameter = derived(
   ([$moonDistance, $moonRadius]) => 2 * Math.asin($moonRadius / $moonDistance) / DEG
 )
 
+export const horizonRadius = derived(
+  [planetRadius, atmosphereThickness],
+  ([$planetRadius, $atmosphereThickness]) => {
+    const atmosphereRadius = $planetRadius + $atmosphereThickness
+    return Math.sqrt(atmosphereRadius * atmosphereRadius - $planetRadius * $planetRadius)
+  }
+)
+
+// export const moonTransitDegrees = derived(
+//   [moonOrbitDirection, moonAngularDiameter, sunAngularDiameter],
+//   ([$moonOrbitDirection, $moonAngularDiameter, $sunAngularDiameter]) =>
+//     // approximate
+//     0.5 * $moonOrbitDirection * ($moonAngularDiameter + $sunAngularDiameter)
+// )
+
+// bit of a hack
 export const moonTransitDegrees = derived(
-  [moonOrbitDirection, moonAngularDiameter, sunAngularDiameter],
-  ([$moonOrbitDirection, $moonAngularDiameter, $sunAngularDiameter]) =>
-    // approximate
-    0.5 * $moonOrbitDirection * ($moonAngularDiameter + $sunAngularDiameter)
+  [moonOrbitDirection, moonAngularDiameter, sunAngularDiameter, moonDistance, horizonRadius],
+  ([$moonOrbitDirection, $moonAngularDiameter, $sunAngularDiameter, $moonDistance, $horizonRadius]) => {
+    const a = $moonOrbitDirection * 0.5 * ($moonAngularDiameter + $sunAngularDiameter)
+    const y = Math.asin($horizonRadius / $moonDistance / 7) / DEG
+    return 0.5 * y + a
+  }
 )
 
 export const transitTime = derived(

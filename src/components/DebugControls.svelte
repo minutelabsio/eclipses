@@ -34,7 +34,7 @@
     elevation: -9
   }).by('20s', { elevation: 10 })
 
-  let player = new Player(tween.duration).seek(12000).pause()
+  let player = new Player(tween.duration).seek(18000).pause()
   player.pipe(tween).subscribe(state => {
     elevationMid.set(state.elevation)
   })
