@@ -21,7 +21,7 @@
     'uranus',
     'neptune'
   ]
-  const MIN_FLICK_VEL = 0.6
+  const MIN_FLICK_VEL = 0.3
   let element
   let pos = 0
   let scale = 500

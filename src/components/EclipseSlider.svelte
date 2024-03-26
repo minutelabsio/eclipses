@@ -75,6 +75,10 @@
 
 <div bind:this={element} on:click={checkClick} on:keydown={checkKey} role="slider" aria-valuenow={progress} tabindex="0">
   <svg viewBox="-10 -10 120 120">
+    <filter id="blur">
+      <feGaussianBlur stdDeviation="1" />
+    </filter>
+
     <!-- a semicircle -->
     <!-- svelte-ignore a11y-no-static-element-interactions -->
     <g on:click|capture|stopPropagation={setSlider} on:pointerdown|capture={setSlider}>
@@ -84,13 +88,15 @@
       <circle
         class="shadow"
         transform={`rotate(${pos * 180} 50 50)`}
-        cx="0" cy="50" dx="50" r="4"
+        cx="14" cy="50" r="4.5"
+        fill="black"
+        filter="url(#blur)"
       />
       <!-- moon -->
       <circle
         class="moon"
         transform={`rotate(${pos * 180} 50 50)`}
-        cx="0" cy="50" dx="50" r="4"
+        cx="0" cy="50" dx="50" r="4.5"
       />
     </g>
     <!-- a circle -->
@@ -104,17 +110,16 @@
     outline: none
   // stroke inside the semicircle
   .path
-    stroke-width: 8px
+    stroke-width: 9px
     stroke-linecap: round
-    stroke: hsla(0, 0%, 30%, 0.5)
+    stroke: hsla(0, 0%, 100%, 0.1)
     fill: none
   .before
-    stroke: hsla(166, 95%, 51%, 0.6)
+    stroke: hsla(0, 0%, 100%, .4)
   .moon
-    fill: hsla(0, 0%, 100%, 1)
-    filter: drop-shadow(0px -1px 2px rgb(0 0 0 / 0.4))
+    fill: #AEAEAE
+    stroke-width: .8
+    stroke: white
   .shadow
-    fill: hsla(0, 0%, 100%, 1)
-    filter: drop-shadow(15px 0px 0px rgb(0 0 0 / 0.4))
-  //   transition: transform 0.25s ease
+    fill: hsla(0, 0%, 0%, .6)
 </style>

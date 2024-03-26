@@ -9,6 +9,7 @@ import {
   sunAngularDiameter,
   altitude,
 } from '../store/environment'
+    import { tick } from 'svelte';
 
 export let controls
 export let telescope = false
@@ -118,10 +119,11 @@ useTask((dt) => {
     mouseButtons.wheel={CameraControls.ACTION.ZOOM}
     touches.two={CameraControls.ACTION.TOUCH_ZOOM}
     bind:ref={controls}
-    on:create={({ ref }) => {
+    on:create={async ({ ref }) => {
       const [x, y, z] = $sunPosition
-      ref.lookInDirectionOf(x, y, z, false)
       ref.addEventListener('control', onInteract)
+      await tick()
+      ref.lookInDirectionOf(x, y, z, false)
     }}
   />
 </T.PerspectiveCamera>

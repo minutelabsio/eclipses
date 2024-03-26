@@ -46,7 +46,6 @@
     const { planet, moon } = params
     hoveringPlanet = planet || 'earth'
     selectedPlanet = planet || 'earth'
-    console.log(moon)
     hoveringMoon = moon || 'luna'
     selectedMoon.set(moon || 'luna')
   }
@@ -205,6 +204,53 @@
   flex-direction: column
   transition: opacity 100ms
 
+.planet-moon-title, .planet-moon-selector-title
+  font-family: "Plus Jakarta Sans", sans-serif
+  color: hsla(0, 0%, 100%, .25)
+  h2, h3
+    margin: 0
+    font-weight: 400
+  h2
+    font-size: 25px
+    &::first-letter
+      text-transform: uppercase
+  h3
+    font-size: 12px
+    letter-spacing: 0.6px
+    margin-left: 1px
+    text-transform: uppercase
+.planet-moon-selector-title
+  position: absolute
+  bottom: 0
+  left: 0
+  width: 100%
+  text-align: center
+  h2
+    position: absolute
+    bottom: 0
+    left: 50%
+    transform: translateY(-85px) translateX(-50%)
+    color: white
+    font-size: 36px
+    text-shadow: 0 0 5px hsla(0, 100%, 100%, 0.75)
+  h3
+    position: absolute
+    bottom: 0
+    left: 50%
+    transform: translateY(-528px) translateX(-50%)
+    color: hsla(0, 100%, 100%, 0.75)
+    font-size: 16px
+    letter-spacing: 0.8px
+    text-transform: none
+    &:first-letter
+      text-transform: uppercase
+
+.planet-moon-title
+  position: fixed
+  top: 1.3rem
+  left: 2rem
+  z-index: 100
+
 .controls
   position: fixed
   bottom: 0px
@@ -217,32 +263,14 @@
   &.hidden
     opacity: 1
     filter: opacity(0)
-  .planet-moon-title
-    font-family: "Plus Jakarta Sans", sans-serif
-    position: absolute
-    bottom: 400px
-    left: 50%
-    transform: translateX(-50%)
-    color: hsla(0, 0%, 100%, .5)
-    transition: opacity 1000ms ease-out
-    text-align: center
-    &.hidden
-      transition: opacity 5000ms ease-in
-    h2, h3
-      margin: 0
-    h2
-      font-size: 2.5rem
-      margin-bottom: 1rem
-    h3
-      font-size: 1.5rem
 
   .eclipse-slider
     position: absolute
     bottom: 62px
     left: 50%
     transform: translateX(-50%)
-    height: 190px
-    width: 280px
+    height: 184px
+    width: 270px
     touch-action: none
     cursor: pointer
     // box-shadow: 0 0 50px 0 hsla(0, 0%, 50%, 0.5)
@@ -255,12 +283,25 @@
     height: 280px
   .moon-selector-container
     position: absolute
-    bottom: 0
+    bottom: 450px
     left: 50%
     transform: translateX(-50%)
     max-width: 660px
     transition: opacity 100ms
     width: 100%
+    &::after
+      content: ''
+      position: absolute
+      top: 35px
+      left: 50%
+      transform: translateX(-50%)
+      width: 800px
+      height: 800px
+      border: 1px solid hsla(0, 0%, 100%, 0.2)
+      border-radius: 50%
+      z-index: -1
+      pointer-events: none
+      touch-action: none
 
   .play-pause
     position: absolute
@@ -271,19 +312,22 @@
     line-height: 0
     background: none
     border: none
-    color: white
+    color: hsla(0, 0%, 100%, .7)
     cursor: pointer
     transition: transform 100ms
     transform-origin: 50% 50%
     &:focus, &:hover
-      transform: translate(-50%, -50%) scale(1.2)
+      color: hsla(0, 100%, 100%, 1)
+    &:hover
+      transform: translate(-50%, -50%) scale(1.1)
     &:active
+      color: hsla(0, 0%, 100%, .7)
       transform: translate(-50%, -50%) scale(1)
 
 .hide-controls
   position: fixed
-  top: 0.75rem
-  left: 1rem
+  top: 1.3rem
+  right: 1.5rem
   font-size: 24px
   button
     line-height: 0
@@ -295,7 +339,7 @@
     background: hsla(0, 0%, 100%, 0)
     width: 50px
     height: 50px
-    color: hsla(0, 0%, 100%, .6)
+    color: hsla(0, 0%, 100%, .4)
     font-size: 1.5em
     transition: transform 100ms, color 150ms
     transform-origin: 50% 50%
@@ -303,25 +347,40 @@
     &:focus, &:hover
       color: hsla(0, 100%, 100%, 1)
     &:active
-      color: hsla(0, 0%, 100%, .6)
+      color: hsla(0, 0%, 100%, .7)
     &.active
-      color: hsla(0, 100%, 100%, 1)
+      color: hsla(0, 100%, 100%, .8)
+.brand
+  position: fixed
+  bottom: 31px
+  left: 50%
+  transform: translateX(-50%)
+  text-align: center
+  color: #FFF
+  text-align: center
+  font-family: "Plus Jakarta Sans"
+  font-size: 9px
+  font-weight: 400
+  letter-spacing: 0.45px
+  color: hsla(0, 0%, 100%, 0.4)
 </style>
 
 <Levetate>
+  <aside class="planet-moon-title no-interaction" class:hidden={selectorActive}>
+    <h2>{hoveringPlanet || ''}</h2>
+    <h3>{hoveringMoon || ''}</h3>
+  </aside>
+  <aside class="brand" class:hidden={!hideUi}>
+    MINUTELABS.io
+  </aside>
   <div class="hide-controls">
     <button on:click={toggleControls} class:active={hideUi}>
-      <Icon icon="mdi:eye" />
+      <Icon icon={hideUi ? 'material-symbols:visibility' : 'material-symbols:visibility-outline'} />
     </button>
   </div>
   <div class="controls-container no-highlight" class:hidden={hideUi} >
     <!-- svelte-ignore a11y-no-static-element-interactions -->
     <div class="controls no-highlight" class:selector={selectorActive} class:hidden={hideEclipseControls} bind:this={element}>
-      <aside class="planet-moon-title no-interaction" class:hidden={!selectorActive}>
-        <h2>{hoveringPlanet || ''}</h2>
-        <h3>{hoveringMoon || ''}</h3>
-      </aside>
-
       <div class="planet-selector-container" class:no-interaction={!selectorActive}>
         <PlanetSelector on:select={onPlanetSelected} bind:active={selectorActive} bind:selected={selectedPlanet} bind:hovering={hoveringPlanet} />
       </div>
@@ -330,11 +389,16 @@
         <MoonSelector planet={hoveringPlanet} bind:hoveringMoon={hoveringMoon} />
       </div>
 
+      <aside class="planet-moon-selector-title no-interaction" class:hidden={!selectorActive}>
+        <h2>{hoveringPlanet || ''}</h2>
+        <h3>{hoveringMoon || ''}</h3>
+      </aside>
+
       {#if !selectorActive}
         <div transition:fade={{ duration: 100 }} class="eclipse-slider no-highlight">
           <EclipseSlider bind:progress={$eclipseProgress} on:swipe={onSwipe} on:start={seekStart} on:end={seekEnd}>
             <button class="play-pause" on:dblclick|capture|stopPropagation on:click={togglePlay}>
-              <Icon icon={ playing ? 'mdi:pause' : 'mdi:play'} />
+              <Icon icon={ playing ? 'material-symbols:pause-rounded' : 'material-symbols:play-arrow-rounded'} />
             </button>
           </EclipseSlider>
         </div>

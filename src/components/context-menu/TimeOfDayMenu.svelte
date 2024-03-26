@@ -18,4 +18,5 @@
     margin: 0 6px
   label
     display: flex
+    color: rgba(255, 255, 255, 0.7)
 </style>

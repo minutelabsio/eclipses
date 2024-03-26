@@ -6,6 +6,9 @@
   export let planet = 'earth'
   export let hoveringMoon = 'luna'
 
+  const selectedItemWidth = 80
+  const itemWidth = 80
+
   const getMoonsFor = (planet) => {
     const moons = Object.entries(PlanetConfigs[planet].moons)
       .map(([name, cfg]) => ({ name, radius: cfg.moonRadius, distance: cfg.moonDistance }))
@@ -36,8 +39,6 @@
   }
 
   const carouselPosition = (index, items) => {
-    const selectedItemWidth = 150
-    const itemWidth = 60
     index = Math.max(0, Math.min(index, items.length - 1))
     const offset = (index - 0.5) * itemWidth + selectedItemWidth / 2
     return offset
@@ -97,7 +98,7 @@
 </script>
 
 <nav>
-  <div class="moon-selector-menu" role="menu" on:keydown={onkey} tabindex="0" bind:this={element}>
+  <div class="moon-selector-menu" style:--item-width={`${itemWidth}px`} role="menu" on:keydown={onkey} tabindex="0" bind:this={element}>
     <ul style:transform={`translateX(-${position}px)`}>
       {#each menuItems as item}
         <!-- svelte-ignore a11y-click-events-have-key-events -->
@@ -110,47 +111,60 @@
 </nav>
 
 <style lang="sass">
+  // a pulse animation
+  @keyframes pulse
+    0%
+      opacity: 1
+    50%
+      opacity: 0.7
+    100%
+      opacity: 1
+
   .moon-selector-menu
+    --item-width: 60px
     display: flex
     width: 100%
-    background: linear-gradient(10deg, rgba(221, 221, 221, 0.15) 7.59%, rgba(221, 221, 221, 0.5) 102.04%)
-    backdrop-filter: blur(10px)
     overflow: hidden
+    mask-image: linear-gradient(90deg, rgba(0,0,0,0) 10%, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 90%)
+    cursor: pointer
     ul, li
       list-style: none
       padding: 0
       margin: 0
     ul
+      flex: 1
       position: relative
-      right: 30px
+      right: calc(var(--item-width) / 2)
       display: flex
       height: 50px
       font-size: 20px
       height: 70px
       margin-left: 50%
       transition: transform 300ms ease
+
     li
       position: relative
       display: flex
       justify-content: center
       align-items: center
       flex: 0 0 auto
-      width: 60px
+      width: var(--item-width)
       transition: width 300ms ease
 
       &.active
-        width: 150px
+        // width: 150px
         .moon
-          background: hsla(0, 0%, 0%, 1)
+          background: hsla(0, 0%, 100%, 0.75)
           transform: scale(calc(var(--scale) * 0.5 + 0.5))
+          animation: pulse 1.6s infinite
 
     .moon
       --scale: 0
       border-radius: 50%
       background: hsla(0, 0%, 100%, 0.3)
       transition: transform 300ms, background 300ms
-      width: 50px
-      height: 50px
+      width: 60px
+      height: 60px
       transform: scale(var(--scale))
       cursor: pointer
 </style>

@@ -11,40 +11,46 @@
   const isTab = (item) => !item.isButton && !item.isToggle
   const menuItems = writable([
     {
-      icon: 'mdi:orbit',
+      icon: 'material-symbols:motion-photos-on-rounded',
       name: 'planet',
       title: 'Planet View',
       isButton: true,
     },
     {
-      icon: 'mdi:telescope',
+      // icon: 'mdi:telescope',
+      icon: 'material-symbols:center-focus-strong-outline',
+      iconOn: 'material-symbols:center-focus-strong',
       name: 'telescope',
       title: 'Telescope View',
       isToggle: true,
     },
     {
-      icon: 'mdi:sun-angle',
+      icon: 'material-symbols:wb-twilight-outline-rounded',
+      iconOn: 'material-symbols:wb-twilight-rounded',
       name: 'sun',
       title: 'Time of day',
       component: TimeOfDayMenu,
       active: true
     },
     {
-      icon: 'mdi:speedometer',
+      icon: 'material-symbols:swap-driving-apps-wheel-outline',
+      iconOn: 'material-symbols:swap-driving-apps-wheel',
       name: 'animation-speed',
       title: 'Animation Speed',
       component: PlaybackSpeedMenu,
     },
     {
-      icon: 'mdi:information',
-      name: 'info',
-      title: 'Info',
+      icon: 'material-symbols:settings-outline-rounded',
+      iconOn: 'material-symbols:settings-rounded',
+      name: 'settings',
+      title: 'Settings',
       expanded: true,
     },
     {
-      icon: 'mdi:gear',
-      name: 'settings',
-      title: 'Settings',
+      icon: 'material-symbols:info-outline-rounded',
+      iconOn: 'material-symbols:info-rounded',
+      name: 'info',
+      title: 'Info',
       expanded: true,
     },
   ])
@@ -107,7 +113,7 @@
     {#each $menuItems as item}
       <li>
         <button on:click={() => buttonClicked(item.name)} class:active={item.active}>
-          <Icon icon={item.icon} />
+          <Icon icon={item.active ? item.iconOn : item.icon} />
           <span class="sr-only">{item.title}</span>
         </button>
       </li>
@@ -126,6 +132,7 @@
       margin: 0 6px
       letter-spacing: 1px
       background: linear-gradient(-5deg, rgba(221, 221, 221, 0.15) 7.59%, rgba(221, 221, 221, 0.3) 102.04%)
+      -webkit-backdrop-filter: blur(10px)
       backdrop-filter: blur(10px)
       border-radius: 10px 10px 0 0
       transition: height 300ms
@@ -146,6 +153,7 @@
       height: 70px
       padding: 0 0.5rem
       background: linear-gradient(10deg, rgba(221, 221, 221, 0.15) 7.59%, rgba(221, 221, 221, 0.5) 102.04%)
+      -webkit-backdrop-filter: blur(10px)
       backdrop-filter: blur(10px)
       li
         button
@@ -158,7 +166,7 @@
           background: hsla(0, 0%, 100%, 0)
           width: 50px
           height: 50px
-          color: hsla(0, 0%, 100%, .6)
+          color: hsla(0, 0%, 100%, .5)
           font-size: 1.5em
           transition: transform 100ms, color 150ms
           transform-origin: 50% 50%
@@ -166,9 +174,9 @@
           &:focus, &:hover
             color: hsla(0, 100%, 100%, 1)
           &:active
-            color: hsla(0, 0%, 100%, .6)
+            color: hsla(0, 0%, 100%, .7)
           &.active
             border: 1px solid hsla(0, 0%, 100%, 0.25)
             background: hsla(0, 0%, 100%, 0.25)
-            color: hsla(0, 100%, 100%, 1)
+            color: hsla(0, 100%, 100%, .8)
 </style>
