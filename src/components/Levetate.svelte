@@ -10,6 +10,6 @@ onMount(() => {
 })
 </script>
 
-<aside bind:this={container}>
+<div bind:this={container}>
   <slot></slot>
-</aside>
+</div>

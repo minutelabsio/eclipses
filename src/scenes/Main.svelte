@@ -167,7 +167,7 @@
   }
 
   let selectedMenuItem
-  $: hideEclipseControls = $selectedMenuItem === 'info' || $selectedMenuItem === 'settings'
+  $: hideEclipseControls = !selectorActive && ($selectedMenuItem === 'info' || $selectedMenuItem === 'settings')
 
   interactivity({
     filter: (hits, state) => {

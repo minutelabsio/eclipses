@@ -4,6 +4,8 @@
   import Icon from '@iconify/svelte'
   import TimeOfDayMenu from './context-menu/TimeOfDayMenu.svelte'
   import PlaybackSpeedMenu from './context-menu/PlaybackSpeedMenu.svelte'
+  import AboutMenu from './context-menu/AboutMenu.svelte'
+  import SettingsMenu from './context-menu/SettingsMenu.svelte'
   import { telescopeMode } from '../store/environment'
 
   export let dispatch = createEventDispatcher()
@@ -44,6 +46,7 @@
       iconOn: 'material-symbols:settings-rounded',
       name: 'settings',
       title: 'Settings',
+      component: SettingsMenu,
       expanded: true,
     },
     {
@@ -51,6 +54,7 @@
       iconOn: 'material-symbols:info-rounded',
       name: 'info',
       title: 'Info',
+      component: AboutMenu,
       expanded: true,
     },
   ])
@@ -123,6 +127,7 @@
 
 <style lang="sass">
   .eclipse-menu
+    font-family: "Plus Jakarta Sans", sans-serif
     .context-menu
       height: 40px
       display: flex
@@ -131,13 +136,16 @@
       padding: 0 1.5rem
       margin: 0 6px
       letter-spacing: 1px
-      background: linear-gradient(-5deg, rgba(221, 221, 221, 0.15) 7.59%, rgba(221, 221, 221, 0.3) 102.04%)
+      background: linear-gradient(-5deg, rgba(125, 125, 125, 0.5) 7.59%, rgba(125, 125, 125, 0.8) 102.04%)
       -webkit-backdrop-filter: blur(10px)
       backdrop-filter: blur(10px)
+      border: 1px solid hsla(0, 0%, 100%, 0)
       border-radius: 10px 10px 0 0
       transition: height 300ms
       &.expanded
-        height: 280px
+        height: 380px
+        border: 1px solid hsla(0, 0%, 100%, 0.3)
+        border-bottom: 0
       &.collapsed
         height: 0
     ul, li
@@ -152,7 +160,7 @@
       font-size: 20px
       height: 70px
       padding: 0 0.5rem
-      background: linear-gradient(10deg, rgba(221, 221, 221, 0.15) 7.59%, rgba(221, 221, 221, 0.5) 102.04%)
+      background: linear-gradient(10deg, rgba(125, 125, 125, 0.5) 7.59%, rgba(125, 125, 125, 0.8) 102.04%)
       -webkit-backdrop-filter: blur(10px)
       backdrop-filter: blur(10px)
       li
