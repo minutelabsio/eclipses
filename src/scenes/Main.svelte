@@ -14,6 +14,8 @@
     mountainsVisible,
     selectedMoon,
     selectPlanet,
+    hasLoaded,
+    elevationMid,
   } from '../store/environment'
   import {
     AU,
@@ -29,10 +31,11 @@
   import { frames } from '../lib/animation'
   import { push } from 'svelte-spa-router'
   import { quintIn } from 'svelte/easing'
-  import { tick } from 'svelte'
+  import { onMount, tick } from 'svelte'
   import { interactivity } from '@threlte/extras'
   import { T } from '@threlte/core'
   import MoonSelector from '../components/MoonSelector.svelte'
+  import { get } from 'svelte/store'
 
   export let selectedPlanet = 'earth'
   export let params = {}
@@ -179,6 +182,27 @@
 
   delay(10000).then(() => {
     hideTutorial = true
+  })
+
+  const animateSunrise = () => {
+    const tween = Tween.create({ el: -5 })
+      .by('2s', { el: -5 }, 'linear')
+      .by('12s', { el: get(elevationMid) }, 'quadInOut')
+
+    frames(12000)
+      .pipe(tween)
+      .subscribe(({ el }) => {
+        elevationMid.set(el)
+      })
+  }
+
+  onMount(() => {
+    hasLoaded.update((v) => {
+      if (!v) {
+        animateSunrise()
+      }
+      return true
+    })
   })
 
 </script>

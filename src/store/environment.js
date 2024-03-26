@@ -30,6 +30,8 @@ const sphereIntersection = (origin, ray, radius) => {
   return x0 < x1 ? [x0, x1] : [x1, x0]
 }
 
+export const hasLoaded = writable(false)
+
 export const sunIntensity = writable(25)
 
 export const telescopeMode = writable(false)
