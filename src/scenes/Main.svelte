@@ -386,7 +386,7 @@
       </div>
 
       <div class="moon-selector-container" class:hidden={!selectorActive}>
-        <MoonSelector planet={hoveringPlanet} bind:hoveringMoon={hoveringMoon} />
+        <MoonSelector planet={hoveringPlanet} bind:hoveringMoon={hoveringMoon} on:select={() => selectorActive = false} />
       </div>
 
       <aside class="planet-moon-selector-title no-interaction" class:hidden={!selectorActive}>
@@ -426,4 +426,5 @@
   far={1.2 * AU}
   bind:controls={cameraControls}
   telescope={$telescopeMode}
+  animateTelescope={!playing}
 />

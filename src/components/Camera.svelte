@@ -14,6 +14,7 @@ import {
 export let controls
 export let telescope = false
 export let orbitPlanet = false
+export let animateTelescope = false
 let camera
 
 const component = forwardEventHandlers()
@@ -51,7 +52,7 @@ let stateSaved = false
 const updateCameraPosition = ([x, y, z]) => {
   if (!followSun) return
   if (!controls) return
-  controls.lookInDirectionOf(x, y, z, false)
+  controls.lookInDirectionOf(x, y, z, animateTelescope)
 }
 
 sunPosition.subscribe(updateCameraPosition)
@@ -114,6 +115,7 @@ useTask((dt) => {
     minZoom={0.5}
     minDistance={2}
     maxDistance={2.1}
+    smoothTime={0.1}
     polarRotateSpeed={orbitPlanet ? 0.5 / zoom : -0.08 / zoom}
     azimuthRotateSpeed={orbitPlanet ? 0.5 / zoom : -0.08 / zoom}
     mouseButtons.wheel={CameraControls.ACTION.ZOOM}

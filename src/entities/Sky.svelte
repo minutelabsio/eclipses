@@ -40,7 +40,7 @@
     METER,
     AU,
   } from '../lib/units'
-  import Thalassa from '../assets/moon-stencils/Thalassa.webp'
+  import * as moonMasks from '../lib/moon-masks.js'
   import { useSuspense } from '@threlte/extras'
 
   export let fisheye = false
@@ -54,9 +54,7 @@
   const suspend = useSuspense()
 
   let textures
-  suspend(useLoader(TextureLoader).load({
-    thalassa: Thalassa,
-  })).then((result) => {
+  suspend(useLoader(TextureLoader).load(moonMasks)).then((result) => {
     textures = result
   })
 

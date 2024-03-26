@@ -1,13 +1,17 @@
 <script>
   import * as PlanetConfigs from '../configs'
   import interact from 'interactjs'
-  import { onMount } from 'svelte'
+  import { onMount, createEventDispatcher } from 'svelte'
+  import * as moonMasks from '../lib/moon-masks.js'
 
   export let planet = 'earth'
   export let hoveringMoon = 'luna'
 
-  const selectedItemWidth = 80
-  const itemWidth = 80
+  const dispatch = createEventDispatcher()
+
+  const minMoonSize = 0.2
+  const selectedItemWidth = 90
+  const itemWidth = 90
 
   const getMoonsFor = (planet) => {
     const moons = Object.entries(PlanetConfigs[planet].moons)
@@ -17,10 +21,12 @@
     // largest moon
     const largest = moons.reduce((a, b) => a?.radius > b.radius ? a : b)
     return moons.map(moon => {
+      const mask = moonMasks[moon.name]
       return {
         name: moon.name,
-        size: moon.radius / largest.radius,
-        active: false
+        size: Math.max(minMoonSize, moon.radius / largest.radius),
+        active: false,
+        mask
       }
     })
   }
@@ -45,7 +51,11 @@
   }
 
   const selectMoon = (item) => () => {
-    hoveringMoon = item.name
+    if (item.name === hoveringMoon) {
+      dispatch('select', { name: item.name })
+    } else {
+      hoveringMoon = item.name
+    }
   }
 
   let dx = 0
@@ -70,6 +80,9 @@
     }
     if (e.key === 'ArrowLeft') {
       prev()
+    }
+    if (e.key === 'Enter') {
+      dispatch('select', { name: hoveringMoon })
     }
   }
 
@@ -102,8 +115,12 @@
     <ul style:transform={`translateX(-${position}px)`}>
       {#each menuItems as item}
         <!-- svelte-ignore a11y-click-events-have-key-events -->
-        <li on:click={selectMoon(item)} role="menuitem" class:active={item.active} >
-          <div class="moon" style:--scale={`${item.size}`}></div>
+        <li on:click={selectMoon(item)} role="menuitem" class:active={item.active}>
+          {#if item.mask}
+            <div class="moon-mask" style:--mask={`url(${item.mask})`} style:--scale={`${item.size}`}></div>
+          {:else}
+            <div class="moon" style:--scale={`${item.size}`}></div>
+          {/if}
         </li>
       {/each}
     </ul>
@@ -153,18 +170,26 @@
 
       &.active
         // width: 150px
-        .moon
-          background: hsla(0, 0%, 100%, 0.75)
+        .moon, .moon-mask
+          background: hsla(0, 0%, 100%, 0.95)
           transform: scale(calc(var(--scale) * 0.5 + 0.5))
           animation: pulse 1.6s infinite
 
     .moon
       --scale: 0
       border-radius: 50%
-      background: hsla(0, 0%, 100%, 0.3)
+      background: hsla(0, 0%, 100%, 0.6)
       transition: transform 300ms, background 300ms
-      width: 60px
-      height: 60px
+      width: 70px
+      height: 70px
       transform: scale(var(--scale))
-      cursor: pointer
+    .moon-mask
+      --scale: 1
+      --mask: none
+      background: hsla(0, 0%, 100%, 0.6)
+      transition: transform 300ms, background 300ms
+      width: 70px
+      height: 70px
+      mask: var(--mask) center / contain luminance
+      transform: scale(var(--scale))
 </style>

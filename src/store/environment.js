@@ -10,6 +10,7 @@ import {
 import { skyPosition } from '../lib/sky-position'
 import * as PlanetConfigs from '../configs'
 import { solarVisibility } from '../lib/occlusion'
+import { quadIn, quadOut } from 'svelte/easing'
 
 const print = (val, ...args) => {
   console.log(val, ...args)
@@ -29,8 +30,13 @@ const sphereIntersection = (origin, ray, radius) => {
   return x0 < x1 ? [x0, x1] : [x1, x0]
 }
 
+export const sunIntensity = writable(25)
+
 export const telescopeMode = writable(false)
-export const telescopeModeExposure = writable(0.25)
+export const telescopeModeExposure = derived(
+  [sunIntensity],
+  ([$sunIntensity]) => MathUtils.lerp(0.5, 0.1, quadOut($sunIntensity / 25))
+)
 export const orbitPlanet = writable(false)
 
 export const planet = writable('earth')
@@ -196,7 +202,6 @@ const getRayleigh = (n, k) => {
   return r
 }
 
-export const sunIntensity = writable(25)
 export const airIndexRefraction = writable(1.0003)
 export const airSurfacePressure = writable(101.3e3)
 export const airSurfaceTemperature = writable(288)
@@ -274,7 +279,6 @@ export const earthVisible = writable(true)
 const state = {
   dayLength,
   telescopeMode,
-  telescopeModeExposure,
   orbitPlanet,
 
   planet,
