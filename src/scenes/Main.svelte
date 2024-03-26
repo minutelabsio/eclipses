@@ -166,6 +166,7 @@
     // toPlanet()
   }
 
+  let hideTutorial = false
   let selectedMenuItem
   $: hideEclipseControls = !selectorActive && ($selectedMenuItem === 'info' || $selectedMenuItem === 'settings')
 
@@ -175,6 +176,11 @@
       return hits.slice(0, 1)
     }
   })
+
+  delay(10000).then(() => {
+    hideTutorial = true
+  })
+
 </script>
 <style lang="sass">
 .no-interaction
@@ -369,9 +375,50 @@
   font-weight: 400
   letter-spacing: 0.45px
   color: hsla(0, 0%, 60%, 0.8)
+
+.tutorial
+  position: fixed
+  font-family: 'Plus Jakarta Sans', sans-serif
+  top: 10%
+  left: 50%
+  padding: 1em
+  transform: translateX(-50%)
+  font-size: 20px
+  font-weight: 400
+  color: hsla(0, 0%, 70%, 0.8)
+  text-shadow: 0 0 2px hsla(0, 100%, 0%, 0.15)
+  z-index: 100
+  text-transform: uppercase
+  transition: opacity 1000ms
+  .icon
+    font-size: 3em
+    margin-right: 0.1em
+    vertical-align: middle
 </style>
 
 <Levetate>
+  <aside class="tutorial no-interaction" class:hidden={hideTutorial}>
+    <div class="pinch-zoom">
+      <p>
+        <span class="icon">
+          <Icon icon="mdi:gesture-swipe" />
+        </span>
+        Drag: Pan
+      </p>
+      <p>
+        <span class="icon">
+          <Icon icon="mdi:gesture-double-tap" />
+        </span>
+        Double Click: center sun
+      </p>
+      <p>
+        <span class="icon">
+          <Icon icon="mdi:gesture-pinch" />
+        </span>
+        Pinch/Scroll: zoom
+      </p>
+    </div>
+  </aside>
   <aside class="planet-moon-title no-interaction" class:hidden={selectorActive}>
     <h2>{hoveringPlanet || ''}</h2>
     <h3>{hoveringMoon || ''}</h3>

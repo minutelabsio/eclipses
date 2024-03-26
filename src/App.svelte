@@ -86,18 +86,17 @@
     position: absolute
     top: 50%
     left: 50%
+    font-family: 'Plus Jakarta Sans', sans-serif
     transform: translate(-50%, -50%)
-    color: white
+    color: hsla(0, 0%, 80%, 0.7)
     font-size: 2rem
-    font-weight: bold
-    text-shadow: 0 0 10px black
     z-index: 100
-    pointer-events: none
-    user-select: none
     -webkit-user-select: none
     -moz-user-select: none
     -ms-user-select: none
     -o-user-select: none
     -khtml-user-select: none
     -webkit-touch-callout: none
+    pointer-events: none
+    user-select: none
 </style>
