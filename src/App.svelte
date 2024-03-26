@@ -2,15 +2,15 @@
   import { Canvas } from '@threlte/core'
   import Main from './scenes/Main.svelte'
   import Fisheye from './scenes/Fisheye.svelte'
-  import Router, { params, replace } from 'svelte-spa-router'
-  import {wrap} from 'svelte-spa-router/wrap'
+  import Router, { replace } from 'svelte-spa-router'
+  import { wrap } from 'svelte-spa-router/wrap'
   import { onMount } from 'svelte'
   import { NoToneMapping } from 'three'
-  import { Suspense, HTML, Billboard } from '@threlte/extras'
+  import { Suspense } from '@threlte/extras'
   import Visualizer from './scenes/Visualizer.svelte'
   import Levetate from './components/Levetate.svelte'
   import Debug from './scenes/Debug.svelte'
-  import { selectPlanet } from './store/environment'
+  import { selectPlanet, dpr } from './store/environment'
   import * as PlanetConfigs from './configs'
 
   const routes = {
@@ -64,7 +64,7 @@
     useLegacyLights={false}
     rendererParameters={renderOptions}
     toneMapping={NoToneMapping}
-    dpr={1}
+    dpr={$dpr}
   >
     <Suspense>
       <Levetate slot="fallback">

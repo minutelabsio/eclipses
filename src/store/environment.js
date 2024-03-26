@@ -267,6 +267,8 @@ export const cloudThreshold = writable(0.4)
 export const cloudAbsorption = writable(0.2)
 export const windSpeed = writable(0.08)
 
+export const qualityPreset = writable(2)
+export const dpr = writable(1)
 export const iSteps = writable(6)
 export const jSteps = writable(5)
 
@@ -348,6 +350,8 @@ const state = {
   cloudAbsorption,
   windSpeed,
 
+  qualityPreset,
+  dpr,
   iSteps,
   jSteps,
 
@@ -391,4 +395,31 @@ export function selectPlanet(name = 'earth', moon = 'luna'){
   load(planetCfg)
   load(planetCfg.moons[moon])
   selectedMoon.set(moon)
+}
+
+export function setQuality(level = 2){
+  qualityPreset.set(level)
+
+  if (level === 4){
+    dpr.set(window.devicePixelRatio)
+  } else {
+    dpr.set(1)
+  }
+
+  switch (level) {
+    case 4:
+    case 3:
+      iSteps.set(10)
+      jSteps.set(10)
+      break
+    case 2:
+      iSteps.set(9)
+      jSteps.set(8)
+      break
+    case 1:
+    default:
+      iSteps.set(6)
+      jSteps.set(5)
+      break
+  }
 }

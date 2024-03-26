@@ -237,7 +237,7 @@
     position: absolute
     bottom: 0
     left: 50%
-    transform: translateY(-528px) translateX(-50%)
+    transform: translateY(-594px) translateX(-50%)
     color: hsla(0, 100%, 100%, 0.75)
     font-size: 16px
     letter-spacing: 0.8px
@@ -292,7 +292,7 @@
     &::after
       content: ''
       position: absolute
-      top: 35px
+      top: 95px
       left: 50%
       transform: translateX(-50%)
       width: 800px
@@ -358,7 +358,7 @@
   text-align: center
   color: #FFF
   text-align: center
-  font-family: "Plus Jakarta Sans"
+  font-family: 'latin-modern-mono', monospace
   font-size: 9px
   font-weight: 400
   letter-spacing: 0.45px

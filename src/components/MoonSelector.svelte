@@ -9,9 +9,11 @@
 
   const dispatch = createEventDispatcher()
 
+  const circleSize = 400
   const minMoonSize = 0.2
   const selectedItemWidth = 90
   const itemWidth = 90
+  const segmentPct = 3.5
 
   const getMoonsFor = (planet) => {
     const moons = Object.entries(PlanetConfigs[planet].moons)
@@ -44,10 +46,8 @@
     })
   }
 
-  const carouselPosition = (index, items) => {
-    index = Math.max(0, Math.min(index, items.length - 1))
-    const offset = (index - 0.5) * itemWidth + selectedItemWidth / 2
-    return offset
+  const carousel = (index, segment) => {
+    return index * segment
   }
 
   const selectMoon = (item) => () => {
@@ -64,7 +64,8 @@
   $: hoveringMoon = moons.find(m => m.name === hoveringMoon) ? hoveringMoon : PlanetConfigs[planet].defaultMoon ?? moons[0].name
   $: menuItems = getMenuItems(moons, hoveringMoon)
   $: selectedIndex = menuItems.findIndex(item => item.active)
-  $: position = carouselPosition(selectedIndex, menuItems) + dx
+  $: da = dx / (circleSize * Math.PI * 2) * 360
+  $: rot = carousel(selectedIndex, segmentPct * 3.6) + da
 
   const next = () => {
     hoveringMoon = menuItems[selectedIndex + 1]?.name || menuItems[0].name
@@ -112,10 +113,10 @@
 
 <nav>
   <div class="moon-selector-menu" style:--item-width={`${itemWidth}px`} role="menu" on:keydown={onkey} tabindex="0" bind:this={element}>
-    <ul style:transform={`translateX(-${position}px)`}>
-      {#each menuItems as item}
+    <ul style:--rot={`${rot}deg`}>
+      {#each menuItems as item, i}
         <!-- svelte-ignore a11y-click-events-have-key-events -->
-        <li on:click={selectMoon(item)} role="menuitem" class:active={item.active}>
+        <li style:--offset={`${i * segmentPct}%`} on:click={selectMoon(item)} role="menuitem" class:active={item.active}>
           {#if item.mask}
             <div class="moon-mask" style:--mask={`url(${item.mask})`} style:--scale={`${item.size}`}></div>
           {:else}
@@ -138,29 +139,36 @@
       opacity: 1
 
   .moon-selector-menu
+    --circle-size: 400px
     --item-width: 60px
     display: flex
     width: 100%
-    overflow: hidden
-    mask-image: linear-gradient(90deg, rgba(0,0,0,0) 10%, rgba(0,0,0,1) 50%, rgba(0,0,0,0) 90%)
+    padding: 60px 0
+    // overflow: hidden
+    // mask-image: linear-gradient(90deg, rgba(0,0,0,0) 10%, rgba(0,0,0,1) 55%, rgba(0,0,0,1) 55%, rgba(0,0,0,0) 90%)
+    mask-image: radial-gradient(ellipse, rgba(0,0,0,1) 5%, rgba(0,0,0,1) 15%, rgba(0,0,0,0) 80%)
     cursor: pointer
     ul, li
       list-style: none
       padding: 0
       margin: 0
     ul
+      --rot: 0deg
       flex: 1
       position: relative
-      right: calc(var(--item-width) / 2)
-      display: flex
       height: 50px
       font-size: 20px
       height: 70px
-      margin-left: 50%
+      transform-origin: center calc(var(--circle-size) + 50%)
+      transform: rotateZ(calc(270deg - var(--rot)))
       transition: transform 300ms ease
 
     li
+      --offset: 0%
       position: relative
+      // circle path
+      offset-path: circle(var(--circle-size) at center calc(var(--circle-size) + 50%))
+      offset-distance: var(--offset)
       display: flex
       justify-content: center
       align-items: center

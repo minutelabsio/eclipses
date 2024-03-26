@@ -20,7 +20,7 @@
   import { exposure, bloomIntensity, telescopeMode, telescopeModeExposure } from '../store/environment'
   import { onMount } from 'svelte'
   import { getGPUTier } from 'detect-gpu'
-  import { iSteps, jSteps } from '../store/environment'
+  import { setQuality } from '../store/environment'
 
   export let lutPre = null
   export let lutPost = null
@@ -28,21 +28,7 @@
   const detectGpu = async () => {
     // detect the gpu tier and adjust settings
     const gpuTier = await getGPUTier()
-    switch (gpuTier.tier){
-      case 3:
-        iSteps.set(10)
-        jSteps.set(10)
-        break
-      case 2:
-        iSteps.set(9)
-        jSteps.set(8)
-        break
-      case 1:
-      default:
-        iSteps.set(6)
-        jSteps.set(5)
-        break
-    }
+    setQuality(gpuTier.tier)
 
     // Example output:
     // {

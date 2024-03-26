@@ -143,6 +143,7 @@
       border-radius: 10px 10px 0 0
       transition: height 300ms
       &.expanded
+        max-height: 100vh
         height: 380px
         border: 1px solid hsla(0, 0%, 100%, 0.3)
         border-bottom: 0
