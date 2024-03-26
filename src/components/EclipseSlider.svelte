@@ -112,10 +112,11 @@
   .path
     stroke-width: 9px
     stroke-linecap: round
-    stroke: hsla(0, 0%, 100%, 0.1)
+    // stroke: hsla(0, 0%, 100%, 0.1)
+    stroke: hsla(0, 0%, 30%, 0.8)
     fill: none
   .before
-    stroke: hsla(0, 0%, 100%, .4)
+    stroke: hsla(0, 0%, 60%, .95)
   .moon
     fill: #AEAEAE
     stroke-width: .8

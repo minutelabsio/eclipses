@@ -207,17 +207,18 @@
 .planet-moon-title, .planet-moon-selector-title
   font-family: "Plus Jakarta Sans", sans-serif
   color: hsla(0, 0%, 100%, .25)
+  font-size: 25px
   h2, h3
     margin: 0
     font-weight: 400
   h2
-    font-size: 25px
+    font-size: 1em
     &::first-letter
       text-transform: uppercase
   h3
-    font-size: 12px
+    font-size: 0.5em
     letter-spacing: 0.6px
-    margin-left: 1px
+    margin-left: 0.1em
     text-transform: uppercase
 .planet-moon-selector-title
   position: absolute
@@ -247,8 +248,8 @@
 
 .planet-moon-title
   position: fixed
-  top: 1.3rem
-  left: 2rem
+  top: 1.25em
+  left: 1.45em
   z-index: 100
 
 .controls
@@ -326,10 +327,11 @@
 
 .hide-controls
   position: fixed
-  top: 1.3rem
-  right: 1.5rem
-  font-size: 24px
+  top: 1.25em
+  right: 1.45em
+  font-size: 25px
   button
+    font-size: 38px
     line-height: 0
     border: none
     padding: 0
@@ -337,10 +339,7 @@
     cursor: pointer
     border-radius: 50%
     background: hsla(0, 0%, 100%, 0)
-    width: 50px
-    height: 50px
     color: hsla(0, 0%, 100%, .4)
-    font-size: 1.5em
     transition: transform 100ms, color 150ms
     transform-origin: 50% 50%
 
@@ -350,6 +349,13 @@
       color: hsla(0, 0%, 100%, .7)
     &.active
       color: hsla(0, 100%, 100%, .8)
+
+@media screen and (min-width: 1024px)
+  .planet-moon-title,
+  .planet-moon-selector-title,
+  .hide-controls
+    font-size: 48px
+
 .brand
   position: fixed
   bottom: 31px
@@ -362,7 +368,7 @@
   font-size: 9px
   font-weight: 400
   letter-spacing: 0.45px
-  color: hsla(0, 0%, 100%, 0.4)
+  color: hsla(0, 0%, 60%, 0.8)
 </style>
 
 <Levetate>

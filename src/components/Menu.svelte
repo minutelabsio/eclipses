@@ -13,45 +13,45 @@
   const isTab = (item) => !item.isButton && !item.isToggle
   const menuItems = writable([
     {
-      icon: 'material-symbols:motion-photos-on-rounded',
+      icon: 'material-symbols-light:motion-photos-on-rounded',
       name: 'planet',
       title: 'Planet View',
       isButton: true,
     },
     {
       // icon: 'mdi:telescope',
-      icon: 'material-symbols:center-focus-strong-outline',
-      iconOn: 'material-symbols:center-focus-strong',
+      icon: 'mdi:telescope',
+      iconOn: 'mdi:telescope',
       name: 'telescope',
       title: 'Telescope View',
       isToggle: true,
     },
     {
-      icon: 'material-symbols:wb-twilight-outline-rounded',
-      iconOn: 'material-symbols:wb-twilight-rounded',
+      icon: 'fluent:weather-sunny-high-48-regular',
+      iconOn: 'fluent:weather-sunny-high-48-filled',
       name: 'sun',
       title: 'Time of day',
       component: TimeOfDayMenu,
       active: true
     },
     {
-      icon: 'material-symbols:swap-driving-apps-wheel-outline',
-      iconOn: 'material-symbols:swap-driving-apps-wheel',
+      icon: 'material-symbols-light:timer-play-outline',
+      iconOn: 'material-symbols-light:timer-play',
       name: 'animation-speed',
       title: 'Animation Speed',
       component: PlaybackSpeedMenu,
     },
     {
-      icon: 'material-symbols:settings-outline-rounded',
-      iconOn: 'material-symbols:settings-rounded',
+      icon: 'material-symbols-light:settings-outline-rounded',
+      iconOn: 'material-symbols-light:settings-rounded',
       name: 'settings',
       title: 'Settings',
       component: SettingsMenu,
       expanded: true,
     },
     {
-      icon: 'material-symbols:info-outline-rounded',
-      iconOn: 'material-symbols:info-rounded',
+      icon: 'material-symbols-light:info-outline-rounded',
+      iconOn: 'material-symbols-light:info-rounded',
       name: 'info',
       title: 'Info',
       component: AboutMenu,
@@ -158,12 +158,15 @@
       display: flex
       justify-content: space-around
       align-items: center
-      font-size: 20px
+      font-size: 40px
       height: 70px
       padding: 0 0.5rem
+      border-radius: 10px 10px 0 0
       background: linear-gradient(10deg, rgba(125, 125, 125, 0.5) 7.59%, rgba(125, 125, 125, 0.8) 102.04%)
       -webkit-backdrop-filter: blur(10px)
       backdrop-filter: blur(10px)
+      @media screen and (max-width: 660px)
+        border-radius: 0
       li
         button
           line-height: 0
@@ -173,10 +176,10 @@
           cursor: pointer
           border-radius: 50%
           background: hsla(0, 0%, 100%, 0)
-          width: 50px
-          height: 50px
+          width: 1.4em
+          height: 1.4em
           color: hsla(0, 0%, 100%, .5)
-          font-size: 1.5em
+          font-size: 1em
           transition: transform 100ms, color 150ms
           transform-origin: 50% 50%
           border: 1px solid hsla(0, 0%, 100%, 0)
