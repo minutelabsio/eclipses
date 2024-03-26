@@ -118,6 +118,7 @@ export default {
   cloudAbsorption: 0.03,
 
   // moon
-  ...moons.niaid,
+  ...moons.despina,
   moons,
+  defaultMoon: 'despina'
 }

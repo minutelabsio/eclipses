@@ -62,9 +62,10 @@ export default {
   airSurfaceTemperature: 165,
 
   // this is a best guess for ammonia clouds
+  // and haze that dulls the rayleigh scattering
   mieRed: 5.12,
-  mieGreen: 8.9,
-  mieBlue: 11.1,
+  mieGreen: 6.47,
+  mieBlue: 7.8,
 
   mieWavelengthRed: 0.38,
   mieWavelengthGreen: 0.43,
@@ -72,7 +73,7 @@ export default {
 
   mieAmount: 5e-6,
   mieDirectional: .41,
-  mieScaleHeight: 11000,
+  mieScaleHeight: 16200,
   mieBaseline: 0,
 
   ozoneLayerHeight: 27e3 * METER,
@@ -82,8 +83,9 @@ export default {
   ozoneBlue: 40,
 
   // moon
-  ...moons.amalthea,
+  ...moons.callisto,
   moons,
+  defaultMoon: 'callisto',
 
   cloudZ: 100e3 * METER / atmosphereThickness,
   cloudThickness: 0.7,

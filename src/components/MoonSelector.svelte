@@ -33,7 +33,7 @@
 
   const getMenuItems = (moons, hoveringMoon) => {
     if (!moons.find(moon => moon.name === hoveringMoon)) {
-      hoveringMoon = moons[0].name
+      hoveringMoon = PlanetConfigs[planet].defaultMoon ?? moons[0].name
       return moons
     }
     return moons.map(moon => {
@@ -61,7 +61,7 @@
   let dx = 0
 
   $: moons = getMoonsFor(planet)
-  $: hoveringMoon = moons.find(m => m.name === hoveringMoon) ? hoveringMoon : moons[0].name
+  $: hoveringMoon = moons.find(m => m.name === hoveringMoon) ? hoveringMoon : PlanetConfigs[planet].defaultMoon ?? moons[0].name
   $: menuItems = getMenuItems(moons, hoveringMoon)
   $: selectedIndex = menuItems.findIndex(item => item.active)
   $: position = carouselPosition(selectedIndex, menuItems) + dx

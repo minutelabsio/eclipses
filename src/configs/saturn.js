@@ -100,24 +100,29 @@ export default {
   // mieScaleHeight: 10000,
 
   // this is meant to mimick titan's haze, which is also present in saturn's atmosphere
-  mieRed: 7.28,
-  mieGreen: 14.86,
-  mieBlue: 26.23,
+  // it dulls the rayleigh blue scattering
+  mieRed: 6.47,
+  mieGreen: 7.82,
+  mieBlue: 8.9,
   mieWavelengthRed: 0.2,
   mieWavelengthGreen: 0.26,
   mieWavelengthBlue: 0.32,
   mieAmount: 3.6e-6,
-  mieDirectional: 0.28,
+  mieDirectional: 0.26,
   mieScaleHeight: 12000,
-  mieBaseline: 0,
+  mieBaseline: 0.1,
 
-  ozoneRed: 0,
-  ozoneGreen: 0,
-  ozoneBlue: 0,
+  // just add some low level dust absorption
+  ozoneRed: 3.5,
+  ozoneGreen: 3.5,
+  ozoneBlue: 3.5,
+  ozoneLayerHeight: 23000,
+  ozoneLayerWidth: 45000,
 
   // moon
-  ...moons.titan,
+  ...moons.dione,
   moons,
+  defaultMoon: 'dione',
 
   windSpeed: 600,
   cloudZ: 0.01, // i think the cloud layer is actually lower...?

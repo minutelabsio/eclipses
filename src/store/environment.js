@@ -386,7 +386,7 @@ export function selectPlanet(name = 'earth', moon = 'luna'){
   const moons = Object.keys(planetCfg.moons)
   moon = moon?.toLowerCase()
   if (!moons.includes(moon)){
-    moon = moons[0]
+    moon = planetCfg.defaultMoon ?? moons[0]
   }
   load(planetCfg)
   load(planetCfg.moons[moon])

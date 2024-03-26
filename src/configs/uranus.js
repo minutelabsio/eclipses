@@ -97,6 +97,7 @@ export default {
   cloudAbsorption: 0.49,
 
   // moon
-  ...moons.miranda,
+  ...moons.umbriel,
   moons,
+  defaultMoon: 'umbriel',
 }
