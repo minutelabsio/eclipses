@@ -32,7 +32,7 @@
   import { push } from 'svelte-spa-router'
   import { quintIn } from 'svelte/easing'
   import { onMount, tick } from 'svelte'
-  import { interactivity } from '@threlte/extras'
+  import { interactivity, onReveal, Suspense } from '@threlte/extras'
   import { T } from '@threlte/core'
   import MoonSelector from '../components/MoonSelector.svelte'
   import { get } from 'svelte/store'
@@ -197,7 +197,7 @@
       })
   }
 
-  onMount(() => {
+  onReveal(() => {
     hasLoaded.update((v) => {
       if (!v) {
         animateSunrise()
@@ -421,6 +421,27 @@
     vertical-align: middle
 </style>
 
+<Suspense>
+
+  <T.Group on:dblclick={lookAtSun} on:click={() => selectorActive = false}>
+    <Space/>
+  </T.Group>
+
+  <Music/>
+
+</Suspense>
+
+<Renderer/>
+
+<Camera
+  makeDefault
+  near={1}
+  far={1.2 * AU}
+  bind:controls={cameraControls}
+  telescope={$telescopeMode}
+  animateTelescope={!playing}
+/>
+
 <Levetate>
   <aside class="tutorial no-interaction" class:hidden={hideTutorial}>
     <div class="pinch-zoom">
@@ -491,20 +512,3 @@
     </div>
   </div>
 </Levetate>
-
-<Renderer/>
-
-<T.Group on:dblclick={lookAtSun} on:click={() => selectorActive = false}>
-  <Space/>
-</T.Group>
-
-<Camera
-  makeDefault
-  near={1}
-  far={1.2 * AU}
-  bind:controls={cameraControls}
-  telescope={$telescopeMode}
-  animateTelescope={!playing}
-/>
-
-<Music/>
