@@ -141,7 +141,6 @@
   .moon-selector-menu
     --circle-size: 400px
     --item-width: 60px
-    display: flex
     width: 100%
     padding: 60px 0
     // overflow: hidden
@@ -154,18 +153,19 @@
       margin: 0
     ul
       --rot: 0deg
-      flex: 1
       position: relative
       height: 50px
       font-size: 20px
       height: 70px
+      width: var(--item-width)
+      margin: 0 auto
       transform-origin: center calc(var(--circle-size) + 50%)
       transform: rotateZ(calc(270deg - var(--rot)))
       transition: transform 300ms ease
 
     li
       --offset: 0%
-      position: relative
+      position: absolute
       // circle path
       offset-path: circle(var(--circle-size) at center calc(var(--circle-size) + 50%))
       offset-distance: var(--offset)
@@ -179,10 +179,10 @@
       &.active
         // width: 150px
         .moon, .moon-mask
-          background: hsla(0, 0%, 100%, 0.95)
           transform: scale(calc(var(--scale) * 0.5 + 0.5))
           animation: pulse 1.6s infinite
-
+        .moon
+          background: hsla(0, 0%, 100%, 0.95)
     .moon
       --scale: 0
       border-radius: 50%
@@ -194,10 +194,14 @@
     .moon-mask
       --scale: 1
       --mask: none
-      background: hsla(0, 0%, 100%, 0.6)
+      // background: hsla(0, 0%, 100%, 0.6)
       transition: transform 300ms, background 300ms
       width: 70px
       height: 70px
-      mask: var(--mask) center / contain luminance
+      will-change: transform, background
+      // mask: var(--mask) center / contain luminance
+      // mask: var(--mask) top left / 50% luminance no-repeat
+      background-image: var(--mask)
+      background-size: contain
       transform: scale(var(--scale))
 </style>
