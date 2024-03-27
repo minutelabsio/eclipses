@@ -37,7 +37,7 @@ export const sunIntensity = writable(25)
 export const telescopeMode = writable(false)
 export const telescopeModeExposure = derived(
   [sunIntensity],
-  ([$sunIntensity]) => MathUtils.lerp(0.5, 0.1, quadOut($sunIntensity / 25))
+  ([$sunIntensity]) => MathUtils.lerp(0.5, 0.3, quadOut($sunIntensity / 25))
 )
 export const orbitPlanet = writable(false)
 

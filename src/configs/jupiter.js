@@ -76,8 +76,8 @@ export default {
   mieScaleHeight: 16200,
   mieBaseline: 0,
 
-  ozoneLayerHeight: 27e3 * METER,
-  ozoneLayerWidth: 0,
+  ozoneLayerHeight: 2600,
+  ozoneLayerWidth: 44e3 * METER,
   ozoneRed: 4.3,
   ozoneGreen: 14.6,
   ozoneBlue: 40,
@@ -88,10 +88,10 @@ export default {
   defaultMoon: 'callisto',
 
   cloudZ: 100e3 * METER / atmosphereThickness,
-  cloudThickness: 0.7,
+  cloudThickness: 5,
   cloudSize: 0.1,
   cloudMie: 0.4,
   cloudThreshold: 0.36,
-  cloudAbsorption: 0.35,
+  cloudAbsorption: 0.45,
   windSpeed: 100,
 }

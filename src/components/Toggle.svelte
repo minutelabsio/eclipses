@@ -22,6 +22,8 @@
   font-size: inherit
   width: 100px
   height: 1.2em
+  font-weight: 400
+  font-size: 12px
 
   > *
     margin: 0 0.2rem

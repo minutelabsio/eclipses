@@ -8,23 +8,25 @@
   }
 </script>
 
-<section class="about">
+<section class="content">
   <h2 class="heading">
     Settings
   </h2>
   <ul class="settings">
     <li>
-      <label for="sound">Sound</label>
-      <Toggle onText="ON" offText="OFF" bind:value={$musicOn} />
+      <h4 class="label">Sound</h4>
+      <div class="switch">
+        <Toggle onText="ON" offText="OFF" bind:value={$musicOn} />
+      </div>
     </li>
     <li>
-      <h4 class="heading">Quality</h4>
+      <h4 class="label">Quality</h4>
       <div class="ctrl">
         <Slider min={1} max={4} steps={4} lowText="Low" highText="High" value={$qualityPreset} on:update={updateQuality}/>
       </div>
     </li>
     <li>
-      <h4 class="heading">Moon Distance (within its orbit)</h4>
+      <h4 class="label">Moon Distance (within its orbit)</h4>
       <div class="ctrl">
         <Slider min="1" max="0" lowText="Near" highText="Far" bind:value={$totalityFactor} />
       </div>
@@ -33,7 +35,7 @@
 </section>
 
 <style lang="sass">
-  .about
+  .content
     display: flex
     flex-direction: column
     align-items: center
@@ -43,13 +45,14 @@
     height: 100%
     padding: 1.5rem 0.5rem
     overflow-y: auto
+    font-size: 11px
   .heading
-    font-size: 10px
     font-weight: 400
     margin: 0
     margin-bottom: 1em
-    text-align: center
+    font-size: 11px
     text-transform: uppercase
+    width: 100%
   .settings
     width: 260px
     list-style: none
@@ -57,15 +60,22 @@
     margin: 0
     li
       display: flex
+      flex-direction: column
       justify-content: space-between
       align-items: center
       margin: 1.5em 0
+      .label
+        text-transform: none
+        font-size: inherit
+        font-weight: 400
+        width: 100%
+        text-align: center
       label
         text-transform: none
         font-size: inherit
         font-weight: 400
-        margin-right: 0.5rem
+      .switch
+        width: 9.65em
       &:has(.ctrl)
-        flex-direction: column
         align-items: stretch
 </style>
