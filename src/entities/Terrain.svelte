@@ -6,8 +6,8 @@
   import { Noise } from 'noisejs'
   import { useSuspense } from '@threlte/extras'
   import { TextureLoader } from 'three'
-  import aoTexture from '../assets/planet textures/snow pbr texture/Snow05 ao 4k.jpg'
-  import normalTexture from '../assets/planet textures/snow pbr texture/Snow05 normal 4k.jpg'
+  // import aoTexture from '../assets/planet textures/snow pbr texture/Snow05 ao 4k.jpg'
+  // import normalTexture from '../assets/planet textures/snow pbr texture/Snow05 normal 4k.jpg'
 
   export let color = 0x000000
   export let visible = true
@@ -98,28 +98,28 @@
 
   const suspend = useSuspense()
 
-  const textures = suspend(useLoader(TextureLoader).load({
-    normalTexture,
-    aoTexture,
-  }))
+  // const textures = suspend(useLoader(TextureLoader).load({
+  //   normalTexture,
+  //   aoTexture,
+  // }))
 
-  textures.then((t) => {
-    const rep = 3e4
-    t.normalTexture.repeat.set(rep, rep)
-    t.normalTexture.wrapS = t.normalTexture.wrapT = THREE.RepeatWrapping
-    t.normalTexture.anisotropy = 16
-    t.aoTexture.repeat.set(rep, rep)
-    t.aoTexture.wrapS = t.aoTexture.wrapT = THREE.RepeatWrapping
-    t.aoTexture.anisotropy = 16
+  // textures.then((t) => {
+  //   const rep = 3e4
+  //   t.normalTexture.repeat.set(rep, rep)
+  //   t.normalTexture.wrapS = t.normalTexture.wrapT = THREE.RepeatWrapping
+  //   t.normalTexture.anisotropy = 16
+  //   t.aoTexture.repeat.set(rep, rep)
+  //   t.aoTexture.wrapS = t.aoTexture.wrapT = THREE.RepeatWrapping
+  //   t.aoTexture.anisotropy = 16
 
-    // const material = Terrain.generateBlendedMaterial([
-    //   { texture: t.groundTexture },
-    // ])
-    // terrainScene.children[0].material = material
-    material.normalMap = t.normalTexture
-    material.aoMap = t.aoTexture
-    material.needsUpdate = true
-  })
+  //   // const material = Terrain.generateBlendedMaterial([
+  //   //   { texture: t.groundTexture },
+  //   // ])
+  //   // terrainScene.children[0].material = material
+  //   material.normalMap = t.normalTexture
+  //   material.aoMap = t.aoTexture
+  //   material.needsUpdate = true
+  // })
 </script>
 
 <T is={terrainScene} visible={visible} children.0.layers={layers} renderOrder={renderOrder} />
