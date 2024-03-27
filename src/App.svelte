@@ -73,7 +73,6 @@
       <Router {routes} on:routeLoaded={routeLoaded} on:conditionsFailed={defaultToEarth}/>
     </Suspense>
   </Canvas>
-
 </main>
 
 <style lang="sass">

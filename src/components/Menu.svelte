@@ -1,6 +1,6 @@
 <script>
   import { derived, writable } from 'svelte/store'
-  import { createEventDispatcher } from 'svelte'
+  import { createEventDispatcher, onMount } from 'svelte'
   import Icon from '@iconify/svelte'
   import TimeOfDayMenu from './context-menu/TimeOfDayMenu.svelte'
   import PlaybackSpeedMenu from './context-menu/PlaybackSpeedMenu.svelte'
@@ -59,10 +59,12 @@
     },
   ])
 
-  telescopeMode.subscribe(value => {
-    menuItems.update(items => {
-      items.find(item => item.name === 'telescope').active = value
-      return items
+  onMount(() => {
+    return telescopeMode.subscribe(value => {
+      menuItems.update(items => {
+        items.find(item => item.name === 'telescope').active = value
+        return items
+      })
     })
   })
 

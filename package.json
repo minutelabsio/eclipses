@@ -34,6 +34,7 @@
     "glsl-dither": "^1.0.1",
     "glsl-noise": "^0.0.0",
     "gsap": "^3.12.2",
+    "howler": "^2.2.4",
     "input-range-scss": "^1.5.3",
     "interactjs": "^1.10.26",
     "intween": "1.0.0-beta.7",

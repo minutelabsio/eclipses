@@ -31,7 +31,7 @@ const sphereIntersection = (origin, ray, radius) => {
 }
 
 export const hasLoaded = writable(false)
-
+export const musicOn = writable(true)
 export const sunIntensity = writable(25)
 
 export const telescopeMode = writable(false)

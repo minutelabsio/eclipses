@@ -9,7 +9,7 @@ import {
   sunAngularDiameter,
   altitude,
 } from '../store/environment'
-    import { tick } from 'svelte';
+    import { onMount, tick } from 'svelte';
 
 export let controls
 export let telescope = false
@@ -55,7 +55,10 @@ const updateCameraPosition = ([x, y, z]) => {
   controls.lookInDirectionOf(x, y, z, animateTelescope)
 }
 
-sunPosition.subscribe(updateCameraPosition)
+onMount(() => {
+  const unsub = sunPosition.subscribe(updateCameraPosition)
+  return unsub
+})
 
 const toggleTelecopeMode = async (camera, telescope) => {
   if (!camera || !controls) return

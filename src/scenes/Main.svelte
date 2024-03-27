@@ -36,6 +36,7 @@
   import { T } from '@threlte/core'
   import MoonSelector from '../components/MoonSelector.svelte'
   import { get } from 'svelte/store'
+    import Music from '../components/Music.svelte';
 
   export let selectedPlanet = 'earth'
   export let params = {}
@@ -505,3 +506,5 @@
   telescope={$telescopeMode}
   animateTelescope={!playing}
 />
+
+<Music/>
