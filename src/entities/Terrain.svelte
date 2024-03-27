@@ -1,9 +1,13 @@
 <script>
-  import { T } from '@threlte/core'
+  import { T, useLoader } from '@threlte/core'
   import * as THREE from 'three'
   import { Easing } from 'intween'
   import Terrain from '../lib/three.terrain.js'
   import { Noise } from 'noisejs'
+  import { useSuspense } from '@threlte/extras'
+  import { TextureLoader } from 'three'
+  import aoTexture from '../assets/planet textures/snow pbr texture/Snow05 ao 4k.jpg'
+  import normalTexture from '../assets/planet textures/snow pbr texture/Snow05 normal 4k.jpg'
 
   export let color = 0x000000
   export let visible = true
@@ -64,8 +68,10 @@
   // texture.repeat.set( 30, 30 )
 
   const material = new THREE.MeshStandardMaterial({
-    color: 0x000000,
+    color: 0x663322,
     dithering: true,
+    roughness: 1,
+    fog: true,
     // bumpMap: texture,
   })
 
@@ -89,6 +95,31 @@
   // terrainScene.children[0].receiveShadow = true
   terrainScene.children[0].geometry.computeVertexNormals()
   $: material.color.set(color)
+
+  const suspend = useSuspense()
+
+  const textures = suspend(useLoader(TextureLoader).load({
+    normalTexture,
+    aoTexture,
+  }))
+
+  textures.then((t) => {
+    const rep = 3e4
+    t.normalTexture.repeat.set(rep, rep)
+    t.normalTexture.wrapS = t.normalTexture.wrapT = THREE.RepeatWrapping
+    t.normalTexture.anisotropy = 16
+    t.aoTexture.repeat.set(rep, rep)
+    t.aoTexture.wrapS = t.aoTexture.wrapT = THREE.RepeatWrapping
+    t.aoTexture.anisotropy = 16
+
+    // const material = Terrain.generateBlendedMaterial([
+    //   { texture: t.groundTexture },
+    // ])
+    // terrainScene.children[0].material = material
+    material.normalMap = t.normalTexture
+    material.aoMap = t.aoTexture
+    material.needsUpdate = true
+  })
 </script>
 
 <T is={terrainScene} visible={visible} children.0.layers={layers} renderOrder={renderOrder} />

@@ -269,6 +269,14 @@ export const cloudThreshold = writable(0.4)
 export const cloudAbsorption = writable(0.2)
 export const windSpeed = writable(0.08)
 
+export const sunBrightness = derived(
+  [elevation, sunVisibility],
+  ([$elevation, $sunVisibility]) => MathUtils.clamp(
+    MathUtils.inverseLerp(-3, 10, $elevation),
+    0, $sunVisibility
+  )
+)
+
 export const qualityPreset = writable(2)
 export const dpr = writable(1)
 export const iSteps = writable(6)

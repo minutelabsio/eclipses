@@ -18,24 +18,16 @@
     eclipseProgress,
     doAnimation,
     elevationRad,
-    totalityFactor,
     sunPosition,
-    sunRadius,
-    moonRadius,
     moonDistance,
     moonRightAscention,
-    moonAngularDiameter,
-    moonPosition,
     starsVisible,
     mountainsVisible,
     earthVisible,
-    elevation,
-    fogHue,
     overrideRA,
-    sunAngularDiameter,
     moonTransitDegrees,
     moonAngleCorrection,
-    sunVisibility,
+    sunBrightness,
   } from '../store/environment'
   import {
     DEG,
@@ -43,11 +35,6 @@
 
   let starsPoints
   const Stars = createStars().then(s => starsPoints = s)
-
-  $: sunBrightness = MathUtils.clamp(
-      MathUtils.inverseLerp(-3, 10, $elevation),
-      0, $sunVisibility
-    )
 
   $: moonMove = new Tween({ theta: -2 * $moonTransitDegrees })
     .by('2s', { theta: 0 }, 'linear')
@@ -74,11 +61,7 @@
     moonRightAscention.set(RA)
   })
 
-  let fog
-  $: fog?.color.setHSL($fogHue / 360, .2, Easing.sinIn(sunBrightness) * 0.3)
 </script>
-
-<T.FogExp2 attach="fog" bind:ref={fog} density={1.5e-5} layers={9}/>
 
 {#await Stars then Stars}
 <T.Group rotation={[-$elevationRad, 0, 0]}>
@@ -92,7 +75,7 @@
   mountainsVisible={$mountainsVisible}
   planetRadius={$planetRadius}
   position={[0, -$planetRadius, 0]}
-  sunBrightness={sunBrightness}
+  sunBrightness={$sunBrightness}
   sunPosition={$sunPosition}
 />
 {/if}
@@ -102,7 +85,7 @@
   mountainsVisible={$mountainsVisible}
   planetRadius={$planetRadius}
   position={[0, -$planetRadius, 0]}
-  sunBrightness={sunBrightness}
+  sunBrightness={$sunBrightness}
   sunPosition={$sunPosition}
 />
 {/if}

@@ -1,5 +1,5 @@
 <script>
-  import { Canvas } from '@threlte/core'
+  import { Canvas, T } from '@threlte/core'
   import Main from './scenes/Main.svelte'
   import Fisheye from './scenes/Fisheye.svelte'
   import Router, { replace } from 'svelte-spa-router'
@@ -10,8 +10,9 @@
   import Visualizer from './scenes/Visualizer.svelte'
   import Levetate from './components/Levetate.svelte'
   import Debug from './scenes/Debug.svelte'
-  import { selectPlanet, dpr } from './store/environment'
+  import { selectPlanet, dpr, fogHue, sunBrightness } from './store/environment'
   import * as PlanetConfigs from './configs'
+  import { sineIn } from 'svelte/easing'
 
   const routes = {
     '/fisheye': Fisheye,
@@ -57,6 +58,9 @@
     // remove the .ml-spinner element
     document.querySelector('.ml-spinner')?.remove()
   })
+
+  let fog
+  $: fog?.color.setHSL($fogHue / 360, .2, sineIn($sunBrightness) * 0.1)
 </script>
 
 <main>
@@ -72,6 +76,9 @@
       </Levetate>
       <Router {routes} on:routeLoaded={routeLoaded} on:conditionsFailed={defaultToEarth}/>
     </Suspense>
+
+    <T.FogExp2 attach="fog" bind:ref={fog} density={1.5e-5} layers={9}/>
+
   </Canvas>
 </main>
 
