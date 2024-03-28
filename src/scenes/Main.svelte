@@ -16,6 +16,8 @@
     selectPlanet,
     hasLoaded,
     elevationMid,
+    exposure,
+    telescopeModeExposure,
   } from '../store/environment'
   import {
     AU,
@@ -37,6 +39,7 @@
   import MoonSelector from '../components/MoonSelector.svelte'
   import { get } from 'svelte/store'
   import Music from '../components/Music.svelte'
+    import ExposureSlider from '../components/ExposureSlider.svelte';
 
   export let selectedPlanet = 'earth'
   export let params = {}
@@ -419,6 +422,11 @@
     font-size: 3em
     margin-right: 0.1em
     vertical-align: middle
+.exposure
+  position: fixed
+  top: 50%
+  right: 1.2em
+  transform: translateY(-100px)
 </style>
 
 <Suspense>
@@ -509,6 +517,9 @@
         on:planet={openPlanetSelector}
         on:telescope={toggleTelecopeMode}
       />
+    </div>
+    <div class="exposure" hidden={!$telescopeMode}>
+      <ExposureSlider bind:value={$telescopeModeExposure} />
     </div>
   </div>
 </Levetate>

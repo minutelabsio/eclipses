@@ -102,7 +102,17 @@
       dispatch('select', name)
     } else if (itemClicked.isToggle) {
       itemClicked.active = !itemClicked.active
-      menuItems.update(i => i)
+      menuItems.update(items => {
+        items.forEach(i => {
+          if (i.name === 'sun' && itemClicked.name === 'telescope') {
+            if (itemClicked.active) {
+              i.active = false
+            }
+            i.disabled = itemClicked.active
+          }
+        })
+        return items
+      })
       dispatch('toggle', name)
     }
     dispatch(name)
@@ -118,7 +128,7 @@
   <ul>
     {#each $menuItems as item}
       <li>
-        <button on:click={() => buttonClicked(item.name)} class:active={item.active}>
+        <button on:click={() => buttonClicked(item.name)} class:active={item.active} disabled={item.disabled}>
           <Icon icon={item.active ? item.iconOn : item.icon} />
           <span class="sr-only">{item.title}</span>
         </button>
@@ -193,4 +203,7 @@
             border: 1px solid hsla(0, 0%, 100%, 0.25)
             background: hsla(0, 0%, 100%, 0.25)
             color: hsla(0, 100%, 100%, .8)
+          &:disabled
+            color: hsla(0, 0%, 100%, 0.25)
+            cursor: not-allowed
 </style>

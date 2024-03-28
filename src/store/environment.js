@@ -35,10 +35,7 @@ export const musicOn = writable(true)
 export const sunIntensity = writable(25)
 
 export const telescopeMode = writable(false)
-export const telescopeModeExposure = derived(
-  [sunIntensity],
-  ([$sunIntensity]) => MathUtils.lerp(0.5, 0.3, quadOut($sunIntensity / 25))
-)
+export const telescopeModeExposure = writable(0.1)
 export const orbitPlanet = writable(false)
 
 export const planet = writable('earth')

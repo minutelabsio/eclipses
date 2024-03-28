@@ -9,7 +9,7 @@ import {
   sunAngularDiameter,
   altitude,
 } from '../store/environment'
-    import { onMount, tick } from 'svelte';
+import { onMount, tick } from 'svelte'
 
 export let controls
 export let telescope = false
