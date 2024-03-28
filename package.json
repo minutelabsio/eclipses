@@ -20,6 +20,7 @@
     "vite-plugin-glslify": "^2.0.2"
   },
   "dependencies": {
+    "@beyonk/svelte-google-analytics": "^2.6.4",
     "@csstools/normalize.css": "^12.1.1",
     "@iconify/svelte": "^3.1.6",
     "@minutelabsio/colors": "^0.0.2",

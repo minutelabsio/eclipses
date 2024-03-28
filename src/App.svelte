@@ -13,6 +13,8 @@
   import { selectPlanet, dpr, fogHue, sunBrightness } from './store/environment'
   import * as PlanetConfigs from './configs'
   import { sineIn } from 'svelte/easing'
+  import { GoogleAnalytics } from '@beyonk/svelte-google-analytics'
+  import { ga } from '@beyonk/svelte-google-analytics'
 
   const routes = {
     '/fisheye': Fisheye,
@@ -43,6 +45,13 @@
     const planet = params.planet
     const moon = params.moon
     selectPlanet(planet, moon)
+
+    if (planet){
+      ga.addEvent('select_planet', {
+        planet: planet,
+        moon: moon,
+      })
+    }
   }
 
   const renderOptions = {
@@ -80,6 +89,11 @@
     <T.FogExp2 attach="fog" bind:ref={fog} density={1.5e-5} layers={9}/>
 
   </Canvas>
+  {#if import.meta.env.PROD}
+    <GoogleAnalytics
+      properties={[ import.meta.env.VITE_GA_ID ]}
+    />
+  {/if}
 </main>
 
 <style lang="sass">
