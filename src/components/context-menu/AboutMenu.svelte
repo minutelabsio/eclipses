@@ -139,7 +139,6 @@ let aboutLabOpen = false
     font-weight: 400
     height: 100%
     padding: 1.5rem 0.5rem
-    overflow-y: auto
     p
       line-height: 1.5
   .heading

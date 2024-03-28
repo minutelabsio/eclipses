@@ -141,6 +141,7 @@
           time={time}
           rotation={[planetTilts[3], Math.PI / 2, 0]}
           on:click={planetClicked('saturn')}
+          ringOpacity={showAll ? 1 : 0.3}
         />
       </T.Group>
     </T.Group>

@@ -120,7 +120,7 @@
 </script>
 
 <nav class="eclipse-menu">
-  <div class="context-menu" class:expanded={$activeItem?.expanded} class:collapsed={!$activeItem}>
+  <div class="context-menu scrollbars" class:expanded={$activeItem?.expanded} class:collapsed={!$activeItem}>
     {#if $activeItem?.component}
     <svelte:component this={$activeItem.component}/>
     {/if}
@@ -154,6 +154,8 @@
       border: 1px solid hsla(0, 0%, 100%, 0)
       border-radius: 10px 10px 0 0
       transition: height 300ms
+      overflow-y: auto
+
       &.expanded
         max-height: 100vh
         height: 380px

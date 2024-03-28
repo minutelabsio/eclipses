@@ -14,6 +14,7 @@ export let planetRadius = 1
 export let position = [0, 0, 0]
 export let rotation = [0, -0.1, .1]
 export let visible = true
+export let ringOpacity = 1
 const RING_OUTER = 2.987
 const RING_INNER = 1.11
 
@@ -69,6 +70,7 @@ const textures = suspend(useLoader(TextureLoader).load({
       side={DoubleSide}
       metalness={1}
       transparent
+      opacity={ringOpacity}
       fog={false}
     />
   </T.Mesh>
