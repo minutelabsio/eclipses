@@ -6,9 +6,9 @@
   import PlaybackSpeedMenu from './context-menu/PlaybackSpeedMenu.svelte'
   import AboutMenu from './context-menu/AboutMenu.svelte'
   import SettingsMenu from './context-menu/SettingsMenu.svelte'
-  import { telescopeMode } from '../store/environment'
 
-  export let dispatch = createEventDispatcher()
+  export let telescope = false
+  const dispatch = createEventDispatcher()
 
   const isTab = (item) => !item.isButton && !item.isToggle
   const menuItems = writable([
@@ -59,15 +59,6 @@
     },
   ])
 
-  onMount(() => {
-    return telescopeMode.subscribe(value => {
-      menuItems.update(items => {
-        items.find(item => item.name === 'telescope').active = value
-        return items
-      })
-    })
-  })
-
   const activeItem = derived(
     menuItems,
     $menuItems => $menuItems.filter(isTab).find(item => item.active)
@@ -102,21 +93,37 @@
       dispatch('select', name)
     } else if (itemClicked.isToggle) {
       itemClicked.active = !itemClicked.active
-      menuItems.update(items => {
-        items.forEach(i => {
-          if (i.name === 'sun' && itemClicked.name === 'telescope') {
-            if (itemClicked.active) {
-              i.active = false
-            }
-            i.disabled = itemClicked.active
-          }
-        })
-        return items
-      })
+      menuItems.update(a => a)
       dispatch('toggle', name)
     }
     dispatch(name)
   }
+
+  const checkTelescopeConditions = (telescope) => {
+    menuItems.update(items => {
+      items.forEach(item => {
+        if (item.name === 'sun') {
+          if (telescope){
+            item.active = false
+          }
+          item.disabled = telescope
+        } else if (item.name === 'telescope') {
+          item.active = telescope
+        }
+      })
+      return items
+    })
+  }
+
+  $: checkTelescopeConditions(telescope)
+
+  menuItems.subscribe(items => {
+    const telescopeBtn = items.find(item => item.name === 'telescope')
+    if (telescopeBtn.active !== telescope) {
+      telescope = telescopeBtn.active
+    }
+  })
+
 </script>
 
 <nav class="eclipse-menu">

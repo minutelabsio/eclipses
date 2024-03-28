@@ -530,8 +530,8 @@
     <div class:hidden={selectorActive} class="menu-container no-highlight">
       <Menu
         bind:selected={selectedMenuItem}
+        bind:telescope={$telescopeMode}
         on:planet={openPlanetSelector}
-        on:telescope={toggleTelecopeMode}
       />
     </div>
     <div class="exposure" hidden={!$telescopeMode}>
