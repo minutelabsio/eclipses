@@ -36,7 +36,7 @@
   import { interactivity, onReveal, Suspense } from '@threlte/extras'
   import { T } from '@threlte/core'
   import MoonSelector from '../components/MoonSelector.svelte'
-  import { get } from 'svelte/store'
+  import { get, writable } from 'svelte/store'
   import Music from '../components/Music.svelte'
   import ExposureSlider from '../components/ExposureSlider.svelte'
 
@@ -69,6 +69,8 @@
   // 0 will be realtime, 1 will be transitTime happens in 10 seconds
   $: player.playbackRate = Util.lerp(1, $transitTime / 10, quintIn($progressRate))
 
+  const playerProgress = writable(0)
+
   player.on('play', () => {
     if (player.progress === 100) {
       player.seek(0)
@@ -81,12 +83,13 @@
 
   player.on('update', () => {
     eclipseProgress.set(player.progress / 100)
+    if (!player.isPaused) {
+      playerProgress.set(player.progress / 100)
+    }
   })
 
-  eclipseProgress.subscribe((v) => {
-    if (player.paused) {
-      player.progress = v * 100
-    }
+  playerProgress.subscribe((v) => {
+    player.progress = v * 100
   })
 
   let wasPlaying = false
@@ -516,7 +519,7 @@
 
       {#if !selectorActive}
         <div transition:fade={{ duration: 100 }} class="eclipse-slider no-highlight">
-          <EclipseSlider bind:progress={$eclipseProgress} on:swipe={onSwipe} on:start={seekStart} on:end={seekEnd}>
+          <EclipseSlider bind:progress={$playerProgress} on:swipe={onSwipe} on:start={seekStart} on:end={seekEnd}>
             <button class="play-pause" on:dblclick|capture|stopPropagation on:click={togglePlay}>
               <Icon icon={ playing ? 'material-symbols:pause-rounded' : 'material-symbols:play-arrow-rounded'} />
             </button>
