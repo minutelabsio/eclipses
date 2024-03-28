@@ -88,6 +88,8 @@
     display: flex
     flex-grow: 1
     flex: 1
+    max-height: 100vh
+    overflow: hidden
   .loading
     position: absolute
     top: 50%
