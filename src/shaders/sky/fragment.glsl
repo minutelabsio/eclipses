@@ -373,11 +373,11 @@ float moonValue(vec3 rayDir, vec3 sMoon, float moonAngularRadius){
   // xy is the vector from the center of the moon to the point on the moon
   // uv should be calculated so that the height of the texture is the angular diameter of the moon
   vec2 uv = 0.5 * xy / moonAngularRadius + vec2(0.5, 0.5);
-  if (uv.x <= 0. || uv.x >= 1. || uv.y <= 0.0 || uv.y >= 1.){
-    return 0.0;
-  }
+  // if (uv.x <= 0. || uv.x >= 1. || uv.y <= 0.0 || uv.y >= 1.){
+  //   return 0.0;
+  // }
   vec4 moon = texture2D(moonTexture, uv);
-  return moon.r;
+  return moon.r * smoothcircle(rayDir, moonAngularRadius, sMoon, 0.0001);
 }
 
 const float bloomFactor = 8e-6;
