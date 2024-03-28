@@ -30,6 +30,7 @@ const sphereIntersection = (origin, ray, radius) => {
   return x0 < x1 ? [x0, x1] : [x1, x0]
 }
 
+export const showTutorial = writable(false)
 export const hasLoaded = writable(false)
 export const musicOn = writable(true)
 export const sunIntensity = writable(25)

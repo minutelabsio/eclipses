@@ -1,7 +1,7 @@
 <script>
   import Toggle from '../Toggle.svelte'
   import Slider from '../Slider.svelte'
-  import { totalityFactor, setQuality, qualityPreset, musicOn } from '../../store/environment'
+  import { totalityFactor, setQuality, qualityPreset, musicOn, showTutorial } from '../../store/environment'
 
   const updateQuality = (e) => {
     setQuality(e.detail.value | 0)
@@ -13,6 +13,12 @@
     Settings
   </h2>
   <ul class="settings">
+    <li>
+      <h4 class="label">Gesture Hints</h4>
+      <div class="switch">
+        <Toggle onText="ON" offText="OFF" bind:value={$showTutorial} />
+      </div>
+    </li>
     <li>
       <h4 class="label">Sound</h4>
       <div class="switch">

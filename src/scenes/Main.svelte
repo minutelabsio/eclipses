@@ -13,11 +13,10 @@
     earthVisible,
     mountainsVisible,
     selectedMoon,
-    selectPlanet,
     hasLoaded,
     elevationMid,
-    exposure,
     telescopeModeExposure,
+    showTutorial,
   } from '../store/environment'
   import {
     AU,
@@ -39,7 +38,7 @@
   import MoonSelector from '../components/MoonSelector.svelte'
   import { get } from 'svelte/store'
   import Music from '../components/Music.svelte'
-    import ExposureSlider from '../components/ExposureSlider.svelte';
+  import ExposureSlider from '../components/ExposureSlider.svelte'
 
   export let selectedPlanet = 'earth'
   export let params = {}
@@ -173,7 +172,6 @@
     // toPlanet()
   }
 
-  let hideTutorial = false
   let selectedMenuItem
   $: hideEclipseControls = !selectorActive && ($selectedMenuItem === 'info' || $selectedMenuItem === 'settings')
 
@@ -184,9 +182,6 @@
     }
   })
 
-  delay(10000).then(() => {
-    hideTutorial = true
-  })
 
   const animateSunrise = () => {
     const tween = Tween.create({ el: -5 })
@@ -204,6 +199,10 @@
     hasLoaded.update((v) => {
       if (!v) {
         animateSunrise()
+        $showTutorial = true
+        delay(10000).then(() => {
+          $showTutorial = false
+        })
       }
       return true
     })
@@ -407,21 +406,34 @@
 .tutorial
   position: fixed
   font-family: 'Plus Jakarta Sans', sans-serif
-  top: 10%
+  top: 160px
   left: 50%
   padding: 1em
   transform: translateX(-50%)
-  font-size: 20px
+  font-size: 18px
   font-weight: 400
   color: hsla(0, 0%, 70%, 0.8)
   text-shadow: 0 0 2px hsla(0, 100%, 0%, 0.15)
   z-index: 100
-  text-transform: uppercase
+  width: 100%
+  max-width: 460px
+  height: 10em
   transition: opacity 1000ms
+  display: flex
+  justify-content: space-around
+  > *
+    display: flex
+    flex-direction: column
+    align-items: center
+    justify-content: flex-end
+    max-width: 3em
+    text-align: center
   .icon
-    font-size: 3em
-    margin-right: 0.1em
+    font-size: 5em
     vertical-align: middle
+  .gesture-text
+    margin-bottom: 0.5em
+    text-transform: uppercase
 .exposure
   position: fixed
   top: 50%
@@ -451,26 +463,27 @@
 />
 
 <Levetate>
-  <aside class="tutorial no-interaction" class:hidden={hideTutorial}>
-    <div class="pinch-zoom">
-      <p>
-        <span class="icon">
-          <Icon icon="mdi:gesture-swipe" />
-        </span>
-        Drag: Pan
-      </p>
-      <p>
-        <span class="icon">
-          <Icon icon="mdi:gesture-double-tap" />
-        </span>
-        Double Click: center sun
-      </p>
-      <p>
-        <span class="icon">
-          <Icon icon="mdi:gesture-pinch" />
-        </span>
-        Pinch/Scroll: zoom
-      </p>
+  <aside class="tutorial no-interaction" class:hidden={!$showTutorial}>
+    <div>
+      <span class="gesture-text">Double Tap</span>
+      <span class="icon">
+        <Icon icon="mdi:gesture-double-tap" />
+      </span>
+      <span>Center Sun</span>
+    </div>
+    <div>
+      <span class="gesture-text">Drag</span>
+      <span class="icon">
+        <Icon icon="mdi:gesture-swipe" />
+      </span>
+      <span>360 Pan</span>
+    </div>
+    <div>
+      <span class="gesture-text">Pinch/ Scroll</span>
+      <span class="icon">
+        <Icon icon="mdi:gesture-pinch" />
+      </span>
+      <span>Zoom In/Out</span>
     </div>
   </aside>
   <aside class="planet-moon-title no-interaction" class:hidden={selectorActive}>
