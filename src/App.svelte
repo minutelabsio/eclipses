@@ -104,6 +104,7 @@
     flex: 1
     max-height: 100vh
     overflow: hidden
+    touch-action: none
   .loading
     position: absolute
     top: 50%
