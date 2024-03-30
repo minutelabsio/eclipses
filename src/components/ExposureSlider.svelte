@@ -26,12 +26,12 @@
   --value: 0
   --width: 228px
   position: relative
-  display: block
   width: var(--width)
+  display: flex
   input
     position: relative
-    right: 14px
     width: 100%
+    margin: 0
     transform: translate(50%, 0) rotate(-90deg)
   .icon-track
     position: absolute
@@ -44,7 +44,7 @@
     transform: translate(50%, 0) rotate(-90deg)
   .icon
     position: absolute
-    top: 2px
+    top: 3px
     left: 3px
     color: hsla(0, 0%, 50%, 1)
     // color: red

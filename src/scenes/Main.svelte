@@ -440,7 +440,7 @@
 .exposure
   position: fixed
   top: 50%
-  right: 1.2em
+  right: 2.1em
   transform: translateY(-100px)
 </style>
 
