@@ -5,6 +5,7 @@
   import interact from 'interactjs'
   import { Observable, Tween, animationFrames } from 'intween'
   import { frames } from '../lib/animation'
+  import { Suspense } from '@threlte/extras'
 
   export let selected = 'earth'
   export let hovering = 'earth'
@@ -181,12 +182,14 @@
 
 <div class="planet-selector" bind:this={element} class:active={active}>
   <Canvas>
-    <PlanetSelectorScene
-      pos={pos / scale}
-      showAll={active}
-      spotlight={active}
-      on:planetClicked={handlePlanetClicked}
-    />
+    <Suspense>
+      <PlanetSelectorScene
+        pos={pos / scale}
+        showAll={active}
+        spotlight={active}
+        on:planetClicked={handlePlanetClicked}
+      />
+    </Suspense>
   </Canvas>
 </div>
 
