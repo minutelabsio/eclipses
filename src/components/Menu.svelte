@@ -35,8 +35,8 @@
     //   active: true
     // },
     {
-      icon: 'material-symbols-light:timer-play-outline',
-      iconOn: 'material-symbols-light:timer-play',
+      icon: 'ion:ios-speedometer-outline',
+      iconOn: 'ion:ios-speedometer',
       name: 'animation-speed',
       title: 'Animation Speed',
       component: PlaybackSpeedMenu,
