@@ -164,7 +164,7 @@
         height: 300px
         -webkit-backdrop-filter: blur(10px)
         backdrop-filter: blur(10px)
-        background: linear-gradient(111.68deg, rgba(128, 128, 128, 0.3) 7.59%, rgba(128, 128, 128, 0.8) 102.04%)
+        background: linear-gradient(-5deg, rgba(128, 128, 128, 0.3) 7.59%, rgba(128, 128, 128, 0.8) 102.04%)
         border-bottom: 0
         transition: height 300ms
       &.full
@@ -186,8 +186,8 @@
       padding: 0 0.5rem
       border-radius: 10px 10px 0 0
       border: 1px solid hsla(0, 0%, 93%, 0.3)
-      border-width: 1px 1px 1px 0
-      background: linear-gradient(111.68deg, rgba(128, 128, 128, 0.36) 7.59%, rgba(128, 128, 128, 0.15) 102.04%)
+      border-width: 1px 1px 0 1px
+      background: linear-gradient(175deg, rgba(128, 128, 128, 0.36) 7.59%, rgba(128, 128, 128, 0.15) 102.04%)
       -webkit-backdrop-filter: blur(10px)
       backdrop-filter: blur(10px)
       @media screen and (max-width: 660px)

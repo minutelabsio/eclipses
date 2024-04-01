@@ -74,7 +74,7 @@
 
 </script>
 
-<div bind:this={element} on:click={checkClick} on:keydown={checkKey} role="slider" aria-valuenow={progress} tabindex="0">
+<div class="wrapper" bind:this={element} on:click={checkClick} on:keydown={checkKey} role="slider" aria-valuenow={progress} tabindex="0">
   <svg viewBox="-10 -10 120 120">
     <filter id="blur">
       <feGaussianBlur stdDeviation="1" />
@@ -120,9 +120,8 @@
 </div>
 
 <style lang="sass">
-  svg
+  .wrapper
     outline: none
-  // stroke inside the semicircle
   .path
     stroke-width: 9px
     stroke-linecap: round
