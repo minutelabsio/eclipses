@@ -5,27 +5,69 @@ let aboutLabOpen = false
 </script>
 
 <section class="about">
-  <div class="header">
-    <p>This lab was made possible by... lorem ipsum</p>
-    <p class="cta centered">
-      <button on:click={() => aboutLabOpen = !aboutLabOpen}>
-        {aboutLabOpen ? 'About this Planet' : 'More About this Lab'}
-      </button>
-    </p>
-  </div>
   {#if aboutLabOpen}
   <h2 class="heading">
     MinuteLabs Eclipse Simulator
   </h2>
-  <div class="content">
-    <p>about lab</p>
+  <div class="content scrollbars">
+    <h3>
+      What is a Solar Eclipse?
+    </h3>
+    <p>
+      Here on Earth, solar eclipses are rare and spectacular events. We built this lab so that you can have realistic awe-inspiring experiences from earth and other planets in our solar system whenever you want - and learn while doing so.
+    </p>
+    <p>
+    This paragraph is info about how other planets have moons of different shapes and sizes and how the sun appears smaller in the sky the further out you go in the solar system.
+    </p>
+    <p>
+    This paragraph mentions how it’s interesting that Mercury and Venus don’t have any moons.
+    </p>
+    <p>
+    This paragraph is about how different factors impact how an eclipse appears in the sky, such as the elements that make up the atmosphere, whether there IS an atmosphere, how the light is scattered, the time of day, etc. It also talks about things like 360 degree sunsets and other similarly unique phenomenon.
+    </p>
+    <p>
+      Here on Earth, solar eclipses are rare and spectacular events. We built this lab so that you can have realistic awe-inspiring experiences from earth and other planets in our solar system whenever you want - and learn while doing so.
+    </p>
+    <p>
+    This paragraph is info about how other planets have moons of different shapes and sizes and how the sun appears smaller in the sky the further out you go in the solar system.
+    </p>
+    <p>
+    This paragraph mentions how it’s interesting that Mercury and Venus don’t have any moons.
+    </p>
+    <p>
+    This paragraph is about how different factors impact how an eclipse appears in the sky, such as the elements that make up the atmosphere, whether there IS an atmosphere, how the light is scattered, the time of day, etc. It also talks about things like 360 degree sunsets and other similarly unique phenomenon.
+    </p>
+    <p>
+      Here on Earth, solar eclipses are rare and spectacular events. We built this lab so that you can have realistic awe-inspiring experiences from earth and other planets in our solar system whenever you want - and learn while doing so.
+    </p>
+    <p>
+    This paragraph is info about how other planets have moons of different shapes and sizes and how the sun appears smaller in the sky the further out you go in the solar system.
+    </p>
+    <p>
+    This paragraph mentions how it’s interesting that Mercury and Venus don’t have any moons.
+    </p>
+    <p>
+    This paragraph is about how different factors impact how an eclipse appears in the sky, such as the elements that make up the atmosphere, whether there IS an atmosphere, how the light is scattered, the time of day, etc. It also talks about things like 360 degree sunsets and other similarly unique phenomenon.
+    </p>
+    <p>
+      Here on Earth, solar eclipses are rare and spectacular events. We built this lab so that you can have realistic awe-inspiring experiences from earth and other planets in our solar system whenever you want - and learn while doing so.
+    </p>
+    <p>
+    This paragraph is info about how other planets have moons of different shapes and sizes and how the sun appears smaller in the sky the further out you go in the solar system.
+    </p>
+    <p>
+    This paragraph mentions how it’s interesting that Mercury and Venus don’t have any moons.
+    </p>
+    <p>
+    This paragraph is about how different factors impact how an eclipse appears in the sky, such as the elements that make up the atmosphere, whether there IS an atmosphere, how the light is scattered, the time of day, etc. It also talks about things like 360 degree sunsets and other similarly unique phenomenon.
+    </p>
   </div>
   {:else}
   <h2 class="heading">
     <span>{$planet}</span>
     <span>{$selectedMoon}</span>
   </h2>
-  <div class="content">
+  <div class="content scrollbars">
     {#if $planet === 'earth'}
       <p>
         Earth: familiar, yes, but nonetheless beautiful. Hopefully this shows it
@@ -130,6 +172,16 @@ let aboutLabOpen = false
     {/if}
   </div>
   {/if}
+  <div class="footer">
+    <p class="made-possible">
+      Eclipse Explorer was made possible by MinuteEarth and the NASA Heliophysics Education Activation Team (NASA HEAT).
+    </p>
+    <p class="cta centered">
+      <button on:click={() => aboutLabOpen = !aboutLabOpen}>
+        {aboutLabOpen ? 'About this Planet' : 'More About this Lab'}
+      </button>
+    </p>
+  </div>
 </section>
 
 <style lang="sass">
@@ -139,8 +191,21 @@ let aboutLabOpen = false
     font-weight: 400
     height: 100%
     padding: 1.5rem 0.5rem
+    display: flex
+    flex-direction: column
     p
       line-height: 1.5
+  .content
+    overflow-y: auto
+    flex: 1
+    margin: 0 -0.85rem
+    padding: 0 0.85rem
+    h3
+      font-size: 16px
+      font-weight: 400
+      line-height: 20px
+      text-align: center
+
   .heading
     display: flex
     justify-content: space-between
@@ -149,19 +214,26 @@ let aboutLabOpen = false
     margin: 0
     margin-bottom: 1.5em
     text-transform: uppercase
-  .header
-    &::after
-      content: ''
-      display: block
-      height: 1px
-      width: 90%
-      margin: 1.5em 0.9em
-      background: hsla(0, 0%, 100%, 0.3)
+  .footer
+    margin-top: auto
+  .footer .made-possible
+    font-size: 11px
+    color: hsla(0, 0%, 75%, 1)
+  .header::after,
+  .footer::before
+    content: ''
+    display: block
+    height: 1px
+    width: 90%
+    margin: 1.5em 0.9em
+    background: hsla(0, 0%, 100%, 0.3)
   .centered
     text-align: center
   .cta
     margin: 1.5em 0
-  button
+  button,
+  .button
+    display: inline-block
     background: none
     color: white
     font-size: 13px

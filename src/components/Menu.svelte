@@ -128,7 +128,7 @@
 </script>
 
 <nav class="eclipse-menu">
-  <div class={'context-menu scrollbars ' + $activeItem?.type} class:collapsed={!$activeItem}>
+  <div class={'context-menu ' + $activeItem?.type} class:collapsed={!$activeItem}>
     {#if $activeItem?.component}
     <svelte:component this={$activeItem.component}/>
     {/if}
