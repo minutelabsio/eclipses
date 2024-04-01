@@ -10,7 +10,6 @@ import {
 import { skyPosition } from '../lib/sky-position'
 import * as PlanetConfigs from '../configs'
 import { solarVisibility } from '../lib/occlusion'
-import { quadIn, quadOut } from 'svelte/easing'
 
 const print = (val, ...args) => {
   console.log(val, ...args)
@@ -33,6 +32,8 @@ const sphereIntersection = (origin, ray, radius) => {
 export const showTutorial = writable(false)
 export const hasLoaded = writable(false)
 export const musicOn = writable(true)
+export const cameraStartPos = writable(skyPosition(100, 10 * DEG, 0))
+
 export const sunIntensity = writable(25)
 
 export const telescopeMode = writable(false)

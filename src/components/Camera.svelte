@@ -8,8 +8,10 @@ import {
   planetRadius,
   sunAngularDiameter,
   altitude,
+  cameraStartPos,
 } from '../store/environment'
 import { onMount, tick } from 'svelte'
+    import { DEG } from '../lib/units';
 
 export let controls
 export let telescope = false
@@ -53,6 +55,8 @@ const updateCameraPosition = ([x, y, z]) => {
   if (!followSun) return
   if (!controls) return
   controls.lookInDirectionOf(x, y, z, animateTelescope)
+  // a little shift to put sun higher in viewport
+  controls.rotate(0, -0.25 * $sunAngularDiameter * DEG, false)
 }
 
 onMount(() => {
@@ -68,9 +72,8 @@ const toggleTelecopeMode = async (camera, telescope) => {
     camera.up.set(0, Math.SQRT1_2, -Math.SQRT1_2)
     controls.updateCameraUp()
     controls.zoomTo(1, false)
-    const [x, y, z] = $sunPosition
-    controls.lookInDirectionOf(x, y, z, false)
     followSun = true
+    updateCameraPosition($sunPosition)
   } else {
     followSun = false
     camera.up.set(0, 1, 0)
@@ -125,7 +128,7 @@ useTask((dt) => {
     touches.two={CameraControls.ACTION.TOUCH_ZOOM}
     bind:ref={controls}
     on:create={async ({ ref }) => {
-      const [x, y, z] = $sunPosition
+      const [x, y, z] = $cameraStartPos
       ref.addEventListener('control', onInteract)
       await tick()
       ref.lookInDirectionOf(x, y, z, false)
