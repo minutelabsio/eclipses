@@ -26,20 +26,21 @@
       title: 'Telescope View',
       isToggle: true,
     },
-    {
-      icon: 'fluent:weather-sunny-high-48-regular',
-      iconOn: 'fluent:weather-sunny-high-48-filled',
-      name: 'sun',
-      title: 'Time of day',
-      component: TimeOfDayMenu,
-      active: true
-    },
+    // {
+    //   icon: 'fluent:weather-sunny-high-48-regular',
+    //   iconOn: 'fluent:weather-sunny-high-48-filled',
+    //   name: 'sun',
+    //   title: 'Time of day',
+    //   component: TimeOfDayMenu,
+    //   active: true
+    // },
     {
       icon: 'material-symbols-light:timer-play-outline',
       iconOn: 'material-symbols-light:timer-play',
       name: 'animation-speed',
       title: 'Animation Speed',
       component: PlaybackSpeedMenu,
+      active: true,
     },
     {
       icon: 'material-symbols-light:settings-outline-rounded',
@@ -47,7 +48,7 @@
       name: 'settings',
       title: 'Settings',
       component: SettingsMenu,
-      expanded: true,
+      type: 'expanded',
     },
     {
       icon: 'material-symbols-light:info-outline-rounded',
@@ -55,7 +56,7 @@
       name: 'info',
       title: 'Info',
       component: AboutMenu,
-      expanded: true,
+      type: 'full',
     },
   ])
 
@@ -127,7 +128,7 @@
 </script>
 
 <nav class="eclipse-menu">
-  <div class="context-menu scrollbars" class:expanded={$activeItem?.expanded} class:collapsed={!$activeItem}>
+  <div class={'context-menu scrollbars ' + $activeItem?.type} class:collapsed={!$activeItem}>
     {#if $activeItem?.component}
     <svelte:component this={$activeItem.component}/>
     {/if}
@@ -155,19 +156,20 @@
       padding: 0 1.5rem
       margin: 0 6px
       letter-spacing: 1px
-      background: linear-gradient(-5deg, rgba(125, 125, 125, 0.5) 7.59%, rgba(125, 125, 125, 0.8) 102.04%)
-      -webkit-backdrop-filter: blur(10px)
-      backdrop-filter: blur(10px)
-      border: 1px solid hsla(0, 0%, 100%, 0)
-      border-radius: 10px 10px 0 0
-      transition: height 300ms
-      overflow-y: auto
+      border-radius: 20px 20px 0 0
 
-      &.expanded
+      &.expanded,
+      &.full
         max-height: 100vh
-        height: 380px
-        border: 1px solid hsla(0, 0%, 100%, 0.3)
+        height: 300px
+        -webkit-backdrop-filter: blur(10px)
+        backdrop-filter: blur(10px)
+        background: linear-gradient(111.68deg, rgba(128, 128, 128, 0.3) 7.59%, rgba(128, 128, 128, 0.8) 102.04%)
         border-bottom: 0
+        transition: height 300ms
+      &.full
+        height: 80vh
+        overflow-y: auto
       &.collapsed
         height: 0
     ul, li
@@ -183,11 +185,14 @@
       height: 70px
       padding: 0 0.5rem
       border-radius: 10px 10px 0 0
-      background: linear-gradient(10deg, rgba(125, 125, 125, 0.5) 7.59%, rgba(125, 125, 125, 0.8) 102.04%)
+      border: 1px solid hsla(0, 0%, 93%, 0.3)
+      border-width: 1px 1px 1px 0
+      background: linear-gradient(111.68deg, rgba(128, 128, 128, 0.36) 7.59%, rgba(128, 128, 128, 0.15) 102.04%)
       -webkit-backdrop-filter: blur(10px)
       backdrop-filter: blur(10px)
       @media screen and (max-width: 660px)
         border-radius: 0
+        border-width: 1px 0 0 0
       li
         button
           line-height: 0

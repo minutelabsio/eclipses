@@ -1,4 +1,4 @@
-@use 'input-range-scss' with ($track-color: hsla(0, 2%, 90%, 1), $thumb-color: #AEAEAE, $thumb-height: 21px, $thumb-width: 21px, $thumb-radius: 50%, $thumb-border-color: white, $thumb-border-width: 1px, $track-border-width: 0, $track-height: 3px)
+@use 'input-range-scss' with ($track-color: hsla(0, 2%, 90%, 0.5), $thumb-color: #AEAEAE, $thumb-height: 21px, $thumb-width: 21px, $thumb-radius: 50%, $thumb-border-color: white, $thumb-border-width: 1px, $track-border-width: 0, $track-height: 3px, $thumb-shadow-size: 0, $track-shadow-size: 0, $contrast: 5%)
 @import '@csstools/normalize.css'
 
 * > *
@@ -59,19 +59,37 @@ label
 p:first-child
   margin-top: 0
 
-.exposure-slider
-  $track-color: hsla(0, 0%, 50%, 1)
-  $thumb-color: hsla(0, 0%, 68%, 1)
-  $thumb-height: 26px
-  $thumb-width: 26px
+.track-slider
+  $track-color: hsla(0, 0%, 50%, 0.75)
+  $thumb-color: hsla(0, 0%, 10%, 1)
+  $thumb-height: 25px
+  $thumb-width: 25px
   $thumb-radius: 50%
   $thumb-border-width: 1px
-  $thumb-border-color: hsla(0, 0%, 15%, 1)
+  $thumb-border-color: hsla(0, 0%, 75%, 1)
   $track-border-color: hsla(0, 0%, 100%, 0.25)
-  $track-border-width: 1px
-  $track-height: 27px
-  $track-radius: 27px
+  $track-border-width: 0px
+  $track-height: 23px
+  $track-radius: 23px
   $thumb-shadow-size: 0
+  $track-shadow-size: 0
+  $contrast: 5%
+  @import 'input-range-scss'
+
+.track-slider-thick
+  $track-color: hsla(0, 0%, 50%, 0.75)
+  $thumb-color: hsla(0, 0%, 10%, 1)
+  $thumb-height: 27px
+  $thumb-width: 27px
+  $thumb-radius: 50%
+  $thumb-border-width: 1px
+  $thumb-border-color: hsla(0, 0%, 75%, 1)
+  $track-border-color: hsla(0, 0%, 100%, 0.25)
+  $track-border-width: 0px
+  $track-height: 25px
+  $track-radius: 25px
+  $thumb-shadow-size: 0
+  $track-shadow-size: 0
   $contrast: 5%
   @import 'input-range-scss'
 
@@ -95,3 +113,6 @@ p:first-child
 
   &::-webkit-scrollbar-thumb:hover
     background-color: hsla(0, 0%, 100%, 0.8)
+
+button
+  outline: none

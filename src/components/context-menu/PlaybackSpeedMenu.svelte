@@ -3,7 +3,7 @@
   import { progressRate } from '../../store/environment'
 </script>
 
-<div class="menu">
+<div class="menu track-slider-thick">
   <label for="speed">
     <Icon icon='mdi:tortoise'/>
   </label>
@@ -15,13 +15,24 @@
 
 <style lang="sass">
   .menu
+    position: relative
     display: flex
     align-items: center
     justify-content: center
+    width: 265px
+    margin: auto
   .slider
     margin: 0 6px
   label
     display: flex
-    font-size: 32px
-    color: rgba(255, 255, 255, 0.7)
+    position: absolute
+    z-index: -1
+    font-size: 22px
+    color: white
+    top: 50%
+    left: 0.5em
+    transform: translateY(-50%)
+  label:last-child
+    left: auto
+    right: 0.5em
 </style>

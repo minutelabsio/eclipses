@@ -17,6 +17,7 @@
     elevationMid,
     telescopeModeExposure,
     showTutorial,
+    totalityFactor,
   } from '../store/environment'
   import {
     AU,
@@ -38,7 +39,7 @@
   import MoonSelector from '../components/MoonSelector.svelte'
   import { get, writable } from 'svelte/store'
   import Music from '../components/Music.svelte'
-  import ExposureSlider from '../components/ExposureSlider.svelte'
+  import VerticalSlider from '../components/VerticalSlider.svelte'
 
   export let selectedPlanet = 'earth'
   export let params = {}
@@ -284,8 +285,8 @@
 
 .planet-moon-title
   position: fixed
-  top: 1.25em
-  left: 1.45em
+  top: 0.9em
+  left: 0.88em
   z-index: 100
 
 .controls
@@ -303,7 +304,7 @@
 
   .eclipse-slider
     position: absolute
-    bottom: 62px
+    bottom: 48px
     left: 50%
     transform: translateX(-50%)
     height: 184px
@@ -317,7 +318,7 @@
     bottom: 0
     left: 0
     width: 100%
-    height: 280px
+    height: 340px
   .moon-selector-container
     position: absolute
     bottom: 450px
@@ -363,8 +364,8 @@
 
 .hide-controls
   position: fixed
-  top: 1.25em
-  right: 1.45em
+  top: 1.2em
+  right: 0.88em
   font-size: 25px
   button
     font-size: 38px
@@ -437,11 +438,23 @@
   .gesture-text
     margin-bottom: 0.5em
     text-transform: uppercase
-.exposure
+.exposure,
+.elevation,
+.moon-distance
   position: fixed
-  top: 50%
-  right: 2.1em
-  transform: translateY(-100px)
+  bottom: 50%
+  right: 22px
+  transform: translateY(calc(50% - 60px))
+  transition: transform 300ms
+  &.hidden
+    transform: translateY(calc(50% - 60px)) translateX(100px)
+.moon-distance
+  left: 22px
+  right: auto
+  :global(svg path)
+    transform: translate(-1px, -1px)
+.sliders-side
+  transition: opacity 300ms
 </style>
 
 <Suspense>
@@ -534,8 +547,16 @@
         on:planet={openPlanetSelector}
       />
     </div>
-    <div class="exposure" hidden={!$telescopeMode}>
-      <ExposureSlider bind:value={$telescopeModeExposure} />
+  </div>
+  <div class:hidden={hideUi} style:display={selectorActive ? 'none' : 'block'} class="sliders-side">
+    <div class="exposure" class:hidden={!$telescopeMode}>
+      <VerticalSlider powerScale bind:value={$telescopeModeExposure} icon="ion:glasses" />
+    </div>
+    <div class="elevation" class:hidden={$telescopeMode}>
+      <VerticalSlider bind:value={$elevationMid} icon="material-symbols-light:clear-day" iconPre="material-symbols:arrow-upward" iconPost="material-symbols:arrow-downward" min={-10} max={90} steps={1000} />
+    </div>
+    <div class="moon-distance">
+      <VerticalSlider bind:value={$totalityFactor} icon="material-symbols-light:clear-night" iconPre="material-symbols:add" iconPost="material-symbols:remove" />
     </div>
   </div>
 </Levetate>

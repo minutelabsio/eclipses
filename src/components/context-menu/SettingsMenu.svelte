@@ -1,7 +1,7 @@
 <script>
   import Toggle from '../Toggle.svelte'
   import Slider from '../Slider.svelte'
-  import { totalityFactor, setQuality, qualityPreset, musicOn, showTutorial } from '../../store/environment'
+  import { setQuality, qualityPreset, musicOn, showTutorial } from '../../store/environment'
 
   const updateQuality = (e) => {
     setQuality(e.detail.value | 0)
@@ -29,12 +29,6 @@
       <h4 class="label">Quality</h4>
       <div class="ctrl">
         <Slider min={1} max={4} steps={4} lowText="Low" highText="High" value={$qualityPreset} on:update={updateQuality}/>
-      </div>
-    </li>
-    <li>
-      <h4 class="label">Moon Distance (within its orbit)</h4>
-      <div class="ctrl">
-        <Slider min="1" max="0" lowText="Near" highText="Far" bind:value={$totalityFactor} />
       </div>
     </li>
   </ul>

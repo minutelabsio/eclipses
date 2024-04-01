@@ -57,7 +57,7 @@
           -0.5, // uranus
           0 // neptune
         ]
-        return { scale: 1, showAll, planetTilts, y: 0.3 }
+        return { scale: 1, showAll, planetTilts, y: 0.35 }
       } else {
         const planetTilts = [
           -1, // earth
@@ -67,7 +67,7 @@
           -0.5, // uranus
           -1 // neptune
         ]
-        return { scale: 1e-2, showAll, planetTilts, y: -0.1 }
+        return { scale: 1e-2, showAll, planetTilts, y: -0.6 }
       }
     }),
     smoothen({ duration: '0.5s', easing: 'quadOut' })
@@ -93,7 +93,7 @@
 
 <T.PerspectiveCamera
   makeDefault={true}
-  position={[0, 0.2, 5]}
+  position={[0, 0.2, 6]}
   lookAt={[0, 0, 0]}
   fov={35}
 />
