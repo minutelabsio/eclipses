@@ -12,6 +12,34 @@ import {
 const planetAxialTilt = 26.73 * DEG
 
 const moons = {
+  prometheus: {
+    // 137 x 81 x 56
+    moonRadius: 42.8 * 1000 * METER,
+    moonOrbitInclination: 0 - planetAxialTilt,
+    moonOrbitPeriod: 0.61588 * DAYS,
+    ...bothApsis(139400 * 1000 * METER, 0.002, 'moon')
+  },
+  pandora: {
+    // 103 x 79 x 63
+    moonRadius: 40 * 1000 * METER,
+    moonOrbitInclination: 0 - planetAxialTilt,
+    moonOrbitPeriod: 0.63137 * DAYS,
+    ...bothApsis(141700 * 1000 * METER, 0.004, 'moon')
+  },
+  epimetheus: {
+    // 130 x 116 x 107
+    moonRadius: 58.6 * 1000 * METER,
+    moonOrbitInclination: 0.3 * DEG - planetAxialTilt,
+    moonOrbitPeriod: 0.69701 * DAYS,
+    ...bothApsis(151400 * 1000 * METER, 0.02, 'moon')
+  },
+  janus: {
+    // 203 x 186 x 149
+    moonRadius: 89 * 1000 * METER,
+    moonOrbitInclination: 0.2 * DEG - planetAxialTilt,
+    moonOrbitPeriod: 0.69735 * DAYS,
+    ...bothApsis(151500 * 1000 * METER, 0.007, 'moon')
+  },
   mimas: {
     moonRadius: 198.6 * 1000 * METER,
     moonOrbitInclination: 1.53 * DEG - planetAxialTilt,

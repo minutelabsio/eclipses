@@ -47,6 +47,12 @@ const moons = {
     moonOrbitPeriod: 0.554654 * DAYS,
     ...bothApsis(73.548e3 * 1000 * METER, 0.0014, 'moon')
   },
+  hippocamp: {
+    moonRadius: 17.4 * 1000 * METER,
+    moonOrbitInclination: 0.064 * DEG - planetAxialTilt,
+    moonOrbitPeriod: 0.95 * DAYS,
+    ...bothApsis(105283 * 1000 * METER, 0.001, 'moon')
+  },
   proteus: {
     // 220 x 208 x 202
     moonRadius: (220 + 208 + 202) / 3 * 1000 * METER,
@@ -65,7 +71,7 @@ const moons = {
     moonOrbitInclination: 4.34 * DEG - planetAxialTilt,
     moonOrbitPeriod: 360.13619 * DAYS,
     ...bothApsis(5513.4e3 * 1000 * METER, 0.7512, 'moon')
-  }
+  },
 }
 
 const planetRadius = 4.007 * Re

@@ -12,6 +12,12 @@ import {
 const planetAxialTilt = 82.23 * DEG
 
 const moons = {
+  perdita: {
+    moonRadius: 15 * 1000 * METER,
+    moonOrbitInclination: 0 - planetAxialTilt,
+    moonOrbitPeriod: 0.638 * DAYS,
+    ...bothApsis(76400 * 1000 * METER, 0.001, 'moon')
+  },
   miranda: {
     // 240 x 234.2 x 232.9
     moonRadius: 235.8 * 1000 * METER,
