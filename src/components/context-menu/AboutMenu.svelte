@@ -45,11 +45,11 @@ let aboutLabOpen = false
       </figcaption>
     </figure>
     <p>
-      Solar eclipses happen when the moon casts a shadow onto the Earth (or another planet).
-      If the moon completely covers the Sun, it's called a total eclipse. If the moon only
-      partially covers the Sun, it's called an annular eclipse. The size of the moon
-      and its distance from the planet affect how much of the Sun is covered, as seen
-      from the surface.
+      A solar eclipse occurs when a moon passes between a planet and the sun,
+      temporarily blocking sunlight and casting a shadow on a planet.
+      Depending on the distance of the sun and moon from the planet, you might
+      see a partial eclipse where only part of the sun is covered; or a total
+      eclipse where the sun is completely covered for a short time.
     </p>
     <p>
       To learn more about eclipses, watch MinuteEarth's video all about them.
@@ -74,16 +74,30 @@ let aboutLabOpen = false
       helped us review the accuracy of the atmospheres... so we're pretty confident
       it's close to what we currently think is accurate.
     </p>
-    <h3>Acknowledgements</h3>
+    <h3>Data and Credits</h3>
     <p>
-      Thanks to Sarah Berman for the UX/UI design of this lab.
-      Thanks to NASA's Heliophysics Education Activation Team (NASA HEAT) for their
-      support in creating this lab. Thanks to Vincent Kofman for his help in reviewing
-      the accuracy of the atmospheric simulations.
-      And as always thanks to the MinuteEarth team.
+      Developer: Jasper Palfree <br />
+      UX Designer: Sarah Berman and Jasper Palfree <br />
+      Interface Designer: Sarah Berman <br />
+      Reviewers: Henry Reich, Vincent Kofman <br />
+      Project Director: Sarah Berman <br />
+      Music: "Stay in Orbit" by Victor Lundberg <br />
     </p>
     <p>
-      Simulation, and development by Jasper Palfree (The MinuteLabs guy).
+      This Product is supported by the NASA Heliophysics Education Activation Team
+      (NASA HEAT), part of NASA's Science Activation portfolio.
+    </p>
+    <p>
+      The material contained in this document is based upon work supported by a
+      National Aeronautics And Space Administration (NASA) grant or cooperative
+      agreement. Any questions, findings, conclusions or recommendations expressed
+      in this materials are those of the author and do not necessarily reflect the
+      views of NASA.
+    </p>
+    <p>
+      MinuteLabs is a Neptune Studios venture produced by Jasper Palfree and is a
+      hub for learning about the physics of our world through fun and inspiring
+      web experiences.
     </p>
   </div>
   {:else}
