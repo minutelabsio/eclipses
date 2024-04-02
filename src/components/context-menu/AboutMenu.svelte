@@ -29,7 +29,7 @@ let aboutLabOpen = false
       Tuning it to the middle will animate the eclipse with realistic timing.
       The <u><Icon icon="material-symbols-light:clear-night" inline/> Moon Distance Slider</u> controls the range of distances the moon
       can be from the planet. The <u><Icon icon="material-symbols-light:clear-day" inline/> Time of Day Slider</u> controls the
-      position of the sun in the sky. The <u><Icon icon="mdi:telescope" inline/> Telescope Mode</u> button lets you zoom in on the
+      position of the Sun in the sky. The <u><Icon icon="mdi:telescope" inline/> Telescope Mode</u> button lets you zoom in on the
       eclipse, where you can use the <u><Icon icon="ion:glasses" inline/> Exposure Slider</u> to adjust the amount of light the "camera"
       is capturing. To disable the music and more, check the <u><Icon icon="material-symbols:settings" inline/> Settings</u> menu.
     </p>
@@ -39,16 +39,16 @@ let aboutLabOpen = false
     <figure>
       <img src={solarEclipseDiagram} alt="Solar Eclipse Diagram" />
       <figcaption>
-        A solar eclipse occurs when the moon passes between the sun and the earth,
-        blocking the sun's light and casting a shadow on the earth.
+        A solar eclipse occurs when the moon passes between the Sun and the earth,
+        blocking the Sun's light and casting a shadow on the earth.
         (Diagram not to scale.)
       </figcaption>
     </figure>
     <p>
       Solar eclipses happen when the moon casts a shadow onto the Earth (or another planet).
-      If the moon completely covers the sun, it's called a total eclipse. If the moon only
-      partially covers the sun, it's called an annular eclipse. The size of the moon
-      and its distance from the planet affect how much of the sun is covered, as seen
+      If the moon completely covers the Sun, it's called a total eclipse. If the moon only
+      partially covers the Sun, it's called an annular eclipse. The size of the moon
+      and its distance from the planet affect how much of the Sun is covered, as seen
       from the surface.
     </p>
     <p>
@@ -97,9 +97,9 @@ let aboutLabOpen = false
         Earth: familiar, yes, but nonetheless beautiful. Hopefully this shows it
         in a new light. The Earth boasts the best total eclipses in the solar
         system. Our moon (called Luna, in case you didn't know) is just the right
-        size and distance to cover the sun perfectly. This allows us to see the
-        sun's corona &mdash; the outermost layer of the sun's atmosphere &mdash;
-        in its full glory.
+        size and distance to cover the Sun perfectly. This allows us to see the
+        Sun's corona &mdash; the outermost layer of the Sun's atmosphere &mdash;
+        in its full glory without the Sun's core overwhelming our vision.
       </p>
     {/if}
     {#if $planet === 'mars'}
@@ -109,24 +109,24 @@ let aboutLabOpen = false
         just like on Earth, and it would look blue if not for the dust. The dust
         is mainly iron oxide, which reflects more red light than blue. On the ground
         this dust gives Mars its red color, but if you move the time of day slider,
-        you'll see that when the sun is low, the sky is blue. This is because the
+        you'll see that when the Sun is low, the sky is blue. This is because the
         iron oxide dust scatters more blue light in the forward direction than it
         does red light. This effect is subtle though, so you see it most when
-        the light has to pass through a lot of dust, which happens when the sun
+        the light has to pass through a lot of dust, which happens when the Sun
         is near the horizon.
       </p>
       <p>
-        Mars has two moons, Phobos and Deimos. Phobos looks small in the sky
-        compared to the sun, so it won't eclipse the sun very much. But you can
-        still see the light from the sun dim a bit when Phobos passes in front
-        of it. NASA actually captured photos of Phobos eclipsing the sun from
-        the surface of Mars. A quick search will show you some of these photos,
+        Mars has two moons: Phobos and Deimos. Phobos looks small in the sky
+        compared to the Sun, so it won't eclipse the Sun very much. But you can
+        still see the light from the Sun dim a bit when Phobos passes in front
+        of it. NASA actually captured photos of Phobos eclipsing the Sun from
+        the surface of Mars. A quick internet search will show you some of these photos,
         which hopefully this Lab replicates well.
       </p>
     {/if}
     {#if $planet === 'jupiter'}
       <p>
-        Jupiter, the Giant. The largest planet in our neighborhood. The sun
+        Jupiter, the Giant. The largest planet in our neighborhood. The Sun
         is starting to look much smaller and farther away now. We don't
         have a solid surface to stand on here. Instead we'll have to hover in
         Jupiter's cloudy atmosphere at an altitude where the air pressure is about
@@ -139,17 +139,19 @@ let aboutLabOpen = false
       <p>
         Jupiter has... a lot of moons. But the big ones are called the Galilean moons.
         These are the four included in this Lab (plus Amalthea as an example of a
-        smaller moon). The Galilean moons all look larger than the sun does
+        smaller moon). The Galilean moons all look larger than the Sun does
         in the sky, but Callisto is the right size and distance to still see
         some of the corona.
       </p>
     {/if}
     {#if $planet === 'saturn'}
       <p>
-        Saturn. And before you ask, yes, the rings are visible. Move the sun
+        Saturn. And before you ask, yes, the rings are visible. Move the Sun
         past the horizon to reveal the stary sky, and the spectacular rings.
         Saturn's atmosphere is similar to Jupiter's. Hydrogen, Helium, ammonia clouds,
-        and haze.
+        and haze. There isn't a solid
+        place to stand, so we'll float in the atmosphere where it's 1 Bar of pressure;
+        about the same as Earth's surface.
       </p>
       <p>
         Saturn also has many moons, but the big ones are Titan and Rhea. The moons
@@ -166,10 +168,11 @@ let aboutLabOpen = false
     {#if $planet === 'uranus'}
       <p>
         This poor planet is always the butt of a lot of jokes and puns. But it really
-        is a beautiful place and it has rings too! Again, there isn't a solid
-        place to stand, so we'll
-        keep floating at 1 Bar of pressure. The sun is hard to see... if you lose
-        track of it, double tap the sun to recenter it and zoom in a bit. The sky
+        is a beautiful place and it has rings too! There isn't a solid
+        place to stand, so we'll float in the atmosphere where it's 1 Bar of pressure;
+        about the same as Earth's surface.
+        The Sun is hard to see... if you lose
+        track of it, double tap the Sun to recenter it and zoom in a bit. The sky
         during the day is a beautiful blue-green color. This is mainly due to
         the methane in Uranus's atmosphere. The methane clouds aren't too shabby
         either.
@@ -181,17 +184,20 @@ let aboutLabOpen = false
     {/if}
     {#if $planet === 'neptune'}
       <p>
-        Neptune is the farthest planet, and the sun looks like a bright star.
+        Neptune is the farthest planet, and the Sun looks like a bright star.
         In many pictures of Neptune, it looks like a deep blue color. But
         recent updates suggest that it looks very similar to Uranus. That
         makes sense, since they're both gas giants with similar atmospheres.
-        Again, enjoy the methane clouds.
+        The clouds are made of methane.
+        There isn't a solid
+        place to stand, so we'll float in the atmosphere where it's 1 Bar of pressure;
+        about the same as Earth's surface.
       </p>
       <p>
-        Since the sun is so far away, most of its closest moons just
-        dwarf the sun in the Neptunian sky. But Nereid is small enough
+        Since the Sun is so far away, most of its closest moons just
+        dwarf the Sun in the Neptunian sky. But Nereid is small enough
         and far enough away that it's almost reminiscent of Phobos eclipsing
-        the sun on Mars... if you zoom in a lot, that is.
+        the Sun on Mars... if you zoom in a lot, that is.
       </p>
     {/if}
   </div>
