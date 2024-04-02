@@ -66,9 +66,23 @@
   let cameraControls
   let hideUi = false
 
+  const getPlaybackRate = (rate, transitTime) => {
+    const t = Util.lerp(0, 2, rate)
+    // some moons are really fast
+    // so if we want "faster" then we figure out if
+    // the transit time happening in 10s is faster than realtime, or slower...
+    if (t <= 1) {
+      const min = Math.min(1 / 10, 1 / 10 / transitTime)
+      return Util.lerp(min, 1, t)
+    } else {
+      const max = Math.max(10, 1 / 10 / transitTime)
+      return Util.lerp(1, max, t - 1)
+    }
+  }
+
   $: player.totalTime = $transitTime * 1000
-  // 0 will be realtime, 1 will be transitTime happens in 10 seconds
-  $: player.playbackRate = Util.lerp(1, $transitTime / 10, quintIn($progressRate))
+  // 0.5 will be realtime
+  $: player.playbackRate = getPlaybackRate($progressRate, $transitTime)
 
   const playerProgress = writable(0)
 
@@ -553,7 +567,7 @@
       <VerticalSlider powerScale bind:value={$telescopeModeExposure} icon="ion:glasses" />
     </div>
     <div class="elevation" class:hidden={$telescopeMode}>
-      <VerticalSlider bind:value={$elevationMid} icon="material-symbols-light:clear-day" iconPre="material-symbols:arrow-upward" iconPost="material-symbols:arrow-downward" min={-10} max={90} steps={1000} />
+      <VerticalSlider bind:value={$elevationMid} icon="material-symbols-light:clear-day" iconPre="material-symbols:arrow-upward" iconPost="material-symbols:arrow-downward" min={-10} max={89.999} steps={1000} />
     </div>
     <div class="moon-distance">
       <VerticalSlider bind:value={$totalityFactor} icon="material-symbols-light:clear-night" iconPre="material-symbols:add" iconPost="material-symbols:remove" />
