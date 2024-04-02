@@ -1,5 +1,7 @@
 <script>
 import { planet, selectedMoon } from '../../store/environment'
+import solarEclipseDiagram from '../../assets/Solar Eclipse Illo.svg'
+import Icon from '@iconify/svelte'
 
 let aboutLabOpen = false
 </script>
@@ -7,59 +9,81 @@ let aboutLabOpen = false
 <section class="about">
   {#if aboutLabOpen}
   <h2 class="heading">
-    MinuteLabs Eclipse Simulator
+    The MinuteLabs Eclipse Explorer
   </h2>
   <div class="content scrollbars">
+    <p>
+      In the real world, <em>looking directly at the Sun is a very bad idea and could
+      cause permanent damage to your eyes</em>. But in this lab, you can safely observe
+      solar eclipses on different planets in our solar system.
+    </p>
+    <p>
+      This Eclipse Explorer simulates solar eclipses on different planets in our solar system.
+      Each planet's unique atmosphere, and moons, affect how a solar eclipse looks
+      from the surface.
+    </p>
+    <h3>Controls</h3>
+    <p>
+      You can use the controls to pan, zoom, and animate the eclipse. You can change
+      the speed of the animation using the <u><Icon icon="mdi:speedometer" inline/> Speed Slider</u>.
+      Tuning it to the middle will animate the eclipse with realistic timing.
+      The <u><Icon icon="material-symbols-light:clear-night" inline/> Moon Distance Slider</u> controls the range of distances the moon
+      can be from the planet. The <u><Icon icon="material-symbols-light:clear-day" inline/> Time of Day Slider</u> controls the
+      position of the sun in the sky. The <u><Icon icon="mdi:telescope" inline/> Telescope Mode</u> button lets you zoom in on the
+      eclipse, where you can use the <u><Icon icon="ion:glasses" inline/> Exposure Slider</u> to adjust the amount of light the "camera"
+      is capturing. To disable the music and more, check the <u><Icon icon="material-symbols:settings" inline/> Settings</u> menu.
+    </p>
     <h3>
       What is a Solar Eclipse?
     </h3>
+    <figure>
+      <img src={solarEclipseDiagram} alt="Solar Eclipse Diagram" />
+      <figcaption>
+        A solar eclipse occurs when the moon passes between the sun and the earth,
+        blocking the sun's light and casting a shadow on the earth.
+        (Diagram not to scale.)
+      </figcaption>
+    </figure>
     <p>
-      Here on Earth, solar eclipses are rare and spectacular events. We built this lab so that you can have realistic awe-inspiring experiences from earth and other planets in our solar system whenever you want - and learn while doing so.
+      Solar eclipses happen when the moon casts a shadow onto the Earth (or another planet).
+      If the moon completely covers the sun, it's called a total eclipse. If the moon only
+      partially covers the sun, it's called an annular eclipse. The size of the moon
+      and its distance from the planet affect how much of the sun is covered, as seen
+      from the surface.
     </p>
     <p>
-    This paragraph is info about how other planets have moons of different shapes and sizes and how the sun appears smaller in the sky the further out you go in the solar system.
+      To learn more about eclipses, watch MinuteEarth's video all about them.
+    </p>
+    <h3>
+      Accuracy of the Simulation
+    </h3>
+    <p>
+      We've done our best to make this simulation as accurate as possible, but there
+      are some limitations. For example, the shadows of the moons are simplified
+      to make the simulation run faster. This means that the shadows may not look
+      exactly like they would in real life. For some moons and planets especially you
+      may see layers of circles in the sky, which is not how a real eclipse would look.
     </p>
     <p>
-    This paragraph mentions how it’s interesting that Mercury and Venus don’t have any moons.
+      The atmospheres of planets are tricky to simulate accurately. For Earth and Mars,
+      we have pictures so we can compare our simulation to reality. For the other planets,
+      we have to rely on what we know about their atmospheres, and make educated guesses
+      about how the light would scatter in them.
+      <a href="https://science.gsfc.nasa.gov/sci/bio/vincent.kofman" target="_blank">NASA's Vincent Kofman</a>,
+      who specializes in simulating planetary atmospheres,
+      helped us review the accuracy of the atmospheres... so we're pretty confident
+      it's close to what we currently think is accurate.
+    </p>
+    <h3>Acknowledgements</h3>
+    <p>
+      Thanks to Sarah Berman for the UX/UI design of this lab.
+      Thanks to NASA's Heliophysics Education Activation Team (NASA HEAT) for their
+      support in creating this lab. Thanks to Vincent Kofman for his help in reviewing
+      the accuracy of the atmospheric simulations.
+      And as always thanks to the MinuteEarth team.
     </p>
     <p>
-    This paragraph is about how different factors impact how an eclipse appears in the sky, such as the elements that make up the atmosphere, whether there IS an atmosphere, how the light is scattered, the time of day, etc. It also talks about things like 360 degree sunsets and other similarly unique phenomenon.
-    </p>
-    <p>
-      Here on Earth, solar eclipses are rare and spectacular events. We built this lab so that you can have realistic awe-inspiring experiences from earth and other planets in our solar system whenever you want - and learn while doing so.
-    </p>
-    <p>
-    This paragraph is info about how other planets have moons of different shapes and sizes and how the sun appears smaller in the sky the further out you go in the solar system.
-    </p>
-    <p>
-    This paragraph mentions how it’s interesting that Mercury and Venus don’t have any moons.
-    </p>
-    <p>
-    This paragraph is about how different factors impact how an eclipse appears in the sky, such as the elements that make up the atmosphere, whether there IS an atmosphere, how the light is scattered, the time of day, etc. It also talks about things like 360 degree sunsets and other similarly unique phenomenon.
-    </p>
-    <p>
-      Here on Earth, solar eclipses are rare and spectacular events. We built this lab so that you can have realistic awe-inspiring experiences from earth and other planets in our solar system whenever you want - and learn while doing so.
-    </p>
-    <p>
-    This paragraph is info about how other planets have moons of different shapes and sizes and how the sun appears smaller in the sky the further out you go in the solar system.
-    </p>
-    <p>
-    This paragraph mentions how it’s interesting that Mercury and Venus don’t have any moons.
-    </p>
-    <p>
-    This paragraph is about how different factors impact how an eclipse appears in the sky, such as the elements that make up the atmosphere, whether there IS an atmosphere, how the light is scattered, the time of day, etc. It also talks about things like 360 degree sunsets and other similarly unique phenomenon.
-    </p>
-    <p>
-      Here on Earth, solar eclipses are rare and spectacular events. We built this lab so that you can have realistic awe-inspiring experiences from earth and other planets in our solar system whenever you want - and learn while doing so.
-    </p>
-    <p>
-    This paragraph is info about how other planets have moons of different shapes and sizes and how the sun appears smaller in the sky the further out you go in the solar system.
-    </p>
-    <p>
-    This paragraph mentions how it’s interesting that Mercury and Venus don’t have any moons.
-    </p>
-    <p>
-    This paragraph is about how different factors impact how an eclipse appears in the sky, such as the elements that make up the atmosphere, whether there IS an atmosphere, how the light is scattered, the time of day, etc. It also talks about things like 360 degree sunsets and other similarly unique phenomenon.
+      Simulation, and development by Jasper Palfree (The MinuteLabs guy).
     </p>
   </div>
   {:else}
@@ -205,7 +229,12 @@ let aboutLabOpen = false
       font-weight: 400
       line-height: 20px
       text-align: center
-
+    u
+      text-decoration: none
+      border-bottom: 2px solid #d5d5d5
+    a
+      color: white
+      text-decoration: underline
   .heading
     display: flex
     justify-content: space-between
@@ -249,4 +278,15 @@ let aboutLabOpen = false
       background: hsla(0, 0%, 100%, 0.1)
     &:active
       background: hsla(0, 0%, 100%, 0.2)
+figure
+  margin: 2em 10%
+  text-align: center
+  img
+    margin: auto
+    width: 100%
+    max-width: 420px
+  figcaption
+    text-align: left
+    font-size: 0.85em
+    margin: 1.5em 0
 </style>
