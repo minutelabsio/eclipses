@@ -118,9 +118,9 @@
 {:else}
 <T.Mesh
   visible={$skyVisible}
-  scale.x={0.5 * AU}
-  scale.y={0.5 * AU}
-  scale.z={0.5 * AU}
+  scale.x={1e9}
+  scale.y={1e9}
+  scale.z={1e9}
   renderOrder={2}
 >
   <T.IcosahedronGeometry args={[1, 32]} />
