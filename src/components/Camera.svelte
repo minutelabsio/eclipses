@@ -97,11 +97,8 @@ $: fov = telescope ? $sunAngularDiameter * 4 : $FOV
 $: setOrbit(camera, orbitPlanet)
 $: toggleTelecopeMode(camera, telescope)
 
-
 useTask((dt) => {
   controls?.update(dt)
-}, {
-  stage: beforeRenderStage
 })
 </script>
 
