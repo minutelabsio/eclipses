@@ -61,7 +61,7 @@ export const observerOrigin = derived(
 )
 export const sunDistance = writable(1 * AU)
 export const sunRadius = writable(109 * Re)
-export const elevationMid = writable(9)
+export const elevationMid = writable(17)
 export const totalityFactor = writable(0.9)
 export const selectedMoon = writable('luna')
 export const moonRadius = writable(0.2727 * Re)

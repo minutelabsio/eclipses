@@ -19,6 +19,7 @@
     telescopeModeExposure,
     showTutorial,
     totalityFactor,
+    elevationAdjustment,
   } from '../store/environment'
   import {
     AU,
@@ -203,8 +204,8 @@
 
 
   const animateSunrise = () => {
-    const tween = Tween.create({ el: -5 })
-      .by('2s', { el: -5 }, 'linear')
+    const tween = Tween.create({ el: -5 - get(elevationAdjustment) })
+      .by('2s', { el: -5 - get(elevationAdjustment) }, 'linear')
       .by('12s', { el: get(elevationMid) }, 'quadInOut')
 
     frames(12000)
@@ -217,7 +218,7 @@
   onReveal(() => {
     hasLoaded.update((v) => {
       if (!v) {
-        // animateSunrise()
+        animateSunrise()
         $showTutorial = true
         delay(10000).then(() => {
           $showTutorial = false
