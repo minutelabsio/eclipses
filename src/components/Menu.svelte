@@ -169,6 +169,7 @@
         transition: height 300ms
       &.full
         height: 80vh
+        height: 80dvh
         overflow-y: auto
       &.collapsed
         height: 0
