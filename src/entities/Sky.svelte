@@ -118,12 +118,9 @@
 {:else}
 <T.Mesh
   visible={$skyVisible}
-  scale.x={1e7}
-  scale.y={1e7}
-  scale.z={1e7}
   renderOrder={2}
 >
-  <T.IcosahedronGeometry args={[1, 32]} />
+  <T.IcosahedronGeometry args={[1e11, 32]} />
   <T is={Sky.shader} />
 </T.Mesh>
 {/if}
