@@ -42,7 +42,7 @@ export const orbitPlanet = writable(false)
 
 export const planet = writable('earth')
 export const dayLength = writable(24 * HOURS)
-export const FOV = writable(26.5)
+export const FOV = writable(40) // 26.5
 export const exposure = writable(1.0)
 export const bloomIntensity = writable(2.5)
 
@@ -133,14 +133,18 @@ export const moonAnimationTime = derived(
   [moonTransitDegrees, moonOrbitPeriod],
   ([$moonTransitDegrees, $moonOrbitPeriod]) => Math.abs(2 * $moonTransitDegrees * $moonOrbitPeriod / 360)
 )
+
+export const maxSunDeviation = derived(
+  [dayLength, moonAnimationTime],
+  ([$dayLength, $moonAnimationTime]) => 180 * $moonAnimationTime / $dayLength
+)
 // moonAnimationTime.subscribe(print)
 // eclipse progress moves moon from -moonTransitDegrees to moonTransitDegrees
 // so calculate how much the sun moves in the same time
 export const elevationAdjustment = derived(
-  [eclipseProgress, dayLength, moonAnimationTime],
-  ([$eclipseProgress, $dayLength, $moonAnimationTime]) => {
-    const a = $moonAnimationTime / 2
-    return 360 * MathUtils.lerp(-a, a, $eclipseProgress) / $dayLength
+  [eclipseProgress, maxSunDeviation],
+  ([$eclipseProgress, $maxSunDeviation]) => {
+    return MathUtils.lerp(-$maxSunDeviation, $maxSunDeviation, $eclipseProgress)
   }
 )
 // elevationAdjustment.subscribe(print)
