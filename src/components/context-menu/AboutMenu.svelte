@@ -285,25 +285,7 @@ let aboutLabOpen = false
     text-align: center
   .cta
     margin: 1.5em 0
-  button,
-  .button
-    display: inline-block
-    background: none
-    color: white
-    font-size: 13px
-    text-transform: uppercase
-    text-decoration: none !important
-    font-weight: 400
-    cursor: pointer
-    padding: .3em 1.1em
-    margin: 0
-    border: 1px solid hsla(0, 0%, 100%, 1)
-    border-radius: 15px
-    transition: background 0.2s
-    &:hover
-      background: hsla(0, 0%, 100%, 0.1)
-    &:active
-      background: hsla(0, 0%, 100%, 0.2)
+
 figure
   margin: 2em 10%
   text-align: center

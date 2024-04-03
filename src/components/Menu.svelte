@@ -17,6 +17,7 @@
       name: 'planet',
       title: 'Planet View',
       isButton: true,
+      helpText: 'Planet / Moon Selector',
     },
     {
       // icon: 'mdi:telescope',
@@ -25,6 +26,7 @@
       name: 'telescope',
       title: 'Telescope View',
       isToggle: true,
+      helpText: 'Telescope View',
     },
     // {
     //   icon: 'fluent:weather-sunny-high-48-regular',
@@ -41,6 +43,7 @@
       title: 'Animation Speed',
       component: PlaybackSpeedMenu,
       active: true,
+      helpText: 'Eclipse Speed',
     },
     {
       icon: 'material-symbols-light:settings-outline-rounded',
@@ -49,6 +52,7 @@
       title: 'Settings',
       component: SettingsMenu,
       type: 'expanded',
+      helpText: 'Settings',
     },
     {
       icon: 'material-symbols-light:info-outline-rounded',
@@ -57,6 +61,7 @@
       title: 'Info',
       component: AboutMenu,
       type: 'full',
+      helpText: 'Planet / Lab Info',
     },
   ])
 
@@ -136,7 +141,12 @@
   <ul>
     {#each $menuItems as item}
       <li>
-        <button on:click={() => buttonClicked(item.name)} class:active={item.active} disabled={item.disabled}>
+        <button
+          on:click={() => buttonClicked(item.name)}
+          class:active={item.active}
+          disabled={item.disabled}
+          data-help-text={item.helpText}
+        >
           <Icon icon={item.active ? item.iconOn : item.icon} />
           <span class="sr-only">{item.title}</span>
         </button>
@@ -157,7 +167,25 @@
       margin: 0 6px
       letter-spacing: 1px
       border-radius: 20px 20px 0 0
-
+      :global(button),
+      :global(.button)
+        display: inline-block
+        background: none
+        color: white
+        font-size: 13px
+        text-transform: uppercase
+        text-decoration: none !important
+        font-weight: 400
+        cursor: pointer
+        padding: .3em 1.1em
+        margin: 0
+        border: 1px solid hsla(0, 0%, 100%, 1)
+        border-radius: 15px
+        transition: background 0.2s
+        &:hover
+          background: hsla(0, 0%, 100%, 0.1)
+        &:active
+          background: hsla(0, 0%, 100%, 0.2)
       &.expanded,
       &.full
         max-height: 100vh
@@ -221,4 +249,6 @@
           &:disabled
             color: hsla(0, 0%, 100%, 0.25)
             cursor: not-allowed
+
+
 </style>

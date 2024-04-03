@@ -10,7 +10,7 @@
   import Visualizer from './scenes/Visualizer.svelte'
   import Levetate from './components/Levetate.svelte'
   import Debug from './scenes/Debug.svelte'
-  import { selectPlanet, dpr, fogHue, sunBrightness } from './store/environment'
+  import { selectPlanet, dpr, fogHue, sunBrightness, showHelp } from './store/environment'
   import * as PlanetConfigs from './configs'
   import { sineIn } from 'svelte/easing'
   import { GoogleAnalytics } from '@beyonk/svelte-google-analytics'
@@ -66,6 +66,10 @@
   onMount(() => {
     // remove the .ml-spinner element
     document.querySelector('.ml-spinner')?.remove()
+  })
+
+  showHelp.subscribe((show) => {
+    document.body.classList.toggle('show-help', show)
   })
 
   let fog

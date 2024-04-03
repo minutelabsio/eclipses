@@ -21,6 +21,7 @@
     showTutorial,
     totalityFactor,
     elevationAdjustment,
+    showHelp,
   } from '../store/environment'
   import {
     AU,
@@ -202,6 +203,12 @@
       return hits.slice(0, 1)
     }
   })
+
+  const onSingleTap = (e) => {
+    selectorActive = false
+    $showTutorial = false
+    $showHelp = false
+  }
 
   let interactor
   target.subscribe(el => {
@@ -442,9 +449,9 @@
   font-size: 18px
   font-weight: 400
   color: hsla(0, 0%, 70%, 0.8)
-  text-shadow: 0 0 2px hsla(0, 100%, 0%, 0.15)
+  text-shadow: 0 0 6px hsla(0, 100%, 0%, 0.45)
   z-index: 100
-  width: 100%
+  width: 80%
   max-width: 460px
   height: 10em
   transition: opacity 1000ms
@@ -484,7 +491,7 @@
 
 <Suspense>
 
-  <T.Group on:click={() => selectorActive = false}>
+  <T.Group on:click={onSingleTap}>
     <Space/>
   </T.Group>
 
@@ -527,14 +534,14 @@
       <span>Zoom In/Out</span>
     </div>
   </aside>
-  <aside class="planet-moon-title no-interaction" class:hidden={selectorActive}>
+  <aside class="planet-moon-title no-interaction help-below" class:hidden={selectorActive} data-help-text="Name of Planet / Moon">
     <h2>{hoveringPlanet || ''}</h2>
     <h3>{hoveringMoon || ''}</h3>
   </aside>
   <aside class="brand" class:hidden={!hideUi}>
     MINUTELABS.io
   </aside>
-  <div class="hide-controls">
+  <div class="hide-controls help-below" data-help-text="Hide Interface">
     <button on:click={toggleControls} class:active={hideUi}>
       <Icon icon={hideUi ? 'material-symbols:visibility' : 'material-symbols:visibility-outline'} />
     </button>
@@ -556,7 +563,7 @@
       </aside>
 
       {#if !selectorActive}
-        <div transition:fade={{ duration: 100 }} class="eclipse-slider no-highlight">
+        <div transition:fade={{ duration: 100 }} class="eclipse-slider no-highlight" data-help-text="Eclipse Progress">
           <EclipseSlider bind:progress={$playerProgress} on:swipe={onSwipe} on:start={seekStart} on:end={seekEnd}>
             <button class="play-pause" on:dblclick|capture|stopPropagation on:click={togglePlay}>
               <Icon icon={ playing ? 'material-symbols:pause-rounded' : 'material-symbols:play-arrow-rounded'} />
@@ -577,10 +584,10 @@
     <div class="exposure" class:hidden={!$telescopeMode}>
       <VerticalSlider powerScale bind:value={$telescopeModeExposure} icon="ion:glasses" />
     </div>
-    <div class="elevation" class:hidden={$telescopeMode}>
+    <div class="elevation help-left" class:hidden={$telescopeMode} data-help-text="Time of Day">
       <VerticalSlider bind:value={$elevationMid} icon="material-symbols-light:clear-day" iconPre="material-symbols:arrow-upward" iconPost="material-symbols:arrow-downward" min={-7+$maxSunDeviation} max={89.999} steps={1000} />
     </div>
-    <div class="moon-distance">
+    <div class="moon-distance help-right" data-help-text="Moon Distance">
       <VerticalSlider bind:value={$totalityFactor} icon="material-symbols-light:clear-night" iconPre="material-symbols:add" iconPost="material-symbols:remove" />
     </div>
   </div>

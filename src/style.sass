@@ -127,3 +127,84 @@ p:first-child
 
 button
   outline: none
+
+[data-help-text]
+  position: relative
+  --help-spacing: 3em
+  &::before,
+  &::after
+    position: absolute
+    z-index: 1000
+    font-size: 11px
+    font-weight: 400
+    font-family: 'Plus Jakarta Sans', sans-serif
+    font-size: 11px
+    font-weight: 400
+    color: white
+    text-align: center
+    transition: opacity 300ms
+    touch-action: none
+    pointer-events: none
+    opacity: 0
+  &::before
+    content: ''
+    bottom: 90%
+    left: 50%
+    transform: translateX(-50%)
+    border: 1px solid hsla(0, 0%, 100%, 0.8)
+    border-width: 0 1px 0 0
+    height: var(--help-spacing)
+    width: 0
+  &::after
+    content: attr(data-help-text)
+    bottom: calc(90% + var(--help-spacing))
+    line-height: 1.3
+    left: 50%
+    height: auto
+    min-width: 5em
+    padding: 0.5em
+    background: hsla(0, 0%, 10%, 1)
+    border-radius: 3px
+    box-shadow: 0px 0px 1px hsla(0, 0%, 100%, 0.3)
+    border: 1px solid hsla(0, 0%, 0%, 0.7)
+    transform: translateX(-50%)
+  &.help-below
+    &::before
+      top: 90%
+      bottom: auto
+    &::after
+      top: calc(90% + var(--help-spacing))
+      bottom: auto
+  &.help-right
+    &::before
+      bottom: 50%
+      left: 90%
+      transform: translateY(50%)
+      height: 0
+      width: var(--help-spacing)
+      border-width: 1px 0 0 0
+    &::after
+      bottom: 50%
+      left: calc(90% + var(--help-spacing))
+      text-align: left
+      transform: translateY(50%)
+  &.help-left
+    &::before
+      bottom: 50%
+      right: 90%
+      left: auto
+      transform: translateY(50%)
+      height: 0
+      width: var(--help-spacing)
+      border-width: 1px 0 0 0
+    &::after
+      bottom: 50%
+      left: auto
+      right: calc(90% + var(--help-spacing))
+      text-align: right
+      transform: translateY(50%)
+
+.show-help [data-help-text]
+  &::before,
+  &::after
+    opacity: 1

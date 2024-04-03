@@ -1,7 +1,12 @@
 <script>
   import Toggle from '../Toggle.svelte'
   import Slider from '../Slider.svelte'
-  import { setQuality, qualityPreset, musicOn, showTutorial } from '../../store/environment'
+  import { setQuality, qualityPreset, musicOn, showTutorial, showHelp } from '../../store/environment'
+
+  const onShowHelp = () => {
+    $showTutorial = !$showHelp
+    $showHelp = !$showHelp
+  }
 
   const updateQuality = (e) => {
     setQuality(e.detail.value | 0)
@@ -15,8 +20,8 @@
   <ul class="settings">
     <li>
       <h4 class="label">Gesture Hints</h4>
-      <div class="switch">
-        <Toggle onText="ON" offText="OFF" bind:value={$showTutorial} />
+      <div class="ctrl">
+        <button on:click={onShowHelp}>Show Help</button>
       </div>
     </li>
     <li>
@@ -77,4 +82,6 @@
         width: 9.65em
       &:has(.ctrl)
         align-items: stretch
+      .ctrl
+        text-align: center
 </style>
