@@ -42,7 +42,7 @@
 
   const { scene, renderer, camera, size, renderStage, autoRender } = useThrelte()
   const composer = new EffectComposer(renderer, {
-    frameBufferType: THREE.HalfFloatType,
+    frameBufferType: THREE.FloatType,
     multisampling: 0
   })
 
