@@ -12,75 +12,79 @@ let aboutLabOpen = false
     The MinuteLabs Eclipse Explorer
   </h2>
   <div class="content scrollbars">
+
     <p>
-      In the real world, <em>looking directly at the Sun is a very bad idea and could
-      cause permanent damage to your eyes</em>. But in this lab, you can safely observe
+      In the real world, <em>looking directly at the Sun with your bare eyes is a very bad idea and could
+      cause permanent damage</em>. But good news! In this lab, you can safely observe
       solar eclipses on different planets in our solar system.
     </p>
     <p>
-      This Eclipse Explorer simulates solar eclipses on different planets in our solar system.
-      Each planet's unique atmosphere, and moons, affect how a solar eclipse looks
-      from the surface.
+      This Eclipse Explorer simulates solar eclipses on planets in our solar system.
+      Each planet's atmosphere and moons affect how a solar eclipse looks from the surface.
     </p>
-    <h3>Controls</h3>
-    <p>
-      You can use the controls to pan, zoom, and animate the eclipse. You can change
-      the speed of the animation using the <u><Icon icon="mdi:speedometer" inline/> Speed Slider</u>.
-      Tuning it to the middle will animate the eclipse with realistic timing.
-      The <u><Icon icon="material-symbols-light:clear-night" inline/> Moon Distance Slider</u> controls the range of distances the moon
-      can be from the planet. The <u><Icon icon="material-symbols-light:clear-day" inline/> Time of Day Slider</u> controls the
-      position of the Sun in the sky. The <u><Icon icon="mdi:telescope" inline/> Telescope Mode</u> button lets you zoom in on the
-      eclipse, where you can use the <u><Icon icon="ion:glasses" inline/> Exposure Slider</u> to adjust the amount of light the "camera"
-      is capturing. To disable the music and more, check the <u><Icon icon="material-symbols:settings" inline/> Settings</u> menu.
-    </p>
+
     <h3>
       What is a Solar Eclipse?
     </h3>
     <figure>
       <img src={solarEclipseDiagram} alt="Solar Eclipse Diagram" />
       <figcaption>
-        A solar eclipse occurs when the moon passes between the Sun and the earth,
-        blocking the Sun's light and casting a shadow on the earth.
+        A solar eclipse occurs when a moon passes between the Sun and a planet,
+        blocking the Sun's light and casting a shadow.
         (Diagram not to scale.)
       </figcaption>
     </figure>
     <p>
-      A solar eclipse occurs when a moon passes between a planet and the sun,
-      temporarily blocking sunlight and casting a shadow on a planet.
-      Depending on the distance of the sun and moon from the planet, you might
-      see a partial eclipse where only part of the sun is covered; or a total
-      eclipse where the sun is completely covered for a short time.
+      A solar eclipse occurs when a moon passes between a planet and the Sun,
+      temporarily blocking sunlight and casting a shadow on a planet. Depending
+      on the distance of the sun and moon from the planet, you might see a partial
+      eclipse where only part of the Sun is covered; or a total eclipse where the Sun
+      is completely covered for a short time.
     </p>
     <p>
       To learn more about eclipses, watch MinuteEarth's video all about them.
     </p>
+
+    <h3>Controls</h3>
+    <p>
+      You can pan, zoom, and animate the eclipse. You can change
+      the speed of the animation using the <u><Icon icon="mdi:speedometer" inline/> Speed Slider</u>.
+      Tuning it to the middle will animate the eclipse with realistic timing.
+      The <u><Icon icon="material-symbols-light:clear-night" inline/> Moon Distance Slider</u>
+      controls how far away the moon is from the surface of the planet. The <u><Icon icon="material-symbols-light:clear-day" inline/> Time of Day Slider</u> controls the
+      position of the Sun in the sky. The <u><Icon icon="mdi:telescope" inline/> Telescope Mode</u> button lets you zoom in on the
+      eclipse, where you can use the <u><Icon icon="ion:glasses" inline/> Exposure Slider</u> to adjust the amount of light the "camera"
+      is capturing. To disable the music and more, check the <u><Icon icon="material-symbols:settings" inline/> Settings</u> menu.
+    </p>
+
     <h3>
       Accuracy of the Simulation
     </h3>
     <p>
-      We've done our best to make this simulation as accurate as possible, but there
-      are some limitations. For example, the shadows of the moons are simplified
-      to make the simulation run faster. This means that the shadows may not look
-      exactly like they would in real life. For some moons and planets especially you
-      may see layers of circles in the sky, which is not how a real eclipse would look.
+      We used <a href="https://nssdc.gsfc.nasa.gov/planetary/factsheet/" target="_blank">data from NASA</a>
+      to simulate the size and distance of the planets and moons.
+      And <a href="https://science.gsfc.nasa.gov/sci/bio/vincent.kofman" target="_blank">NASA's Vincent Kofman</a>,
+      who specializes in simulating planetary atmospheres,
+      helped us review the accuracy of the atmospheres.
+      We've done our best to make this simulation as accurate as possible,
+      but there are limitations. For example, the moons' shadows are simplified
+      to make the simulation run faster.
     </p>
     <p>
-      The atmospheres of planets are tricky to simulate accurately. For Earth and Mars,
-      we have pictures so we can compare our simulation to reality. For the other planets,
-      we have to rely on what we know about their atmospheres, and make educated guesses
-      about how the light would scatter in them.
-      <a href="https://science.gsfc.nasa.gov/sci/bio/vincent.kofman" target="_blank">NASA's Vincent Kofman</a>,
-      who specializes in simulating planetary atmospheres,
-      helped us review the accuracy of the atmospheres... so we're pretty confident
-      it's close to what we currently think is accurate.
+      Atmospheres are also tricky to simulate accurately. For Earth and Mars,
+      we have pictures so we can compare our simulation to reality.
+      For the other planets, we have to rely on what we know about their
+      atmospheres, and make educated guesses about how they scatter light.
     </p>
+
     <h3>Data and Credits</h3>
     <p>
-      Developer: Jasper Palfree <br />
-      UX Designer: Sarah Berman and Jasper Palfree <br />
-      Interface Designer: Sarah Berman <br />
-      Reviewers: Henry Reich, Vincent Kofman <br />
-      Project Director: Sarah Berman <br />
+      Development: Jasper Palfree <br />
+      UX Design: Sarah Berman and Jasper Palfree <br />
+      Interface Design: Sarah Berman <br />
+      Physics Feedback: Vincent Kofman, Henry Reich <br />
+      Review Team: MinuteEarth <br />
+      Project Direction: Sarah Berman <br />
       Music: "Stay in Orbit" by Victor Lundberg <br />
     </p>
     <p>
@@ -96,9 +100,15 @@ let aboutLabOpen = false
     </p>
     <p>
       MinuteLabs is a Neptune Studios venture produced by Jasper Palfree and is a
-      hub for learning about the physics of our world through fun and inspiring
+      hub for learning about our world through fun and inspiring
       web experiences.
     </p>
+    <p>
+      For more interactives, visit
+    </p>
+    <div class="centered">
+      <a class="button" href="https://minutelabs.io" target="_blank">minutelabs.io</a>
+    </div>
   </div>
   {:else}
   <h2 class="heading">
@@ -108,110 +118,104 @@ let aboutLabOpen = false
   <div class="content scrollbars">
     {#if $planet === 'earth'}
       <p>
-        Earth: familiar, yes, but nonetheless beautiful. Hopefully this shows it
-        in a new light. The Earth boasts the best total eclipses in the solar
-        system. Our moon (called Luna, in case you didn't know) is just the right
-        size and distance to cover the Sun perfectly. This allows us to see the
-        Sun's corona &mdash; the outermost layer of the Sun's atmosphere &mdash;
-        in its full glory without the Sun's core overwhelming our vision.
+        Earth: familiar, but nonetheless beautiful. The Earth boasts the best
+        total eclipses in the solar system. Our moon (called Luna, in case you
+        didn't know) is just the right size and distance to cover the Sun perfectly.
+        This allows us to see the Sun's corona &mdash; the outermost layer of the
+        Sun's atmosphere &mdash; in its full glory without the Sun's core
+        overwhelming our vision.
       </p>
     {/if}
     {#if $planet === 'mars'}
       <p>
-        Mars is a dusty place. It has an atmosphere, but the air is very thin.
-        The air pressure is about 0.6% of Earth's. The air scatters the sunlight
-        just like on Earth, and it would look blue if not for the dust. The dust
-        is mainly iron oxide, which reflects more red light than blue. On the ground
-        this dust gives Mars its red color, but if you move the time of day slider,
-        you'll see that when the Sun is low, the sky is blue. This is because the
-        iron oxide dust scatters more blue light in the forward direction than it
-        does red light. This effect is subtle though, so you see it most when
-        the light has to pass through a lot of dust, which happens when the Sun
-        is near the horizon.
+        Mars: A dusty planet with a thin atmosphere. At the surface, the air
+        pressure is about 0.6% of Earth's. The air scatters the sunlight just
+        like on Earth, and it would look blue if not for the dust. The dust is
+        mainly iron oxide, which on the ground this dust gives Mars its red color.
+        In the air, the dust scatters the light in a way that makes the Sun look
+        blue near the horizon. But if you use the time of day slider to move the
+        Sun higher, you'll see the sky turn a reddish hue.
       </p>
       <p>
         Mars has two moons: Phobos and Deimos. Phobos looks small in the sky
-        compared to the Sun, so it won't eclipse the Sun very much. But you can
-        still see the light from the Sun dim a bit when Phobos passes in front
-        of it. NASA actually captured photos of Phobos eclipsing the Sun from
-        the surface of Mars. A quick internet search will show you some of these photos,
-        which hopefully this Lab replicates well.
+        compared to the Sun, so it won't fully eclipse the Sun. But you can
+        still see the light from the Sun dim a bit when Phobos passes in
+        front of it. NASA captured photos of Phobos eclipsing the Sun from
+        the surface of Mars, which makes Phobos the only other moon in our
+        solar system to be photographed eclipsing the Sun from the surface of a planet.
       </p>
     {/if}
     {#if $planet === 'jupiter'}
       <p>
-        Jupiter, the Giant. The largest planet in our neighborhood. The Sun
-        is starting to look much smaller and farther away now. We don't
-        have a solid surface to stand on here. Instead we'll have to hover in
-        Jupiter's cloudy atmosphere at an altitude where the air pressure is about
-        the same as Earth's (around 1 Bar). The Hydrogen and Helium in Jupiter's
-        atmosphere scatter sunlight in a similar way to Earth's atmosphere, but
-        the atmosphere is hazy and cloudy, so the familiar "sky blue" color
-        is muted. The clouds are made of ammonia crystals,
-        which look similar to water clouds on Earth.
+        Jupiter, the Giant. The largest planet in our neighborhood. The Sun is
+        starting to look much smaller and farther away now. We don't have a solid
+        surface to stand on here. Instead we'll hover in Jupiter's cloudy
+        atmosphere at an altitude where the air pressure is about the same as
+        Earth's at sea level (around 1 Bar). The Hydrogen and Helium in Jupiter's
+        atmosphere scatter sunlight similarly to Earth's atmosphere, but the
+        atmosphere is hazy and cloudy, so the familiar "sky blue" color is dulled.
+        Oh, and those clouds you see? Those are made of ammonia crystals, not water.
       </p>
       <p>
-        Jupiter has... a lot of moons. But the big ones are called the Galilean moons.
-        These are the four included in this Lab (plus Amalthea as an example of a
-        smaller moon). The Galilean moons all look larger than the Sun does
-        in the sky, but Callisto is the right size and distance to still see
-        some of the corona.
+        Jupiter has 95 recognized moons, but for simplicity, we only included
+        five in the Lab. Four of these are known as the Galilean moons, and they
+        all look larger in the sky than the Sun, but Callisto is the right size
+        and distance to reveal some of the Sun's corona. Amalthea is an example
+        of a smaller moon.
       </p>
     {/if}
     {#if $planet === 'saturn'}
       <p>
-        Saturn. And before you ask, yes, the rings are visible. Move the Sun
-        past the horizon to reveal the stary sky, and the spectacular rings.
-        Saturn's atmosphere is similar to Jupiter's. Hydrogen, Helium, ammonia clouds,
-        and haze. There isn't a solid
-        place to stand, so we'll float in the atmosphere where it's 1 Bar of pressure;
-        about the same as Earth's surface.
+        Saturn. And before you ask, yes, the rings are visible. Move the Sun past
+        the horizon to reveal the starry sky and the spectacular rings. Saturn's
+        atmosphere is similar to Jupiter's, complete with Hydrogen, Helium,
+        ammonia clouds, and haze. There isn't a solid place to stand, so we'll
+        float in the atmosphere where it's 1 Bar of pressure; about the same as
+        Earth's surface.
       </p>
       <p>
-        Saturn also has many moons, but the big ones are Titan and Rhea. The moons
-        are about the right size where the eclipse really starts to look like a
-        shadow passing over you in the sky. Zoom out to see this better.
+        Saturn has many moons, but the big ones are Titan and Rhea. The sizes
+        of these moons relative to Saturn's sky are about the size where their
+        eclipses really start to look like a shadow passing over you in the sky.
+        Zoom out to see this better.
       </p>
       <p>
-        You may also start to see some places where the simulation breaks down
-        a bit. Mimas, for example, is so close to Saturn that the way we're
-        simulating the shadows doesn't work very well. It looks like a bunch
-        of circles in the sky... but the real eclipse wouldn't look like that.
+        You may also see some places where the simulation breaks down. Mimas,
+        for example, is too close to Saturn for our simulation to work well.
+        The shadow looks like a bunch of circles in the sky... and, of course,
+        the real eclipse wouldn't look like that.
       </p>
     {/if}
     {#if $planet === 'uranus'}
       <p>
-        This poor planet is always the butt of a lot of jokes and puns. But it really
-        is a beautiful place and it has rings too! There isn't a solid
-        place to stand, so we'll float in the atmosphere where it's 1 Bar of pressure;
-        about the same as Earth's surface.
-        The Sun is hard to see... if you lose
-        track of it, double tap the Sun to recenter it and zoom in a bit. The sky
-        during the day is a beautiful blue-green color. This is mainly due to
-        the methane in Uranus's atmosphere. The methane clouds aren't too shabby
-        either.
+        This poor planet is always the butt of a lot of jokes and puns. But it
+        really is a beautiful place and, like Saturn, it has rings! There isn't a
+        solid place to stand, so we'll float in the atmosphere where it's 1 Bar
+        of pressure; about the same as Earth's surface. Here, the Sun is hard to
+        see... if you lose track of it, double tap the screen to recenter the Sun
+        and zoom in. During the day, the sky is a beautiful blue-green color,
+        mainly due to the methane in Uranus' atmosphere.. The methane clouds aren't
+        too shabby either.
       </p>
       <p>
-        There are lots of moons to choose from. And again, like Saturn, you may
-        see the simulation break down a bit with some of the moons.
+        There are lots of moons to choose from. And again, like Saturn, you
+        may see the simulation break down with some of the moons.
       </p>
     {/if}
     {#if $planet === 'neptune'}
       <p>
-        Neptune is the farthest planet, and the Sun looks like a bright star.
-        In many pictures of Neptune, it looks like a deep blue color. But
-        recent updates suggest that it looks very similar to Uranus. That
-        makes sense, since they're both gas giants with similar atmospheres.
-        The clouds are made of methane.
-        There isn't a solid
-        place to stand, so we'll float in the atmosphere where it's 1 Bar of pressure;
-        about the same as Earth's surface.
+        Neptune is the farthest plane. In many pictures of Neptune, it has
+        a deep blue color. But recent updates suggest that it looks very similar
+        to Uranus. That makes sense, since they're both gas giants with similar
+        atmospheres and methane clouds. There isn't a solid place to stand,
+        so we'll float in the atmosphere where it's 1 Bar of pressure; about
+        the same as Earth at sea level.
       </p>
       <p>
-        Since the Sun is so far away, most of its closest moons just
-        dwarf the Sun in the Neptunian sky. But Nereid is small enough
-        and far enough away that it's almost reminiscent of Phobos eclipsing
-        the Sun on Mars... if you zoom in a lot, that is.
+        Since the Sun is so far away, most of Neptune's closest moons just
+        dwarf the Sun in the sky. But Nereid is small enough and far enough
+        away that it's almost reminiscent of Phobos eclipsing the Sun on Mars...
+        if you zoom in a lot, that is.
       </p>
     {/if}
   </div>
@@ -287,6 +291,7 @@ let aboutLabOpen = false
     color: white
     font-size: 13px
     text-transform: uppercase
+    text-decoration: none !important
     font-weight: 400
     cursor: pointer
     padding: .3em 1.1em
