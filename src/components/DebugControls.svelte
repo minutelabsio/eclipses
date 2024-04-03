@@ -82,6 +82,7 @@
     const appSettings = new GUI({
       width: 400
     })
+    appSettings.add({ version: import.meta.env.VITE_LAB_VERSION }, 'version').disable()
     const planetFolder = appSettings.addFolder('Planet')
     let moonSelector = planetFolder.add(state, 'selectedMoon', ['luna']).onChange((v) => {
       load(PlanetConfigs[eclipseState.planet].moons[v])
