@@ -29,6 +29,7 @@ const sphereIntersection = (origin, ray, radius) => {
   return x0 < x1 ? [x0, x1] : [x1, x0]
 }
 
+export const skyScale = writable(1)
 export const showTutorial = writable(false)
 export const showHelp = writable(false)
 export const hasLoaded = writable(false)
@@ -310,6 +311,8 @@ export const mountainsVisible = writable(true)
 export const earthVisible = writable(true)
 
 const state = {
+  skyScale,
+
   dayLength,
   telescopeMode,
   orbitPlanet,

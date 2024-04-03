@@ -181,6 +181,7 @@
     cloudSettings.add(state, 'windSpeed', 0, 200, 1)
 
     const performanceSettings = atmosSettings.addFolder('performance').close()
+    performanceSettings.add(state, 'skyScale', -10, 10, 1)
     performanceSettings.add(state, 'iSteps', 1, 32, 1).listen()
     performanceSettings.add(state, 'jSteps', 1, 32, 1).listen()
 

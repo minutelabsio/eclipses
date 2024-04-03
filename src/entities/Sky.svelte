@@ -35,6 +35,7 @@
     windSpeed,
     skyVisible,
     selectedMoon,
+    skyScale,
   } from '../store/environment'
   import {
     METER,
@@ -66,7 +67,7 @@
     return null
   }
 
-  $: scale = 1e-6
+  $: scale = Math.pow(10, $skyScale)
   $: Sky.cameraScale = scale
   $: Sky.moonTexture = getTexture(textures, $selectedMoon)
   $: Sky.sunIntensity = $sunIntensity
