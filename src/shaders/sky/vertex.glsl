@@ -22,12 +22,12 @@ uniform float planetRadius;
 
 void main() {
   vec4 worldPosition = modelMatrix * vec4(position, 1.0);
-  vWorldPosition = worldPosition.xyz;
+  vWorldPosition = worldPosition.xyz * cameraScale;
   vUv = uv;
-  vCameraDirection = normalize(cameraPosition.xyz - worldPosition.xyz);
+  vCameraDirection = normalize(cameraPosition.xyz * cameraScale - vWorldPosition);
 
   gl_Position = projectionMatrix * modelViewMatrix * worldPosition;
-  gl_Position.z = gl_Position.w; // set z to camera.far... not sure why though
+  // gl_Position.z = gl_Position.w; // set z to camera.far... not sure why though
 
   origin = (modelMatrix * vec4(0.0, 0.0, 0.0, 1.0)).xyz;
   rayOrigin = fisheye ? vec3(0., planetRadius + uAltitude, 0.0) : (cameraPosition - origin + vec3(0, 1.0, 0)) * cameraScale;
