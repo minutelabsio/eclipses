@@ -43,6 +43,7 @@
   import { get, writable } from 'svelte/store'
   import Music from '../components/Music.svelte'
   import VerticalSlider from '../components/VerticalSlider.svelte'
+  import interact from 'interactjs'
 
   export let selectedPlanet = 'earth'
   export let params = {}
@@ -195,14 +196,21 @@
   let selectedMenuItem
   $: hideEclipseControls = !selectorActive && ($selectedMenuItem === 'info' || $selectedMenuItem === 'settings')
 
-  interactivity({
-    target: document.body,
+  const { target } = interactivity({
     filter: (hits, state) => {
       // Only return the first hit
       return hits.slice(0, 1)
     }
   })
 
+  let interactor
+  target.subscribe(el => {
+    if (interactor) {
+      interactor.unset()
+    }
+    interact(el).styleCursor(false)
+      .on('doubletap', lookAtSun)
+  })
 
   const animateSunrise = () => {
     const tween = Tween.create({ el: -5 - get(elevationAdjustment) })
@@ -476,7 +484,7 @@
 
 <Suspense>
 
-  <T.Group on:dblclick={lookAtSun} on:click={() => selectorActive = false}>
+  <T.Group on:click={() => selectorActive = false}>
     <Space/>
   </T.Group>
 
