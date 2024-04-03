@@ -14,13 +14,13 @@ let aboutLabOpen = false
   <div class="content scrollbars">
 
     <p>
+      This Eclipse Explorer simulates solar eclipses on planets in our solar system.
+      Each planet's atmosphere and moons affect how a solar eclipse looks from the surface.
+    </p>
+    <p>
       In the real world, <em>looking directly at the Sun with your bare eyes is a very bad idea and could
       cause permanent damage</em>. But good news! In this lab, you can safely observe
       solar eclipses on different planets in our solar system.
-    </p>
-    <p>
-      This Eclipse Explorer simulates solar eclipses on planets in our solar system.
-      Each planet's atmosphere and moons affect how a solar eclipse looks from the surface.
     </p>
 
     <h3>
@@ -49,9 +49,9 @@ let aboutLabOpen = false
     <p>
       You can pan, zoom, and animate the eclipse. You can change
       the speed of the animation using the <u><Icon icon="mdi:speedometer" inline/> Speed Slider</u>.
-      Tuning it to the middle will animate the eclipse with realistic timing.
+      Tuning it to the left will animate the eclipse with realistic timing.
       The <u><Icon icon="material-symbols-light:clear-night" inline/> Moon Distance Slider</u>
-      controls how far away the moon is from the surface of the planet. The <u><Icon icon="material-symbols-light:clear-day" inline/> Time of Day Slider</u> controls the
+      controls how far away the moon is (within its orbit) from the planet. The <u><Icon icon="material-symbols-light:clear-day" inline/> Time of Day Slider</u> controls the
       position of the Sun in the sky. The <u><Icon icon="mdi:telescope" inline/> Telescope Mode</u> button lets you zoom in on the
       eclipse, where you can use the <u><Icon icon="ion:glasses" inline/> Exposure Slider</u> to adjust the amount of light the "camera"
       is capturing. To disable the music and more, check the <u><Icon icon="material-symbols:settings" inline/> Settings</u> menu.
@@ -120,7 +120,8 @@ let aboutLabOpen = false
       <p>
         Earth: familiar, but nonetheless beautiful. The Earth boasts the best
         total eclipses in the solar system. Our moon (called Luna, in case you
-        didn't know) is just the right size and distance to cover the Sun perfectly.
+        didn't know) is just the right size and distance to cover the Sun perfectly,
+        at least when it's in the nearer-to-Earth part of its orbit.
         This allows us to see the Sun's corona &mdash; the outermost layer of the
         Sun's atmosphere &mdash; in its full glory without the Sun's core
         overwhelming our vision.
@@ -166,7 +167,7 @@ let aboutLabOpen = false
     {/if}
     {#if $planet === 'saturn'}
       <p>
-        Saturn. And before you ask, yes, the rings are visible. Move the Sun past
+        Saturn. And before you ask, yes &mdash; the rings are visible. Move the Sun past
         the horizon to reveal the starry sky and the spectacular rings. Saturn's
         atmosphere is similar to Jupiter's, complete with Hydrogen, Helium,
         ammonia clouds, and haze. There isn't a solid place to stand, so we'll
@@ -188,7 +189,7 @@ let aboutLabOpen = false
     {/if}
     {#if $planet === 'uranus'}
       <p>
-        This poor planet is always the butt of a lot of jokes and puns. But it
+        Uranus. This poor planet is always the butt of a lot of jokes and puns. But it
         really is a beautiful place and, like Saturn, it has rings! There isn't a
         solid place to stand, so we'll float in the atmosphere where it's 1 Bar
         of pressure; about the same as Earth's surface. Here, the Sun is hard to
