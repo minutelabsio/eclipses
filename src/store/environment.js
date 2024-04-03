@@ -184,7 +184,8 @@ export const moonAngleCorrection = derived(
     const R = $observerOrigin.length()
     const R2 = $observerOrigin.lengthSq()
     const cosa = Math.min(1., (R2 + m2 - d * d) / (2 * R * m))
-    return 0.5 * Math.PI - Math.acos(cosa) - $elevationMid * DEG
+    const sign = Math.sign($sunDirection.z) // FIXME: bit of a hack
+    return (0.5 * Math.PI - Math.acos(cosa) - $elevationMid * DEG) * sign
   }
 )
 export const moonPosition = derived(
