@@ -111,16 +111,21 @@
   visible={$skyVisible}
   renderOrder={2}
 >
-  <T.PlaneGeometry args={[6, 6]} />
+  <!-- <T.PlaneGeometry args={[6, 6]} /> -->
+  <T.CircleGeometry args={[3, 32]} />
   <!-- <T.MeshBasicMaterial color={0xff0000} /> -->
   <T is={Sky.shader} />
 </T.Mesh>
 {:else}
 <T.Mesh
   visible={$skyVisible}
+  scale.x={1e11}
+  scale.y={1e11}
+  scale.z={1e11}
   renderOrder={2}
 >
-  <T.IcosahedronGeometry args={[1e11, 32]} />
+  <!-- <T.SphereGeometry args={[1, 32]} /> -->
+  <T.IcosahedronGeometry args={[1, 32]} />
   <T is={Sky.shader} />
 </T.Mesh>
 {/if}

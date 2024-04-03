@@ -29,7 +29,7 @@ const sphereIntersection = (origin, ray, radius) => {
   return x0 < x1 ? [x0, x1] : [x1, x0]
 }
 
-export const skyScale = writable(1)
+export const skyScale = writable(0)
 export const showTutorial = writable(false)
 export const showHelp = writable(false)
 export const hasLoaded = writable(false)
