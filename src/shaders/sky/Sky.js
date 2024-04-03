@@ -33,6 +33,7 @@ export default () => {
 
   const uniforms = {
     opacity: 1,
+    cameraScale: 1,
     planetColor: new THREE.Color(0x111111),
     moonPosition: new THREE.Vector3(0, 0, 0),
     moonRadius: 0.2727 * Re,

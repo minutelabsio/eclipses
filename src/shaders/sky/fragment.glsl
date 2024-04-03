@@ -606,7 +606,7 @@ vec4 scattering(
     opacity = mix(1., opacity, avgUmbra);
   }
   // add the clouds
-  color = color * (1. - cloudAbsorptionAmount)  + cloud;
+  color = color * (1. - cloudAbsorptionAmount) + cloud;
   return vec4(I0 * clamp(color, 0.0, 1.0), clamp(opacity, 0.0, 1.0));
 }
 
@@ -630,7 +630,8 @@ void main() {
 
   // if the ray intersects the planet, return planet color
   bool planet_intersected = intersectsInside(intPlanet);
-  if (altitude < 2000.){
+  float z = altitude / atmosphereThickness;
+  if (z < 0.025){
     if(planet_intersected) {
       gl_FragColor = vec4(planetColor, 1.);
       return;
@@ -656,7 +657,7 @@ void main() {
 
   // as we get closer to the planet, the atmosphere should get darker
   if (planet_intersected){
-    float k = remap(altitude, 2000., 4000., 0., 1.);
+    float k = remap(z, 0.025, 0.05, 0., 1.);
     color = mix(vec4(planetColor, 1.), color, k);
   } else {
     // color = color * (1.0 + 0.8 * fbm(vUv * 100.));

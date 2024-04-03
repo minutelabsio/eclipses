@@ -66,18 +66,20 @@
     return null
   }
 
+  $: scale = 1e-6
+  $: Sky.cameraScale = scale
   $: Sky.moonTexture = getTexture(textures, $selectedMoon)
   $: Sky.sunIntensity = $sunIntensity
-  $: Sky.rayleighCoefficients = $rayleighCoefficient
-  $: Sky.rayleighScaleHeight = $rayleighScaleHeight
-  $: Sky.mieCoefficients = $mieCoefficient
+  $: Sky.rayleighCoefficients = $rayleighCoefficient.clone().multiplyScalar(1/scale)
+  $: Sky.rayleighScaleHeight = $rayleighScaleHeight * scale
+  $: Sky.mieCoefficients = $mieCoefficient.clone().multiplyScalar(1/scale)
   $: Sky.mieWavelengthResponse = $mieWavelengthResponse
-  $: Sky.mieScaleHeight = $mieScaleHeight
+  $: Sky.mieScaleHeight = $mieScaleHeight * scale
   $: Sky.mieDirectional = $mieDirectional
   $: Sky.mieBaseline = $mieBaseline
-  $: Sky.ozoneLayerHeight = $ozoneLayerHeight
-  $: Sky.ozoneLayerWidth = $ozoneLayerWidth
-  $: Sky.ozoneCoefficients = $ozoneCoefficients
+  $: Sky.ozoneLayerHeight = $ozoneLayerHeight * scale
+  $: Sky.ozoneLayerWidth = $ozoneLayerWidth * scale
+  $: Sky.ozoneCoefficients = $ozoneCoefficients.clone().multiplyScalar(1/scale)
   // $: Sky.exposure = $exposure
   $: Sky.iSteps = $iSteps
   $: Sky.jSteps = $jSteps
@@ -88,14 +90,14 @@
   $: Sky.cloudThreshold = $cloudThreshold
   $: Sky.cloudAbsorption = $cloudAbsorption
   $: Sky.windSpeed = $windSpeed
-  $: Sky.atmosphereThickness = $atmosphereThickness
-  $: Sky.planetRadius = $planetRadius
-  $: Sky.sunPosition.set(...$sunPosition)
-  $: Sky.sunRadius = $sunRadius / METER
-  $: Sky.moonPosition.copy($moonPosition)
-  $: Sky.moonRadius = $moonRadius / METER
+  $: Sky.atmosphereThickness = $atmosphereThickness * scale
+  $: Sky.planetRadius = $planetRadius * scale
+  $: Sky.sunPosition.set(...$sunPosition).multiplyScalar(scale)
+  $: Sky.sunRadius = $sunRadius / METER * scale
+  $: Sky.moonPosition.copy($moonPosition).multiplyScalar(scale)
+  $: Sky.moonRadius = $moonRadius / METER * scale
   $: Sky.fisheye = fisheye
-  $: Sky.uAltitude = $altitude
+  $: Sky.uAltitude = ($altitude + 1) * scale
 
   // $: Sky.shader.blendEquation = $altitude > $atmosphereThickness * 0.9 ? THREE.AddEquation : THREE.MaxEquation
 
