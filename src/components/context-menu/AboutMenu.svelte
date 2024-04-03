@@ -109,6 +109,16 @@ let aboutLabOpen = false
     <div class="centered">
       <a class="button" href="https://minutelabs.io" target="_blank">minutelabs.io</a>
     </div>
+    <h3>Source Code</h3>
+    <p>As always, the code for this lab is freely available on
+      <a href="https://github.com/minutelabsio/eclipses" target="_blank">github</a>.
+    </p>
+    <h3>Bug Reports</h3>
+    <p>If you find a bug, you can post it on
+      <a href="https://www.patreon.com/minutelabsio" target="_blank">patreon</a>,
+      <a href="mailto:bugs@minutelabs.io">email us</a>,
+      or post it on <a href="https://github.com/minutelabsio/eclipses" target="_blank">github</a>.
+    </p>
   </div>
   {:else}
   <h2 class="heading">
@@ -254,6 +264,7 @@ let aboutLabOpen = false
       font-weight: 400
       line-height: 20px
       text-align: center
+      margin-top: 2em
     u
       text-decoration: none
       border-bottom: 2px solid #d5d5d5
