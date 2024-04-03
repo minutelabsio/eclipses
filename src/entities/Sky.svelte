@@ -67,7 +67,9 @@
     return null
   }
 
+  // this was an attempt to fix what look like floating point artifacts
   $: scale = Math.pow(10, $skyScale)
+
   $: Sky.cameraScale = scale
   $: Sky.moonTexture = getTexture(textures, $selectedMoon)
   $: Sky.sunIntensity = $sunIntensity
