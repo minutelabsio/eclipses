@@ -6,6 +6,7 @@
     telescopeMode,
     moonAnimationTime,
     transitTime,
+    maxSunDeviation,
     progressRate,
     altitude,
     planetRadius,
@@ -69,11 +70,10 @@
   let hideUi = false
 
   const getPlaybackRate = (rate, moonAnimationTime) => {
-    const t = Util.lerp(0, 2, rate)
-    // some moons are really fast
-    // so if we want "faster" then we figure out if
-    // the transit time happening in 10s is faster than realtime, or slower...
-    if (t <= 1) {
+    const t = Util.lerp(1, 2, rate)
+    // if a moon transit is faster than 10s this handles it...
+    // but i don't think there are... so we set t in {1, 2}
+    if (t < 1) {
       const min = Math.min(1 / 10, moonAnimationTime / 10)
       return Util.lerp(min, 1, t)
     } else {
@@ -83,7 +83,7 @@
   }
 
   $: player.totalTime = $moonAnimationTime * 1000
-  // 0.5 will be realtime
+  // 0 will be realtime
   $: player.playbackRate = getPlaybackRate($progressRate, $moonAnimationTime)
 
   const playerProgress = writable(0)
@@ -196,6 +196,7 @@
   $: hideEclipseControls = !selectorActive && ($selectedMenuItem === 'info' || $selectedMenuItem === 'settings')
 
   interactivity({
+    target: document.body,
     filter: (hits, state) => {
       // Only return the first hit
       return hits.slice(0, 1)
@@ -569,7 +570,7 @@
       <VerticalSlider powerScale bind:value={$telescopeModeExposure} icon="ion:glasses" />
     </div>
     <div class="elevation" class:hidden={$telescopeMode}>
-      <VerticalSlider bind:value={$elevationMid} icon="material-symbols-light:clear-day" iconPre="material-symbols:arrow-upward" iconPost="material-symbols:arrow-downward" min={-10} max={89.999} steps={1000} />
+      <VerticalSlider bind:value={$elevationMid} icon="material-symbols-light:clear-day" iconPre="material-symbols:arrow-upward" iconPost="material-symbols:arrow-downward" min={-7+$maxSunDeviation} max={89.999} steps={1000} />
     </div>
     <div class="moon-distance">
       <VerticalSlider bind:value={$totalityFactor} icon="material-symbols-light:clear-night" iconPre="material-symbols:add" iconPost="material-symbols:remove" />
