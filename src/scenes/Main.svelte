@@ -4,6 +4,7 @@
   import {
     eclipseProgress,
     telescopeMode,
+    moonAnimationTime,
     transitTime,
     progressRate,
     altitude,
@@ -66,23 +67,23 @@
   let cameraControls
   let hideUi = false
 
-  const getPlaybackRate = (rate, transitTime) => {
+  const getPlaybackRate = (rate, moonAnimationTime) => {
     const t = Util.lerp(0, 2, rate)
     // some moons are really fast
     // so if we want "faster" then we figure out if
     // the transit time happening in 10s is faster than realtime, or slower...
     if (t <= 1) {
-      const min = Math.min(1 / 10, 1 / 10 / transitTime)
+      const min = Math.min(1 / 10, moonAnimationTime / 10)
       return Util.lerp(min, 1, t)
     } else {
-      const max = Math.max(10, 1 / 10 / transitTime)
+      const max = Math.max(10, moonAnimationTime / 10)
       return Util.lerp(1, max, t - 1)
     }
   }
 
-  $: player.totalTime = $transitTime * 1000
+  $: player.totalTime = $moonAnimationTime * 1000
   // 0.5 will be realtime
-  $: player.playbackRate = getPlaybackRate($progressRate, $transitTime)
+  $: player.playbackRate = getPlaybackRate($progressRate, $moonAnimationTime)
 
   const playerProgress = writable(0)
 
@@ -216,7 +217,7 @@
   onReveal(() => {
     hasLoaded.update((v) => {
       if (!v) {
-        animateSunrise()
+        // animateSunrise()
         $showTutorial = true
         delay(10000).then(() => {
           $showTutorial = false

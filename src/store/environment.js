@@ -71,6 +71,11 @@ export const moonOrbitPeriod = writable(27.3217 * 24 * HOURS)
 export const moonOrbitDirection = derived(
   [moonOrbitPeriod], ([$moonOrbitPeriod]) => $moonOrbitPeriod < 0 ? -1 : 1
 )
+// positive means moon increases elevation
+export const moonRelativeDirection = derived(
+  [moonOrbitPeriod, dayLength],
+  ([$moonOrbitPeriod, $dayLength]) => -Math.sign($moonOrbitPeriod - $dayLength)
+)
 export const moonOrbitInclination = writable(5.145 * DEG)
 export const moonRightAscention = writable(0)
 
@@ -89,7 +94,8 @@ export const moonAngularDiameter = derived(
   ([$moonDistance, $moonRadius]) => 2 * Math.asin($moonRadius / $moonDistance) / DEG
 )
 
-export const horizonRadius = derived(
+// thickness of atmosphere at horizon
+export const horizonThickness = derived(
   [planetRadius, atmosphereThickness],
   ([$planetRadius, $atmosphereThickness]) => {
     const atmosphereRadius = $planetRadius + $atmosphereThickness
@@ -104,30 +110,40 @@ export const horizonRadius = derived(
 //     0.5 * $moonOrbitDirection * ($moonAngularDiameter + $sunAngularDiameter)
 // )
 
-// bit of a hack
-export const moonTransitDegrees = derived(
-  [moonOrbitDirection, moonAngularDiameter, sunAngularDiameter, moonDistance, horizonRadius],
-  ([$moonOrbitDirection, $moonAngularDiameter, $sunAngularDiameter, $moonDistance, $horizonRadius]) => {
-    const a = $moonOrbitDirection * 0.5 * ($moonAngularDiameter + $sunAngularDiameter)
-    const y = Math.asin($horizonRadius / $moonDistance / 7) / DEG
-    return 0.5 * y + a
-  }
-)
-
+// time to transit the sun
 export const transitTime = derived(
   [moonAngularDiameter, moonOrbitPeriod, sunAngularDiameter, dayLength],
   ([$moonAngularDiameter, $moonOrbitPeriod, $sunAngularDiameter, $dayLength]) => {
-    return Math.abs($moonOrbitPeriod * $moonAngularDiameter / 360 - $sunAngularDiameter * $dayLength / 360)
+    return Math.abs($moonOrbitPeriod * ($moonAngularDiameter + $sunAngularDiameter) / 360 - $sunAngularDiameter * $dayLength / 360)
   }
 )
-// eclipse progress moves moon from -angularDiameter to angularDiameter
+
+export const moonTransitDegrees = derived(
+  [moonAngularDiameter, sunAngularDiameter, moonDistance, horizonThickness, dayLength, transitTime],
+  ([$moonAngularDiameter, $sunAngularDiameter, $moonDistance, $horizonThickness, $dayLength, $transitTime]) => {
+    const a = 0.5 * ($moonAngularDiameter + $sunAngularDiameter)
+    // the angle at which the moon shadow isn't visible on the horizon
+    const y = Math.asin($horizonThickness / $moonDistance) / DEG
+    return Math.max(y / 10, Math.abs(a))
+  }
+)
+// moonTransitDegrees.subscribe(print)
+
+export const moonAnimationTime = derived(
+  [moonTransitDegrees, moonOrbitPeriod],
+  ([$moonTransitDegrees, $moonOrbitPeriod]) => Math.abs(2 * $moonTransitDegrees * $moonOrbitPeriod / 360)
+)
+// moonAnimationTime.subscribe(print)
+// eclipse progress moves moon from -moonTransitDegrees to moonTransitDegrees
 // so calculate how much the sun moves in the same time
 export const elevationAdjustment = derived(
-  [eclipseProgress, dayLength, transitTime],
-  ([$eclipseProgress, $dayLength, $transitTime]) => {
-    return 2 * Math.PI * MathUtils.lerp(-$transitTime, $transitTime, $eclipseProgress) / $dayLength
+  [eclipseProgress, dayLength, moonAnimationTime],
+  ([$eclipseProgress, $dayLength, $moonAnimationTime]) => {
+    const a = $moonAnimationTime / 2
+    return 360 * MathUtils.lerp(-a, a, $eclipseProgress) / $dayLength
   }
 )
+// elevationAdjustment.subscribe(print)
 
 export const elevation = derived(
   [elevationMid, elevationAdjustment],

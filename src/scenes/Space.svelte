@@ -36,11 +36,11 @@
   let starsPoints
   const Stars = createStars().then(s => starsPoints = s)
 
-  $: moonMove = new Tween({ theta: -2 * $moonTransitDegrees })
+  $: moonMove = new Tween({ theta: -$moonTransitDegrees })
     .by('2s', { theta: 0 }, 'linear')
-    .by('4s', { theta: 2 * $moonTransitDegrees }, 'linear')
+    .by('4s', { theta: $moonTransitDegrees }, 'linear')
     .by('6s', { theta: 0 }, 'linear')
-    .by('8s', { theta: -2 * $moonTransitDegrees }, 'linear')
+    .by('8s', { theta: -$moonTransitDegrees }, 'linear')
     .loop()
 
   $: angleLimit = Math.asin($planetRadius / $moonDistance)
