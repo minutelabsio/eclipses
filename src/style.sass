@@ -60,7 +60,6 @@ p:first-child
   margin-top: 0
 
 .track-slider
-  cursor: pointer
   $track-color: hsla(0, 0%, 50%, 0.75)
   $thumb-color: hsla(0, 0%, 10%, 1)
   $thumb-height: 25px
@@ -76,9 +75,12 @@ p:first-child
   $track-shadow-size: 0
   $contrast: 5%
   @import 'input-range-scss'
+  [type='range']
+    height: $track-height
+  [type='range']::-moz-range-track
+    height: $track-height !important
 
 .track-slider-thick
-  cursor: pointer
   $track-color: hsla(0, 0%, 50%, 0.75)
   $thumb-color: hsla(0, 0%, 10%, 1)
   $thumb-height: 27px
@@ -94,6 +96,11 @@ p:first-child
   $track-shadow-size: 0
   $contrast: 5%
   @import 'input-range-scss'
+  // GERRRTRRRRRNGLGLKDSLKRFJLKS
+  [type='range']
+    height: $track-height
+  [type='range']::-moz-range-track
+    height: $track-height !important
 
 .scrollbars
   overscroll-behavior-block: contain
