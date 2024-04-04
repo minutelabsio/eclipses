@@ -42,7 +42,7 @@ let aboutLabOpen = false
       is completely covered for a short time.
     </p>
     <p>
-      To learn more about eclipses, watch MinuteEarth's video all about them.
+      To learn more about eclipses, <a href="https://youtu.be/wshkH64xDac" target="_blank">watch MinuteEarth's video all about them</a>.
     </p>
 
     <h3>Controls</h3>
