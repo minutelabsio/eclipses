@@ -105,23 +105,20 @@ vec3 opticalDepths(vec3 start, vec3 end, int steps) {
 }
 
 const vec2 NO_INTERSECTION = vec2(1e-5, -1e-5);
+// https://link.springer.com/content/pdf/10.1007/978-1-4842-4427-2_7.pdf
 vec2 raySphereIntersection(vec3 origin, vec3 ray, float radius) {
-  // ray = normalize(ray);
-  // ray-sphere intersection that assumes
-  // the sphere is centered at the origin.
-  // float a = dot(ray, ray);
-  // float b = 2.0 * dot(ray, origin);
-  // float c = dot(origin, origin) - (radius * radius);
-  // return solveQuadratic(a, b, c);
-  float b = dot(ray, origin);
-  float c = dot(origin, origin) - (radius * radius);
-  float d = b * b - c;
+  float b = -dot(origin, ray);
+  vec3 w = origin + b * ray;
+  float r2 = radius * radius;
+  float d = r2 - dot(w, w);
   if(d < 0.0) {
     return NO_INTERSECTION;
   }
+  float c = dot(origin, origin) - r2;
   float sqrtd = sqrt(d);
-  float x0 = -b - sqrtd;
-  float x1 = -b + sqrtd;
+  float q = b + sign(b) * sqrtd;
+  float x0 = c / q;
+  float x1 = q;
   return vec2(min(x0, x1), max(x0, x1));
 }
 
