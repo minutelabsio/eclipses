@@ -56,6 +56,8 @@ uniform float cloudAbsorption;
 #pragma glslify: cnoise2 = require(glsl-noise/classic/2d)
 #pragma glslify: cnoise3 = require(glsl-noise/classic/3d)
 #pragma glslify: umbra = require(./umbra)
+#pragma glslify: Intersection = require(glsl-ray-sphere/intersection)
+#pragma glslify: sphereIntersection = require(glsl-ray-sphere/rsi, Intersection=Intersection)
 
 const float ONE_OVER_E = exp(-1.0);
 const float THREE_OVER_16_PI = 3.0 / (16.0 * PI);
@@ -103,37 +105,6 @@ vec3 opticalDepths(vec3 start, vec3 end, int steps) {
   }
   return od;
 }
-
-const vec2 NO_INTERSECTION = vec2(1e-5, -1e-5);
-// https://link.springer.com/content/pdf/10.1007/978-1-4842-4427-2_7.pdf
-vec2 raySphereIntersection(vec3 origin, vec3 ray, float radius) {
-  float b = -dot(origin, ray);
-  vec3 w = origin + b * ray;
-  float r2 = radius * radius;
-  float d = r2 - dot(w, w);
-  if(d < 0.0) {
-    return NO_INTERSECTION;
-  }
-  float c = dot(origin, origin) - r2;
-  float sqrtd = sqrt(d);
-  float q = b + sign(b) * sqrtd;
-  float x0 = c / q;
-  float x1 = q;
-  return vec2(min(x0, x1), max(x0, x1));
-}
-
-bool intersectsOutside(vec2 intersections){
-  return intersections.x <= intersections.y && intersections.x > 0.0;
-}
-
-bool intersectsInside(vec2 intersections) {
-  return intersections.x <= intersections.y && intersections.y > 0.0;
-}
-
-bool intersectsInsideOnly(vec2 intersections) {
-  return intersections.x <= intersections.y && intersections.y > 0.0 && intersections.x < 0.0;
-}
-
 
 float smoothcircle(vec3 ray, float angularRadius, vec3 centerDir, float boundary){
   // this way gives weird artifacts because the angle is so small it leads to floating point errors
@@ -432,12 +403,6 @@ vec4 scattering(
   float atmosphereRadius,
   ivec2 steps
 ){
-  // float rayHeight = length(rayOrigin);
-  // // Ray starts inside the planet -> return 0
-  // if (rayHeight < planetRadius) {
-  //   return vec4(0.0);
-  // }
-
   float sunDisk = sunMoonIntensity(
     rayDir,
     normalize(sunPosition - rayOrigin),
@@ -446,33 +411,29 @@ vec4 scattering(
     MoonAngularRadiusCamera
   );
 
-  vec2 path = raySphereIntersection(rayOrigin, rayDir, atmosphereRadius);
+  Intersection atmosInt = sphereIntersection(rayOrigin, rayDir, atmosphereRadius);
+
   // Ray does not intersect the atmosphere (on the way forward) at all;
   // exit early.
-  if (!intersectsInside(path)) {
+  if (atmosInt.hits == 0) {
     return vec4(I0 * vec3(sunDisk), step(0.01, length(sunDisk)));
   }
-
-  // if(altitude < 0.1 * atmosphereThickness) {
-  //   vec2 intPlanet = raySphereIntersection(rayOrigin, rayDir, planetRadius);
-  //   vec3 intPt = rayOrigin + intPlanet.x * rayDir;
-    // mieCoefficients *= fbm(normalize(intPt) * 400. + 500. * time);
-    // path.y *= fbm(rayDir * 4. + 300. * time);
-  // }
 
   float rApparentSun = tan(SunAngularRadius);
   float rApparentMoon = tan(moonAngularRadius);
 
+  vec2 path = vec2(atmosInt.t0, atmosInt.t1);
   // always start atmosphere ray at viewpoint if we start inside atmosphere
   path.x = max(path.x, 0.0);
 
   // if the planet is intersected, set the end of the ray to the planet
   // surface.
   // determine intersections with the planet, atmosphere, etc
-  vec2 intPlanet = raySphereIntersection(rayOrigin, rayDir, planetRadius);
-  bool planet_intersected = intersectsOutside(intPlanet);
-  path.y = planet_intersected ? intPlanet.x : path.y;
+  Intersection planetInt = sphereIntersection(rayOrigin, rayDir, planetRadius);
+  bool planet_intersected = planetInt.hits > 1; // only count exterior intersection
+  path.y = planet_intersected ? planetInt.t0 : path.y;
 
+  // if planet intersected, no light comes from the sun
   sunDisk = planet_intersected ? 0.0 : sunDisk;
 
   vec3 start = rayOrigin + rayDir * path.x;
@@ -507,17 +468,12 @@ vec4 scattering(
     vec3 odStep = opticalDensity(length(pos) - planetRadius) * ds;
     primaryDepth += odStep;
 
-    // if the ray intersects the planet, no light comes this way...but..
-    // I tried doing this and it created lines in the atmosphere
-    // vec2 intPlanet2 = raySphereIntersection(pos, sSun, planetRadius);
-
     // has minimum brightness for corona
     float u = max(1e-2, umbra(pos, rApparentSun, sunPosition, rApparentMoon, moonPosition));
     avgUmbra += u;
-    // u = intersectsOutside(intPlanet2) ? 0.0 : u;
 
-    vec2 intAtmosOut = raySphereIntersection(pos, sSun, atmosphereRadius);
-    vec3 exit = pos + intAtmosOut.y * sSun;
+    Intersection atmosOut = sphereIntersection(pos, sSun, atmosphereRadius);
+    vec3 exit = pos + atmosOut.t1 * sSun;
 
     vec3 secondaryDepth = opticalDepths(pos, exit, steps.y);
     // vec2 secondaryDepth = getOpticalDepths(pos, normalize(exit - pos), scaleHeights, planetRadius, atmosphereRadius);
@@ -549,20 +505,20 @@ vec4 scattering(
   float cloudAmount = 0.0;
   vec3 cloud = vec3(0.0);
   float cloudAbsorptionAmount = 0.0;
-  if (!intersectsOutside(intPlanet) && cloudThickness >= 0.01){
+  if (!planet_intersected && cloudThickness >= 0.01){
     float cloudHeight = cloudZ * atmosphereThickness;
-    vec2 cloudInt = raySphereIntersection(rayOrigin, rayDir, planetRadius + cloudHeight);
-    if (intersectsInsideOnly(cloudInt)){
+    Intersection intCloud = sphereIntersection(rayOrigin, rayDir, planetRadius + cloudHeight);
+    if (intCloud.isInside){
       float cloudNorm = miePhase(1., cloudMie);
       float cloudPhase = 4. * miePhase(mu, cloudMie) / cloudNorm;
       float cloudRefl = 4. * miePhase(mu, -0.1);
-      vec3 cloudPoint = rayOrigin + cloudInt.y * rayDir;
-      vec2 planetInt = raySphereIntersection(cloudPoint, sSun, planetRadius);
+      vec3 cloudPoint = rayOrigin + intCloud.t1 * rayDir;
+      Intersection intPlanet = sphereIntersection(cloudPoint, rayDir, planetRadius);
       vec3 cloudLayer = cloudSize * 900. * cloudPoint / atmosphereRadius;
       cloudAmount = cloudThickness * smoothstep(0., 1.0, fbm(cloudLayer + windSpeed * time) - cloudThreshold);
       // float cloudAmount = 2. * getPhases(rayDir, sSun, 0.5 + 0.4 * fbm(cloudLayer * 20.)).y;
       cloudAbsorptionAmount = clamp(cloudAbsorption * cloudAmount, 0., 1.);
-      float brightness = remap(planetInt.y - abs(planetInt.x), 0., 0.08 * planetRadius, 1., 0.);
+      float brightness = remap(intPlanet.t1 - abs(intPlanet.t0), 0., 0.08 * planetRadius, 1., 0.);
       cloud =  clamp(0.1 * cloudAmount * mieCoefficients * (brightness * (1. - cloudAbsorption) * (cloudPhase + cloudRefl) * (rayleighT + mieT)), 0., 1.);
     }
   }
@@ -623,10 +579,10 @@ void main() {
 
   }
 
-  vec2 intPlanet = raySphereIntersection(rayOrigin, rayDir, planetRadius);
+  Intersection intPlanet = sphereIntersection(rayOrigin, rayDir, planetRadius);
 
   // if the ray intersects the planet, return planet color
-  bool planet_intersected = intersectsInside(intPlanet);
+  bool planet_intersected = intPlanet.hits > 1;
   float z = altitude / atmosphereThickness;
   if (z < 0.025){
     if(planet_intersected) {
