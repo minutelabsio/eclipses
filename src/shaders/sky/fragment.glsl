@@ -106,15 +106,22 @@ vec3 opticalDepths(vec3 start, vec3 end, int steps) {
   return od;
 }
 
-float smoothcircle(vec3 ray, float angularRadius, vec3 centerDir, float boundary){
+float smoothcircle(vec3 ray, float angularRadius, vec3 centerDir){
   // this way gives weird artifacts because the angle is so small it leads to floating point errors
   // float angle = acos(dot(centerDir, ray));
   // float b = boundary * angularRadius;
   // return 1.0 - smoothstep(angularRadius - b, angularRadius + b, angle);
-  float y = length(ray - centerDir);
-  float r = sin(angularRadius);
-  float b = boundary * r;
-  return smoothstep(r + b, r - b, y);
+  // float y = length(ray - centerDir);
+  // float r = sin(angularRadius);
+  // float b = 0.001;
+  // return smoothstep(r + b, r - b, y);
+  float d = distance(ray, centerDir);
+  float px = fwidth(d); // roughly a pixel
+  float r = max(angularRadius, px);
+  // dim as sun gets smaller
+  float i = smoothstep(0., px, angularRadius);
+  float delta = 0.01 * angularRadius; //0.1 * fwidth(d); //fwidth(d); //0.5 * fwidth(d);
+  return i * smoothstep(r, r - delta, d);
 }
 
 float closestApproachDepth(vec3 start, vec3 ray, float planetRadius) {
@@ -220,14 +227,14 @@ vec3 sunMoon(vec3 rayDir, vec3 sSun, float sunAngularRadius, vec3 sMoon, float m
   mu = max(mu, 0.99);
   // Color of the solar disk (that isn't blocked by the moon)
   float sunDisk = 0.0;
-  sunDisk = smoothcircle(rayDir, sunAngularRadius, sSun, 0.01);
+  sunDisk = smoothcircle(rayDir, sunAngularRadius, sSun);
 
   float g = 0.9997; //clampMix(0.99993, 0.999, (acos(dot(sSun, sMoon)) - 0.001) / 0.02);
   float gg = g * g;
   float mumu = mu * mu;
   // sunDisk = (0.001) * THREE_OVER_8_PI * ((1.0 - gg) * (mumu + 1.0)) / (pow(1.0 + gg - 2.0 * mu * g, 1.5) * (2.0 + gg));
 
-  float moonDisk = smoothcircle(rayDir, moonAngularRadius * 1.0, sMoon, 0.01);
+  float moonDisk = smoothcircle(rayDir, moonAngularRadius * 1.0, sMoon);
 
   sunDisk += I0 * 0.000003 * (1. - gg) * (mumu + 1.0) / pow(1. + gg - 2. * mu * g, 1.5);
   sunDisk = mumu*(1. - 0.3*cnoise3(vec3(normalize(rayDir-sSun).xy * 6., 3.*snoise3(20.*vCameraDirection)))) * mix(sunDisk, 0.0, moonDisk);
@@ -335,7 +342,7 @@ float moonValue(vec3 rayDir, vec3 sMoon, float moonAngularRadius){
     // create little bumps on the edge of the moon
     vec2 y = normalize(squash(rayDir, sMoon));
     float r = moonAngularRadius * (1. - 0.002 * cnoise2(15. * y));
-    return smoothcircle(rayDir, r, sMoon, 0.01);
+    return smoothcircle(rayDir, r, sMoon);
   }
   vec2 xy = squash(rayDir, sMoon);
   // xy is the vector from the center of the moon to the point on the moon
@@ -345,23 +352,23 @@ float moonValue(vec3 rayDir, vec3 sMoon, float moonAngularRadius){
   //   return 0.0;
   // }
   vec4 moon = texture2D(moonTexture, uv);
-  return moon.r * smoothcircle(rayDir, moonAngularRadius, sMoon, 0.0001);
+  return moon.r * smoothcircle(rayDir, moonAngularRadius, sMoon);
 }
 
 const float bloomFactor = 8e-6;
 float sunMoonIntensity(vec3 rayDir, vec3 sSun, float sunAngularRadius, vec3 sMoon, float moonAngularRadius){
-  if (distance(sSun, rayDir) > 0.07){
-    return 0.0;
-  }
+  // if (distance(sSun, rayDir) > 0.07){
+  //   return 0.0;
+  // }
 
   // simple circle sun
-  float sun = smoothcircle(rayDir, sunAngularRadius, sSun, 0.01);
+  float sun = smoothcircle(rayDir, sunAngularRadius, sSun);
   // some texture on the sun
   vec2 sunxy = squash(rayDir, sSun) / sunAngularRadius;
   // sunspots (not that you'd really see them)
   sun *= (1. - 0.2 * step(0.8, cnoise2(15. * sunxy)));
   // flairs
-  // sun += smoothcircle(rayDir, sunAngularRadius * 0.9, sSun, 0.3) *
+  // sun += smoothcircle(rayDir, sunAngularRadius * 0.9, sSun) *
   //   smoothstep(0.3, 0.9, fbm(vec3(sunxy, 0.) * 20.)) *
   //   clampMix(0., 1., sin(atan(sunxy.y, sunxy.x) * 10. * cnoise2(sunxy * 1.)));
   float corona = coronaValue(rayDir, sSun, sunAngularRadius);
