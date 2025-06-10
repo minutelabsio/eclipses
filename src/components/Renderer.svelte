@@ -53,7 +53,8 @@
     composer.removeAllPasses()
     const renderpass = new RenderPass(scene, camera)
     renderpass.skipShadowMapUpdate = true
-    renderpass.selection = new Selection([], 1)
+    // TODO: in the new version of postprocessing this 0 throws an error. need to figure out how to change to 1
+    renderpass.selection = new Selection([], 0)
     composer.addPass(renderpass)
     const renderpass2 = new RenderPass(scene, camera)
     renderpass2.clear = false

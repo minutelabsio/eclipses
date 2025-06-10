@@ -39,7 +39,7 @@
     "howler": "^2.2.4",
     "input-range-scss": "^1.5.3",
     "interactjs": "^1.10.26",
-    "intween": "1.0.0-beta.7",
+    "intween": "^1.0.0-beta.9",
     "lil-gui": "^0.18.2",
     "lodash": "^4.17.21",
     "noisejs": "^2.1.0",
