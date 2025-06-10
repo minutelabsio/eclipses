@@ -53,7 +53,7 @@
     composer.removeAllPasses()
     const renderpass = new RenderPass(scene, camera)
     renderpass.skipShadowMapUpdate = true
-    renderpass.selection = new Selection([], 0)
+    renderpass.selection = new Selection([], 1)
     composer.addPass(renderpass)
     const renderpass2 = new RenderPass(scene, camera)
     renderpass2.clear = false
